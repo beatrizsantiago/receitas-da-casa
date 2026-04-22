@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────
+
+enum RecipeCategory {
+  SWEET
+  SAVORY
+}
+
+enum PhotoType {
+  COVER
+  USER
+}
+
+// ─────────────────────────────────────────
+// Modelos
+// ─────────────────────────────────────────
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+
+  recipes Recipe[]
+}
+
+model Recipe {
+  id          Int            @id @default(autoincrement())
+  title       String
+  description String?
+  category    RecipeCategory
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  deletedAt   DateTime?
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  notes       RecipeNote[]
+  ingredients Ingredient[]
+  steps       Step[]
+  photos      RecipePhoto[]
+  cookHistory CookHistory[]
+  tags        RecipeTag[]
+
+  @@index([userId])
+  @@index([deletedAt])
+}
+
+model RecipeNote {
+  id          Int    @id @default(autoincrement())
+  content     String
+  description String?
+  priority    Int    @default(0)
+
+  recipeId Int
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+}
+
+model Ingredient {
+  id       Int    @id @default(autoincrement())
+  name     String
+  quantity String
+  unit     String
+
+  recipeId Int
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+}
+
+model Step {
+  id          Int    @id @default(autoincrement())
+  description String
+  order       Int
+
+  recipeId Int
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+  @@unique([recipeId, order])
+}
+
+model RecipePhoto {
+  id   Int       @id @default(autoincrement())
+  url  String
+  type PhotoType
+
+  recipeId Int
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+}
+
+model CookHistory {
+  id     Int      @id @default(autoincrement())
+  date   DateTime @default(now())
+  notes  String?
+  rating Int
+
+  recipeId Int
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+}
+
+model Tag {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  color String
+
+  recipes RecipeTag[]
+}
+
+model RecipeTag {
+  recipeId Int
+  tagId    Int
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([recipeId, tagId])
+}
