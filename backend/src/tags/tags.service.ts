@@ -18,7 +18,7 @@ export class TagsService {
     await this.recipes.findOne(userId, recipeId);
 
     const tag = await this.prisma.tag.findUnique({ where: { id: tagId } });
-    if (!tag) throw new NotFoundException('Tag not found');
+    if (!tag) throw new NotFoundException('Tag não encontrada');
 
     return this.prisma.recipeTag.upsert({
       where: { recipeId_tagId: { recipeId, tagId } },

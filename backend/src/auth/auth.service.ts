@@ -17,7 +17,7 @@ export class AuthService {
 
   async register(dto: RegisterDto) {
     const existing = await this.users.findByEmail(dto.email);
-    if (existing) throw new ConflictException('Email already registered');
+    if (existing) throw new ConflictException('E-mail já cadastrado');
 
     const hashed = await bcrypt.hash(dto.password, 10);
     const user = await this.users.create({ ...dto, password: hashed });
@@ -29,10 +29,10 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const user = await this.users.findByEmail(dto.email);
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+    if (!user) throw new UnauthorizedException('E-mail ou senha inválidos');
 
     const valid = await bcrypt.compare(dto.password, user.password);
-    if (!valid) throw new UnauthorizedException('Invalid credentials');
+    if (!valid) throw new UnauthorizedException('E-mail ou senha inválidos');
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userWithoutPassword } = user;

@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
@@ -11,6 +11,16 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: true,
+      exceptionFactory: (errors) => {
+        const formatted: Record<string, string[]> = {};
+        errors.forEach((err) => {
+          formatted[err.property] = Object.values(err.constraints || {});
+        });
+        return new BadRequestException({
+          message: 'Dados inválidos',
+          validation_errors: formatted,
+        });
+      },
     }),
   );
 

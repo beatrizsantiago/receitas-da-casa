@@ -38,7 +38,7 @@ export class RecipeNotesService {
 
   private async findNote(id: number) {
     const note = await this.prisma.recipeNote.findUnique({ where: { id } });
-    if (!note) throw new NotFoundException('Note not found');
+    if (!note) throw new NotFoundException('Anotação não encontrada');
     return note;
   }
 }

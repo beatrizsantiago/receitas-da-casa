@@ -35,7 +35,7 @@ export class IngredientsService {
 
   private async findIngredient(id: number) {
     const ingredient = await this.prisma.ingredient.findUnique({ where: { id } });
-    if (!ingredient) throw new NotFoundException('Ingredient not found');
+    if (!ingredient) throw new NotFoundException('Ingrediente não encontrado');
     return ingredient;
   }
 }

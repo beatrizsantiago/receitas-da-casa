@@ -38,7 +38,7 @@ export class StepsService {
 
   private async findStep(id: number) {
     const step = await this.prisma.step.findUnique({ where: { id } });
-    if (!step) throw new NotFoundException('Step not found');
+    if (!step) throw new NotFoundException('Passo não encontrado');
     return step;
   }
 }

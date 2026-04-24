@@ -69,7 +69,7 @@ export class RecipesService {
         _count: { select: { cookHistory: true } },
       },
     });
-    if (!recipe) throw new NotFoundException('Recipe not found');
+    if (!recipe) throw new NotFoundException('Receita não encontrada');
     return mapRecipe(recipe);
   }
 
