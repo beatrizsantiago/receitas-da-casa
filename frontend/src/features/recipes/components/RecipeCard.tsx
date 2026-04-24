@@ -1,19 +1,13 @@
-import { Badge, Box, Card, Flex, Text } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { LuFlame } from 'react-icons/lu';
 import type { Recipe } from '../types';
+import { gradientFromHues } from '@/shared/utils/colors';
 
-const CATEGORY_META: Record<string, { label: string; bg: string; fg: string }> = {
-  SWEET: { label: 'Doce', bg: 'yellow.100', fg: 'yellow.900' },
-  SAVORY: { label: 'Salgado', bg: 'secondary.100', fg: 'secondary.900' },
+const CATEGORY_META: Record<string, { label: string; tone: string }> = {
+  SWEET: { label: 'Doce', tone: 'primary' },
+  SAVORY: { label: 'Salgado', tone: 'secondary' },
 };
-
-function gradientFromHues(hues?: [number, number]): string {
-  if (!hues) return 'linear-gradient(135deg, #E8D8C3, #D6C6B3)';
-  const c1 = `oklch(0.72 0.14 ${hues[0]})`;
-  const c2 = `oklch(0.52 0.12 ${hues[1]})`;
-  return `linear-gradient(135deg, ${c1}, ${c2})`;
-}
 
 interface Props {
   recipe: Recipe;
@@ -25,16 +19,21 @@ export function RecipeCard({ recipe }: Props) {
   const cat = CATEGORY_META[recipe.category];
 
   return (
-    <Card.Root
+    <Box
       cursor="pointer"
       overflow="hidden"
-      _hover={{ shadow: 'lg', transform: 'translateY(-2px)' }}
+      bg="white"
+      rounded="16px"
+      borderWidth="1px"
+      borderColor="beige.100"
+      boxShadow="0 1px 3px rgba(47,30,10,0.06)"
+      _hover={{ boxShadow: '0 8px 24px rgba(47,30,10,0.12)', transform: 'translateY(-2px)' }}
       transition="all 0.2s"
       onClick={() => navigate(`/receitas/${recipe.id}`)}
       display="flex"
       flexDirection="column"
     >
-      <Box position="relative" h="160px">
+      <Box position="relative" h="160px" overflow="hidden">
         {cover ? (
           <Box
             w="full"
@@ -44,85 +43,103 @@ export function RecipeCard({ recipe }: Props) {
             backgroundPosition="center"
           />
         ) : (
-          <Box w="full" h="full" style={{ background: gradientFromHues(recipe.hues) }}>
-            <Flex h="full" align="center" justify="center" fontSize="4xl">
-              🍲
-            </Flex>
-          </Box>
+          <Box
+            w="full"
+            h="full"
+            style={{ background: gradientFromHues(recipe.hues) }}
+          />
         )}
 
-        <Badge
+        <Box
           position="absolute"
-          top="12px"
-          left="12px"
-          bg={cat?.bg ?? 'neutral.100'}
-          color={cat?.fg ?? 'neutral.800'}
-          fontSize="xs"
-          fontWeight="500"
+          inset={0}
+          bg="linear-gradient(to bottom, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.45) 100%)"
+        />
+
+        <Box
+          position="absolute"
+          top={2.5}
+          left={2.5}
           px={2}
           py={0.5}
           rounded="md"
+          fontSize="11px"
+          fontWeight="500"
+          bg={cat?.tone === 'primary' ? 'primary.50' : 'secondary.50'}
+          color={cat?.tone === 'primary' ? 'primary.800' : 'secondary.800'}
         >
           {cat?.label ?? recipe.category}
-        </Badge>
+        </Box>
+
+        <Text
+          position="absolute"
+          bottom={2.5}
+          left={3}
+          right={3}
+          fontFamily="'Caveat', cursive"
+          fontSize="22px"
+          color="white"
+          lineHeight={1.15}
+          lineClamp={2}
+          textShadow="0 1px 3px rgba(0,0,0,0.3)"
+        >
+          {recipe.title || 'Sem título'}
+        </Text>
       </Box>
 
-      <Card.Body p={4} display="flex" flexDirection="column" flex={1} gap={0}>
+      <Box p={3.5} display="flex" flexDirection="column" flex={1} gap={0}>
         <Text
-          fontSize="lg"
+          fontFamily="'Fraunces', Georgia, serif"
+          fontSize="15px"
           fontWeight="500"
           color="neutral.800"
           letterSpacing="-0.01em"
-          lineHeight={1.2}
+          lineHeight={1.25}
           lineClamp={2}
         >
-          {recipe.title}
+          {recipe.title || 'Sem título'}
         </Text>
 
         {recipe.description && (
           <Text
-            fontSize="xs"
+            fontSize="12px"
             color="neutral.500"
             mt={1}
             lineClamp={2}
-            lineHeight={1.45}
+            lineHeight={1.5}
           >
             {recipe.description}
           </Text>
         )}
 
         {recipe.tags && recipe.tags.length > 0 && (
-          <Flex gap={1} flexWrap="wrap" mt={2.5}>
+          <Flex gap={1} flexWrap="wrap" mt={2}>
             {recipe.tags.slice(0, 3).map((t) => (
-              <Badge
+              <Box
                 key={t.tag.id}
-                variant="subtle"
-                colorPalette="neutral"
-                fontSize="10px"
-                px={1.5}
+                as="span"
+                display="inline-flex"
+                px={2}
                 py={0.5}
-                rounded="md"
+                rounded="full"
+                fontSize="10px"
+                fontWeight="600"
+                style={{
+                  backgroundColor: t.tag.color + '18',
+                  color: t.tag.color,
+                }}
               >
                 #{t.tag.name}
-              </Badge>
+              </Box>
             ))}
           </Flex>
         )}
 
-        <Flex
-          align="center"
-          justify="space-between"
-          mt="auto"
-          pt={2.5}
-          borderTopWidth="1px"
-          borderColor="beige.200"
-        >
-          <Flex align="center" gap={1} fontSize="11px" color="neutral.400">
-            <LuFlame size={13} color="var(--chakra-colors-yellow-500)" />
-            <Text>{recipe.cooks ?? 0}x feita</Text>
-          </Flex>
+        <Flex align="center" gap={1} mt="auto" pt={2.5} fontSize="11px" color="neutral.400">
+          <LuFlame size={13} color="var(--chakra-colors-secondary-500)" />
+          <Text>{recipe.cooks ?? 0}x feita</Text>
         </Flex>
-      </Card.Body>
-    </Card.Root>
+      </Box>
+    </Box>
   );
 }
