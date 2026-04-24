@@ -19,20 +19,46 @@ export function CategorySummarySection({ categories, onViewAll }: Props) {
     <Box>
       <Flex justify="space-between" align="flex-end" mb={4}>
         <Box>
-          <Text color="neutral.500" textTransform="lowercase" letterSpacing="0.04em" fontFamily="'Caveat', cursive">
+          <Text
+            fontFamily="'Caveat', cursive"
+            fontSize="18px"
+            color="primary.500"
+            lineHeight={1}
+          >
             organizadas
           </Text>
-          <Heading size="md" color="neutral.800" fontWeight="600" letterSpacing="-0.01em">
+          <Heading
+            fontFamily="'Fraunces', Georgia, serif"
+            fontSize="28px"
+            fontWeight="500"
+            color="neutral.800"
+            letterSpacing="-0.02em"
+            lineHeight={1.1}
+            mt={0.5}
+          >
             Por categoria
           </Heading>
         </Box>
-        <Button variant="ghost" size="sm" color="neutral.500" onClick={onViewAll}>
-          <Flex align="center" gap={1}>
-            Ver todas
-            <LuChevronRight size={14} />
-          </Flex>
+        <Button
+          size="sm"
+          variant="outline"
+          borderColor="beige.200"
+          color="neutral.500"
+          rounded="full"
+          fontSize="13px"
+          fontWeight="500"
+          display="inline-flex"
+          alignItems="center"
+          gap={1}
+          px={3.5}
+          _hover={{ bg: 'beige.50', borderColor: 'beige.300' }}
+          onClick={onViewAll}
+        >
+          Tags
+          <LuChevronRight size={13} />
         </Button>
       </Flex>
+
       <Flex direction="column" gap={2}>
         {categories.map((c) => (
           <Flex
@@ -42,15 +68,28 @@ export function CategorySummarySection({ categories, onViewAll }: Props) {
             px={4}
             py={3.5}
             bg={c.meta?.bg ?? 'neutral.50'}
-            rounded="xl"
+            rounded="14px"
             cursor="pointer"
-            _hover={{ opacity: 0.9 }}
+            _hover={{ opacity: 0.85 }}
+            transition="opacity 120ms"
             onClick={onViewAll}
           >
-            <Text fontWeight="500" fontSize="md" color={c.meta?.fg ?? 'neutral.800'} letterSpacing="-0.005em">
+            <Text
+              fontFamily="'Fraunces', Georgia, serif"
+              fontWeight="500"
+              fontSize="16px"
+              color={c.meta?.fg ?? 'neutral.800'}
+              letterSpacing="-0.01em"
+            >
               {c.meta?.label ?? c.cat}
             </Text>
-            <Text fontFamily="mono" fontSize="xs" color={c.meta?.fg ?? 'neutral.800'} opacity={0.7}>
+            <Text
+              fontFamily="'Courier New', monospace"
+              fontSize="12px"
+              color={c.meta?.fg ?? 'neutral.800'}
+              opacity={0.7}
+              letterSpacing="0.03em"
+            >
               {String(c.count).padStart(2, '0')} receitas
             </Text>
           </Flex>

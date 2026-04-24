@@ -17,8 +17,8 @@ export function useRecipeStats(recipes: Recipe[], mobile: boolean) {
 
   const categoryCounts = useMemo(() => {
     const meta: Record<string, { label: string; bg: string; fg: string }> = {
-      SWEET: { label: 'Doce', bg: 'yellow.50', fg: 'yellow.800' },
-      SAVORY: { label: 'Salgado', bg: 'secondary.50', fg: 'secondary.800' },
+      SWEET: { label: 'Doce', bg: 'primary.50', fg: 'primary.700' },
+      SAVORY: { label: 'Salgado', bg: 'secondary.50', fg: 'secondary.700' },
     };
     return Object.entries(
       recipes.reduce((acc, r) => {

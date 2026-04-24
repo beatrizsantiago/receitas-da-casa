@@ -13,29 +13,84 @@ export function DashboardHero({ userName, recipeCount, mobile, onNewRecipe }: Pr
   const greeting = useGreeting();
 
   return (
-    <Box position="relative" overflow="hidden" borderRadius="2xl" p={mobile ? 6 : 7} bg="linear-gradient(120deg, #C44A2F 0%, #A43A24 100%)" color="white">
-      <Box position="absolute" top="-40px" right="-30px" w="180px" h="180px" borderRadius="full" bg="rgba(242,201,76,0.2)" />
-      <Box position="absolute" bottom="-60px" right="60px" w="140px" h="140px" borderRadius="full" bg="rgba(242,201,76,0.12)" />
+    <Box
+      position="relative"
+      overflow="hidden"
+      borderRadius="20px"
+      px={mobile ? 5 : 7}
+      py={mobile ? 5 : 6}
+      bg="linear-gradient(120deg, #C44A2F 0%, #A43A24 100%)"
+      color="white"
+    >
+      <Box
+        position="absolute"
+        top="-50px"
+        right="-20px"
+        w="200px"
+        h="200px"
+        borderRadius="full"
+        bg="rgba(255,255,255,0.07)"
+      />
+      <Box
+        position="absolute"
+        bottom="-70px"
+        right="80px"
+        w="160px"
+        h="160px"
+        borderRadius="full"
+        bg="rgba(255,255,255,0.05)"
+      />
 
-      <Flex position="relative" direction={mobile ? 'column' : 'row'} align={mobile ? 'flex-start' : 'center'} justify="space-between" gap={4}>
+      <Flex
+        position="relative"
+        direction={mobile ? 'column' : 'row'}
+        align={mobile ? 'flex-start' : 'center'}
+        justify="space-between"
+        gap={4}
+      >
         <Box>
-          <Text fontFamily="'Caveat', cursive" fontSize="2xl" color="yellow.200" lineHeight={1}>
+          <Text
+            fontFamily="'Caveat', cursive"
+            fontSize={mobile ? '18px' : '20px'}
+            color="rgba(255,235,220,0.85)"
+            lineHeight={1}
+          >
             {greeting},
           </Text>
-          <Heading size={mobile ? 'lg' : 'xl'} fontWeight="500" letterSpacing="-0.02em" lineHeight={1.1} mt={1}>
+          <Heading
+            fontFamily="'Fraunces', Georgia, serif"
+            fontSize={mobile ? '28px' : '34px'}
+            fontWeight="500"
+            letterSpacing="-0.02em"
+            lineHeight={1.05}
+            mt={0.5}
+          >
             {userName ?? 'Chef'} ✿
           </Heading>
-          <Text fontSize="sm" opacity={0.85} mt={2} maxW="420px" lineHeight={1.5}>
+          <Text fontSize="14px" color="rgba(255,235,220,0.8)" mt={1.5} maxW="420px" lineHeight={1.5}>
             {recipeCount === 0
               ? 'Seu caderno está pronto para começar.'
               : `Você tem ${recipeCount} receitas guardadas. O que vai ser hoje?`}
           </Text>
         </Box>
-        <Button bg="white" color="primary.600" fontWeight="600" onClick={onNewRecipe} shadow="lg" _hover={{ bg: 'beige.50' }} flexShrink={0}>
-          <Flex align="center" gap={2}>
-            <LuPlus size={16} />
-            Nova Receita
-          </Flex>
+        <Button
+          bg="rgba(255,251,243,0.95)"
+          color="primary.700"
+          fontWeight="600"
+          fontSize="13px"
+          rounded="10px"
+          px={4}
+          size="sm"
+          flexShrink={0}
+          display="inline-flex"
+          alignItems="center"
+          gap={1.5}
+          boxShadow="0 4px 12px rgba(0,0,0,0.15)"
+          _hover={{ bg: 'white' }}
+          onClick={onNewRecipe}
+        >
+          <LuPlus size={15} />
+          Nova Receita
         </Button>
       </Flex>
     </Box>
