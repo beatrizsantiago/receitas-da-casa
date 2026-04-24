@@ -20,7 +20,7 @@ export const router = createBrowserRouter([
     element: <PublicLayout />,
     children: [
       { path: '/', element: <Login /> },
-      { path: '/registro', element: <Register /> },
+      { path: '/cadastro', element: <Register /> },
     ],
   },
   {
