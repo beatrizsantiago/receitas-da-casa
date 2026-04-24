@@ -67,7 +67,7 @@ npm run preview
 | Rota | Descrição | Proteção |
 |------|-----------|----------|
 | `/` | Login | Pública |
-| `/registro` | Cadastro | Pública |
+| `/cadastro` | Cadastro | Pública |
 | `/dashboard` | Dashboard principal | Privada |
 | `/receitas` | Lista de receitas | Privada |
 | `/receitas/nova` | Criar nova receita | Privada |
@@ -97,7 +97,7 @@ O projeto segue uma arquitetura **feature-based**:
 src/
   components/ui/     # Componentes genéricos reutilizáveis
   features/
-    auth/            # Login, registro, contexto de autenticação
+    auth/            # Login, cadastro, contexto de autenticação
     recipes/         # CRUD de receitas, ingredientes, passos, notas
   pages/             # Páginas de alto nível
   routes/            # Configuração de rotas e guards
