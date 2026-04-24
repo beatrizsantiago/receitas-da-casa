@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RecipesService } from '../recipes/recipes.service';
 import { AddTagDto } from './dto/add-tag.dto';
@@ -14,18 +14,15 @@ export class TagsService {
     return this.prisma.tag.findMany({ orderBy: { name: 'asc' } });
   }
 
-  async addToRecipe(userId: number, recipeId: number, dto: AddTagDto) {
+  async addToRecipe(userId: number, recipeId: number, tagId: number) {
     await this.recipes.findOne(userId, recipeId);
 
-    const tag = await this.prisma.tag.upsert({
-      where: { name: dto.name },
-      create: { name: dto.name, color: dto.color },
-      update: {},
-    });
+    const tag = await this.prisma.tag.findUnique({ where: { id: tagId } });
+    if (!tag) throw new NotFoundException('Tag not found');
 
     return this.prisma.recipeTag.upsert({
-      where: { recipeId_tagId: { recipeId, tagId: tag.id } },
-      create: { recipeId, tagId: tag.id },
+      where: { recipeId_tagId: { recipeId, tagId } },
+      create: { recipeId, tagId },
       update: {},
     });
   }

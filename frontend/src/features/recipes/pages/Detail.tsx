@@ -84,7 +84,6 @@ export default function RecipeDetail() {
         recipeId,
         dto: {
           date: new Date().toISOString(),
-          rating: 5,
           ...(notes ? { notes } : {}),
         },
       });
@@ -124,10 +123,19 @@ export default function RecipeDetail() {
     for (const nt of drafts.tags) {
       if (!currentTags.some((ct) => ct.name === nt.name)) {
         try {
-          await addTagMut.mutateAsync({
-            recipeId,
-            dto: { name: nt.name, color: nt.color },
-          });
+          const existingTag = allTags.find(
+            (t) => t.name.toLowerCase() === nt.name.toLowerCase()
+          );
+          if (existingTag) {
+            await addTagMut.mutateAsync({ recipeId, tagId: existingTag.id });
+          } else {
+            const newTag = await tagsService.create({
+              name: nt.name,
+              color: nt.color,
+            });
+            setAllTags((prev) => [...prev, newTag]);
+            await addTagMut.mutateAsync({ recipeId, tagId: newTag.id });
+          }
         } catch {
           /* ignore */
         }

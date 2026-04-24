@@ -17,7 +17,6 @@ import type {
   UpdateRecipeDto,
   UpdateStepDto,
 } from '../types';
-import type { AddTagDto } from '@/features/tags/types';
 
 export const recipesService = {
   async list(params?: { page?: number; limit?: number; category?: string }): Promise<PaginatedResponse<Recipe>> {
@@ -101,8 +100,8 @@ export const recipesService = {
     await api.delete(`/notes/${id}`);
   },
 
-  async addTag(recipeId: number, dto: AddTagDto): Promise<void> {
-    await api.post(`/recipes/${recipeId}/tags`, dto);
+  async addTag(recipeId: number, tagId: number): Promise<void> {
+    await api.post(`/recipes/${recipeId}/tags`, { tagId });
   },
 
   async removeTag(recipeId: number, tagId: number): Promise<void> {

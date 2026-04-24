@@ -8,7 +8,7 @@ export interface RecipeDrafts {
   tags: { name: string; color: string }[];
   ingredients: { name: string; quantity: string; unit: string }[];
   steps: { description: string; order: number }[];
-  notes: { content: string; description?: string; priority?: number }[];
+  notes: { content: string }[];
   cover: { cover: boolean; hues: [number, number] };
 }
 
@@ -19,7 +19,7 @@ export interface RecipeDraftSetters {
   setTags: React.Dispatch<React.SetStateAction<{ name: string; color: string }[]>>;
   setIngredients: React.Dispatch<React.SetStateAction<{ name: string; quantity: string; unit: string }[]>>;
   setSteps: React.Dispatch<React.SetStateAction<{ description: string; order: number }[]>>;
-  setNotes: React.Dispatch<React.SetStateAction<{ content: string; description?: string; priority?: number }[]>>;
+  setNotes: React.Dispatch<React.SetStateAction<{ content: string }[]>>;
   setCover: React.Dispatch<React.SetStateAction<{ cover: boolean; hues: [number, number] }>>;
 }
 
@@ -30,7 +30,7 @@ export function useRecipeDrafts() {
   const [tagsDraft, setTagsDraft] = useState<{ name: string; color: string }[]>([]);
   const [ingDraft, setIngDraft] = useState<{ name: string; quantity: string; unit: string }[]>([]);
   const [stepsDraft, setStepsDraft] = useState<{ description: string; order: number }[]>([]);
-  const [notesDraft, setNotesDraft] = useState<{ content: string; description?: string; priority?: number }[]>([]);
+  const [notesDraft, setNotesDraft] = useState<{ content: string }[]>([]);
   const [coverDraft, setCoverDraft] = useState<{ cover: boolean; hues: [number, number] }>({ cover: false, hues: [25, 35] });
 
   function initDrafts(recipe?: Recipe | null) {
@@ -60,8 +60,6 @@ export function useRecipeDrafts() {
     setNotesDraft(
       recipe.notes?.map((n) => ({
         content: n.content,
-        description: n.description,
-        priority: n.priority,
       })) ?? []
     );
     setCoverDraft({

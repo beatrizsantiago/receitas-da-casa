@@ -25,10 +25,7 @@ export interface Note {
   id: number;
   recipeId: number;
   content: string;
-  description?: string;
-  priority: number;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface Photo {
@@ -44,7 +41,6 @@ export interface CookHistory {
   recipeId: number;
   date: string;
   notes?: string | null;
-  rating: number;
 }
 
 export interface Recipe {
@@ -93,15 +89,12 @@ export interface UpdateStepDto extends Partial<CreateStepDto> {}
 
 export interface CreateNoteDto {
   content: string;
-  description?: string;
-  priority?: number;
 }
 
 export interface UpdateNoteDto extends Partial<CreateNoteDto> {}
 
 export interface CreateCookHistoryDto {
   notes?: string;
-  rating: number;
   date?: string;
 }
 

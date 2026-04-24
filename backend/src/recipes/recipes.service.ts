@@ -63,7 +63,7 @@ export class RecipesService {
         tags: { include: { tag: true } },
         ingredients: true,
         steps: { orderBy: { order: 'asc' } },
-        notes: { orderBy: { priority: 'desc' } },
+        notes: { orderBy: { createdAt: 'desc' } },
         photos: true,
         cookHistory: { orderBy: { date: 'desc' } },
         _count: { select: { cookHistory: true } },

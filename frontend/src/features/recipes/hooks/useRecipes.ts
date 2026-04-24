@@ -154,8 +154,8 @@ export function useAddHistoryMutation() {
 export function useAddTagToRecipeMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ recipeId, dto }: { recipeId: number; dto: { name: string; color: string } }) =>
-      recipesService.addTag(recipeId, dto),
+    mutationFn: ({ recipeId, tagId }: { recipeId: number; tagId: number }) =>
+      recipesService.addTag(recipeId, tagId),
     onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: [RECIPE_KEY, vars.recipeId] }),
   });
 }

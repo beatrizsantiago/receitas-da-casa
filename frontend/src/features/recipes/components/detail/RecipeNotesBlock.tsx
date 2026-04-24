@@ -62,11 +62,6 @@ export function RecipeNotesBlock({
               >
                 {note.content}
               </Text>
-              {note.description && (
-                <Text fontSize="12px" color="neutral.500" mt={1}>
-                  {note.description}
-                </Text>
-              )}
             </Box>
           ))}
         </Flex>

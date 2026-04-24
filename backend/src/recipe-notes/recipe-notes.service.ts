@@ -20,7 +20,7 @@ export class RecipeNotesService {
     await this.recipes.findOne(userId, recipeId);
     return this.prisma.recipeNote.findMany({
       where: { recipeId },
-      orderBy: { priority: 'desc' },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
