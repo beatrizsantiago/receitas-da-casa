@@ -9,7 +9,6 @@ export interface RecipeDrafts {
   ingredients: { name: string; quantity: string; unit: string }[];
   steps: { description: string; order: number }[];
   notes: { content: string }[];
-  cover: { cover: boolean; hues: [number, number] };
 }
 
 export interface RecipeDraftSetters {
@@ -20,7 +19,6 @@ export interface RecipeDraftSetters {
   setIngredients: React.Dispatch<React.SetStateAction<{ name: string; quantity: string; unit: string }[]>>;
   setSteps: React.Dispatch<React.SetStateAction<{ description: string; order: number }[]>>;
   setNotes: React.Dispatch<React.SetStateAction<{ content: string }[]>>;
-  setCover: React.Dispatch<React.SetStateAction<{ cover: boolean; hues: [number, number] }>>;
 }
 
 export function useRecipeDrafts() {
@@ -31,7 +29,6 @@ export function useRecipeDrafts() {
   const [ingDraft, setIngDraft] = useState<{ name: string; quantity: string; unit: string }[]>([]);
   const [stepsDraft, setStepsDraft] = useState<{ description: string; order: number }[]>([]);
   const [notesDraft, setNotesDraft] = useState<{ content: string }[]>([]);
-  const [coverDraft, setCoverDraft] = useState<{ cover: boolean; hues: [number, number] }>({ cover: false, hues: [25, 35] });
 
   function initDrafts(recipe?: Recipe | null) {
     if (!recipe) return;
@@ -62,10 +59,6 @@ export function useRecipeDrafts() {
         content: n.content,
       })) ?? []
     );
-    setCoverDraft({
-      cover: recipe.photos?.some((p) => p.type === 'COVER') ?? false,
-      hues: recipe.hues ?? [25, 35],
-    });
   }
 
   const drafts: RecipeDrafts = {
@@ -76,7 +69,6 @@ export function useRecipeDrafts() {
     ingredients: ingDraft,
     steps: stepsDraft,
     notes: notesDraft,
-    cover: coverDraft,
   };
 
   const setters: RecipeDraftSetters = {
@@ -87,7 +79,6 @@ export function useRecipeDrafts() {
     setIngredients: setIngDraft,
     setSteps: setStepsDraft,
     setNotes: setNotesDraft,
-    setCover: setCoverDraft,
   };
 
   return { drafts, setters, initDrafts } as const;

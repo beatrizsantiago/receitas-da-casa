@@ -1,5 +1,5 @@
 import { Box, Flex, Heading, Image, Text } from '@chakra-ui/react';
-import { gradientFromHues } from '@/shared/utils/colors';
+import { COVER_GRADIENT } from '@/shared/utils/constants';
 import type { Recipe } from '@/features/recipes/types';
 
 interface Props {
@@ -90,7 +90,7 @@ export function MostCookedSection({ recipes, onRecipeClick }: Props) {
                   <Box
                     w="full"
                     h="full"
-                    style={{ background: gradientFromHues(r.hues) }}
+                    style={{ background: COVER_GRADIENT }}
                   />
                 )}
               </Box>

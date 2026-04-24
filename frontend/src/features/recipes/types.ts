@@ -33,6 +33,7 @@ export interface Photo {
   recipeId: number;
   url: string;
   type: PhotoType;
+  positionY: number;
   createdAt: string;
 }
 
@@ -58,7 +59,6 @@ export interface Recipe {
   cookHistory?: CookHistory[];
   cooks?: number;
   lastCooked?: string | null;
-  hues?: [number, number];
 }
 
 export interface CreateRecipeDto {

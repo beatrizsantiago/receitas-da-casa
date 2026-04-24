@@ -1,7 +1,6 @@
 import { Badge, Box, Button, Flex, Input, Text, Textarea } from '@chakra-ui/react';
 import { EditableBlock } from '@/shared/components/ui/EditableBlock';
-import { TagSelector } from '../TagSelector';
-import type { Recipe, Tag } from '../../types';
+import type { Recipe } from '../../types';
 import type { RecipeDrafts, RecipeDraftSetters } from '../../hooks/useRecipeDrafts';
 import type { RecipeCategory } from '../../types';
 
@@ -9,7 +8,6 @@ interface RecipeTitleBlockProps {
   recipe: Recipe;
   drafts: RecipeDrafts;
   setters: RecipeDraftSetters;
-  allTags: Tag[];
   onSave: () => void | Promise<void>;
   onCancel: () => void;
 }
@@ -18,7 +16,6 @@ export function RecipeTitleBlock({
   recipe,
   drafts,
   setters,
-  allTags,
   onSave,
   onCancel,
 }: RecipeTitleBlockProps) {
@@ -30,6 +27,7 @@ export function RecipeTitleBlock({
   return (
     <EditableBlock
       eyebrow="como essa receita se chama"
+      title={recipe.title}
       onSave={onSave}
       onCancel={onCancel}
       editor={
@@ -99,19 +97,14 @@ export function RecipeTitleBlock({
                   px={3}
                   py={1.5}
                   onClick={() => setters.setCategory(c.id)}
-                  bg={
-                    drafts.category === c.id ? 'neutral.800' : 'transparent'
-                  }
-                  color={
-                    drafts.category === c.id ? 'beige.50' : 'neutral.500'
-                  }
+                  bg={drafts.category === c.id ? 'neutral.800' : 'transparent'}
+                  color={drafts.category === c.id ? 'beige.50' : 'neutral.500'}
                   borderWidth="1px"
                   borderColor={
                     drafts.category === c.id ? 'transparent' : 'beige.200'
                   }
                   _hover={{
-                    bg:
-                      drafts.category === c.id ? 'neutral.800' : 'beige.50',
+                    bg: drafts.category === c.id ? 'neutral.800' : 'beige.50',
                   }}
                 >
                   {c.label}
@@ -119,82 +112,11 @@ export function RecipeTitleBlock({
               ))}
             </Flex>
           </Box>
-          <TagSelector selected={drafts.tags} onChange={setters.setTags} />
-          {allTags.length > 0 && (
-            <Box mt={1}>
-              <Text
-                fontSize="11px"
-                color="neutral.500"
-                fontWeight="600"
-                letterSpacing="0.05em"
-                textTransform="uppercase"
-                mb={1.5}
-              >
-                Das suas tags
-              </Text>
-              <Flex gap={1.5} flexWrap="wrap">
-                {allTags
-                  .filter(
-                    (ut) =>
-                      !drafts.tags.some(
-                        (t) => t.name === ut.name.toLowerCase()
-                      )
-                  )
-                  .map((ut) => (
-                    <Box
-                      key={ut.id}
-                      as="span"
-                      display="inline-flex"
-                      alignItems="center"
-                      gap={1}
-                      px={2.5}
-                      py={1}
-                      rounded="full"
-                      fontSize="12px"
-                      fontWeight="600"
-                      cursor="pointer"
-                      style={{
-                        backgroundColor: ut.color + '22',
-                        color: ut.color,
-                        border: `1px solid ${ut.color}44`,
-                      }}
-                      onClick={() =>
-                        setters.setTags((prev) => [
-                          ...prev,
-                          { name: ut.name.toLowerCase(), color: ut.color },
-                        ])
-                      }
-                    >
-                      + #{ut.name}
-                    </Box>
-                  ))}
-              </Flex>
-            </Box>
-          )}
         </Flex>
       }
     >
       <Flex direction="column" gap={2.5}>
         <Flex align="center" gap={2.5} flexWrap="wrap">
-          <Text
-            fontFamily="'Fraunces', Georgia, serif"
-            fontSize="24px"
-            color="neutral.800"
-            fontWeight="500"
-            letterSpacing="-0.015em"
-            lineHeight={1.15}
-          >
-            {recipe.title || (
-              <Text
-                as="span"
-                color="neutral.400"
-                fontStyle="italic"
-                fontSize="16px"
-              >
-                Sem título
-              </Text>
-            )}
-          </Text>
           <Badge
             bg={cat.tone === 'primary' ? 'primary.50' : 'secondary.50'}
             color={cat.tone === 'primary' ? 'primary.800' : 'secondary.800'}
@@ -214,29 +136,6 @@ export function RecipeTitleBlock({
             </Text>
           )}
         </Text>
-        {recipe.tags && recipe.tags.length > 0 && (
-          <Flex gap={1.5} flexWrap="wrap" mt={0.5}>
-            {recipe.tags.map((t) => (
-              <Box
-                key={t.tag.id}
-                as="span"
-                display="inline-flex"
-                px={2.5}
-                py={1}
-                rounded="full"
-                fontSize="12px"
-                fontWeight="600"
-                style={{
-                  backgroundColor: t.tag.color + '22',
-                  color: t.tag.color,
-                  border: `1px solid ${t.tag.color}44`,
-                }}
-              >
-                #{t.tag.name}
-              </Box>
-            ))}
-          </Flex>
-        )}
       </Flex>
     </EditableBlock>
   );

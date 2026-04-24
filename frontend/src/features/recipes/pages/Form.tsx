@@ -14,8 +14,6 @@ import { useBreakpointValue } from '@chakra-ui/react';
 import { LuCheck, LuChevronLeft } from 'react-icons/lu';
 import { AxiosError } from 'axios';
 import { useCreateRecipeMutation } from '../hooks/useRecipes';
-import { CoverUploader } from '@/shared/components/ui/CoverUploader';
-import { randomHues } from '@/shared/utils/colors';
 import { toast } from 'react-toastify';
 import { getApiErrorMessage, type ApiErrorResponse } from '@/shared/utils/parseError';
 import type { RecipeCategory } from '../types';
@@ -24,10 +22,6 @@ export default function RecipeCreate() {
   const navigate = useNavigate();
   const mobile = useBreakpointValue({ base: true, md: false });
   const [category, setCategory] = useState<RecipeCategory>('SAVORY');
-  const [cover, setCover] = useState(false);
-  const [hues, setHues] = useState<[number, number]>([25, 35]);
-  const [defaultHues] = useState<[number, number]>(() => randomHues());
-
   const createRecipe = useCreateRecipeMutation();
 
   const validationErrors = (createRecipe.error as AxiosError<ApiErrorResponse> | null)?.response?.data?.validation_errors;
@@ -131,29 +125,6 @@ export default function RecipeCreate() {
             flexDirection="column"
             gap={5}
           >
-          {/* Foto de capa */}
-          <Box>
-            <Text
-              fontSize="11px"
-              fontWeight="600"
-              color="neutral.500"
-              letterSpacing="0.08em"
-              textTransform="uppercase"
-              mb={2}
-            >
-              Foto de capa
-            </Text>
-            <CoverUploader
-              cover={cover}
-              hues={hues}
-              defaultHues={defaultHues}
-              onChange={(c, h) => {
-                setCover(c);
-                if (h) setHues(h);
-              }}
-            />
-          </Box>
-
           {/* Título */}
           <Field.Root required invalid={!!validationErrors?.title}>
             <Field.Label fontSize="13px" fontWeight="550" color="neutral.600" letterSpacing="-0.005em">

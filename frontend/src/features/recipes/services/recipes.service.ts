@@ -118,13 +118,17 @@ export const recipesService = {
     return data;
   },
 
-  async generateUploadUrl(fileName: string, contentType: string): Promise<{ uploadUrl: string; publicUrl: string }> {
-    const { data } = await api.post<{ uploadUrl: string; publicUrl: string }>('/photos/upload-url', { fileName, contentType });
+  async uploadPhoto(file: File, type: 'COVER' | 'USER', recipeId: number): Promise<Photo> {
+    const form = new FormData();
+    form.append('file', file);
+    form.append('type', type);
+    form.append('recipeId', String(recipeId));
+    const { data } = await api.post<Photo>('/photos', form);
     return data;
   },
 
-  async createPhoto(dto: { url: string; type: 'COVER' | 'USER'; recipeId: number }): Promise<Photo> {
-    const { data } = await api.post<Photo>('/photos', dto);
+  async updatePhotoPosition(photoId: number, positionY: number): Promise<Photo> {
+    const { data } = await api.patch<Photo>(`/photos/${photoId}`, { positionY });
     return data;
   },
 };

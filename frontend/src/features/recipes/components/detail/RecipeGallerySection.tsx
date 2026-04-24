@@ -1,6 +1,10 @@
+import { useState } from 'react';
 import { Box, Button, Heading, Image, Text } from '@chakra-ui/react';
 import { useBreakpointValue } from '@chakra-ui/react';
 import { LuImages } from 'react-icons/lu';
+import Lightbox from 'yet-another-react-lightbox';
+import Zoom from 'yet-another-react-lightbox/plugins/zoom';
+import 'yet-another-react-lightbox/styles.css';
 import type { Photo } from '../../types';
 
 interface RecipeGallerySectionProps {
@@ -16,6 +20,9 @@ export function RecipeGallerySection({
   galleryInputRef,
 }: RecipeGallerySectionProps) {
   const mobile = useBreakpointValue({ base: true, md: false });
+  const [lightboxIndex, setLightboxIndex] = useState(-1);
+
+  const slides = photos?.map((p) => ({ src: p.url })) ?? [];
 
   return (
     <Box
@@ -25,27 +32,34 @@ export function RecipeGallerySection({
       borderColor="beige.100"
       p={5}
     >
-      <Box mb={4}>
-        <Text
-          fontFamily="'Caveat', cursive"
-          fontSize="18px"
-          color="primary.500"
-          lineHeight={1}
-          mb={2}
-        >
-          lembranças
-        </Text>
-        <Heading
-          fontFamily="'Fraunces', Georgia, serif"
-          fontSize="22px"
-          fontWeight="500"
-          color="neutral.800"
-          letterSpacing="-0.015em"
-          lineHeight={1.15}
-          mb={3}
-        >
-          Fotos da receita
-        </Heading>
+      <Box
+        display="flex"
+        flexDirection={mobile ? 'column' : 'row'}
+        justifyContent="space-between"
+        gap={mobile ? 3 : 2}
+        mb={4}
+      >
+        <Box>
+          <Text
+            fontFamily="'Caveat', cursive"
+            fontSize="18px"
+            color="primary.500"
+            lineHeight={1}
+            mb={2}
+          >
+            lembranças
+          </Text>
+          <Heading
+            fontFamily="'Fraunces', Georgia, serif"
+            fontSize="22px"
+            fontWeight="500"
+            color="neutral.800"
+            letterSpacing="-0.015em"
+            lineHeight={1.15}
+          >
+            Fotos da receita
+          </Heading>
+        </Box>
         <Button
           size="sm"
           variant="outline"
@@ -76,36 +90,51 @@ export function RecipeGallerySection({
         onChange={onGalleryFileChange}
       />
 
-      {photos && photos.length > 0 ? (
-        <Box
-          display="grid"
-          gridTemplateColumns={
-            mobile
-              ? 'repeat(2, 1fr)'
-              : 'repeat(auto-fill, minmax(160px, 1fr))'
-          }
-          gap={3}
-        >
-          {photos.map((photo) => (
-            <Box
-              key={photo.id}
-              rounded="lg"
-              overflow="hidden"
-              borderWidth="1px"
-              borderColor="beige.200"
-              position="relative"
-              aspectRatio="1"
-            >
-              <Image
-                src={photo.url}
-                alt="Foto da receita"
-                w="full"
-                h="full"
-                objectFit="cover"
-              />
-            </Box>
-          ))}
-        </Box>
+      {slides.length > 0 ? (
+        <>
+          <Box
+            display="grid"
+            gridTemplateColumns={
+              mobile
+                ? 'repeat(2, 1fr)'
+                : 'repeat(auto-fill, minmax(160px, 1fr))'
+            }
+            gap={3}
+          >
+            {slides.map((slide, i) => (
+              <Box
+                key={i}
+                rounded="lg"
+                overflow="hidden"
+                borderWidth="1px"
+                borderColor="beige.200"
+                position="relative"
+                aspectRatio="1"
+                cursor="pointer"
+                onClick={() => setLightboxIndex(i)}
+                _hover={{ opacity: 0.88 }}
+                transition="opacity 150ms"
+              >
+                <Image
+                  src={slide.src}
+                  alt="Foto da receita"
+                  w="full"
+                  h="full"
+                  objectFit="cover"
+                />
+              </Box>
+            ))}
+          </Box>
+
+          <Lightbox
+            open={lightboxIndex >= 0}
+            index={lightboxIndex}
+            close={() => setLightboxIndex(-1)}
+            slides={slides}
+            plugins={[Zoom]}
+            carousel={{ finite: slides.length <= 1 }}
+          />
+        </>
       ) : (
         <Box
           textAlign="center"

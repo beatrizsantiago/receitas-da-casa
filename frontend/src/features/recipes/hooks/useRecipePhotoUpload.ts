@@ -1,31 +1,18 @@
 import { useRef, useState } from 'react';
 import { toast } from 'react-toastify';
-import {
-  useUploadPhotoMutation,
-  useCreatePhotoMutation,
-} from '../hooks/usePhotoMutations';
+import { useUploadPhotoMutation } from '../hooks/usePhotoMutations';
 
 export function useRecipePhotoUpload(recipeId: number) {
   const [uploading, setUploading] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
-  const uploadPhotoMut = useUploadPhotoMutation();
-  const createPhotoMut = useCreatePhotoMutation();
+  const uploadMut = useUploadPhotoMutation();
 
   async function handlePhotoUpload(file: File, type: 'COVER' | 'USER') {
     setUploading(true);
     try {
-      const { uploadUrl, publicUrl } = await uploadPhotoMut.mutateAsync({
-        fileName: file.name,
-        contentType: file.type,
-      });
-      await fetch(uploadUrl, {
-        method: 'PUT',
-        body: file,
-        headers: { 'Content-Type': file.type },
-      });
-      await createPhotoMut.mutateAsync({ url: publicUrl, type, recipeId });
+      await uploadMut.mutateAsync({ file, type, recipeId });
       toast.success(type === 'COVER' ? 'Capa atualizada!' : 'Foto adicionada!');
     } catch {
       toast.error('Erro ao enviar foto');
@@ -52,6 +39,5 @@ export function useRecipePhotoUpload(recipeId: number) {
     galleryInputRef,
     onCoverFileChange,
     onGalleryFileChange,
-    handlePhotoUpload,
   } as const;
 }

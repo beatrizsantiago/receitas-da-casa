@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useTagsQuery, useCreateTagMutation } from '@/features/tags/hooks/useTags';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Box, Button, useBreakpointValue } from '@chakra-ui/react';
+import { Box, useBreakpointValue } from '@chakra-ui/react';
 import { LuPencil } from 'react-icons/lu';
-import { CoverUploader } from '@/shared/components/ui/CoverUploader';
 import { LoadingSpinner } from '@/shared/components/ui/LoadingSpinner';
 import { EmptyState } from '@/shared/components/ui/EmptyState';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
@@ -17,7 +17,7 @@ import {
 } from '../hooks/useRecipes';
 import { useRecipeDrafts } from '../hooks/useRecipeDrafts';
 import { useRecipePhotoUpload } from '../hooks/useRecipePhotoUpload';
-import { tagsService } from '@/features/tags/services/tags.service';
+import { useUpdatePhotoPositionMutation } from '../hooks/usePhotoMutations';
 import { RecipeCoverSection } from '../components/detail/RecipeCoverSection';
 import { RecipeTitleBlock } from '../components/detail/RecipeTitleBlock';
 import { RecipeTagsBlock } from '../components/detail/RecipeTagsBlock';
@@ -26,8 +26,6 @@ import { RecipeStepsBlock } from '../components/detail/RecipeStepsBlock';
 import { RecipeNotesBlock } from '../components/detail/RecipeNotesBlock';
 import { RecipeHistorySection } from '../components/detail/RecipeHistorySection';
 import { RecipeGallerySection } from '../components/detail/RecipeGallerySection';
-import type { Tag } from '../types';
-
 export default function RecipeDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -37,8 +35,8 @@ export default function RecipeDetail() {
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [editingCover, setEditingCover] = useState(false);
-  const [allTags, setAllTags] = useState<Tag[]>([]);
+
+  const { data: allTags = [] } = useTagsQuery();
 
   const { drafts, setters, initDrafts } = useRecipeDrafts();
   const {
@@ -47,7 +45,6 @@ export default function RecipeDetail() {
     galleryInputRef,
     onCoverFileChange,
     onGalleryFileChange,
-    handlePhotoUpload,
   } = useRecipePhotoUpload(recipeId);
 
   const updateRecipe = useUpdateRecipeMutation();
@@ -55,10 +52,12 @@ export default function RecipeDetail() {
   const addTagMut = useAddTagToRecipeMutation();
   const removeTagMut = useRemoveTagFromRecipeMutation();
   const addHistoryMut = useAddHistoryMutation();
+  const updatePositionMut = useUpdatePhotoPositionMutation();
+  const createTagMut = useCreateTagMutation();
 
-  useEffect(() => {
-    tagsService.list().then(setAllTags).catch(() => {});
-  }, []);
+  async function handleSavePosition(photoId: number, positionY: number) {
+    await updatePositionMut.mutateAsync({ photoId, positionY, recipeId });
+  }
 
   useEffect(() => {
     initDrafts(recipe);
@@ -126,11 +125,7 @@ export default function RecipeDetail() {
           if (existingTag) {
             await addTagMut.mutateAsync({ recipeId, tagId: existingTag.id });
           } else {
-            const newTag = await tagsService.create({
-              name: nt.name,
-              color: nt.color,
-            });
-            setAllTags((prev) => [...prev, newTag]);
+            const newTag = await createTagMut.mutateAsync({ name: nt.name, color: nt.color });
             await addTagMut.mutateAsync({ recipeId, tagId: newTag.id });
           }
         } catch {
@@ -160,104 +155,15 @@ export default function RecipeDetail() {
 
   return (
     <Box minH="100vh" bg="beige.100" pb={mobile ? 20 : 16}>
-      <Box position="relative">
-        <RecipeCoverSection
-          recipe={recipe}
-          onBack={() => navigate('/receitas')}
-          onDeleteClick={() => setDeleteOpen(true)}
-          onEditCover={() => {
-            initDrafts();
-            setEditingCover(true);
-          }}
-          onCoverFileChange={onCoverFileChange}
-          coverInputRef={coverInputRef}
-          uploading={uploading}
-        />
-
-        {editingCover && (
-          <Box
-            position="fixed"
-            inset={0}
-            bg="rgba(47,30,10,0.55)"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            p={mobile ? 4 : 7}
-            zIndex={1000}
-          >
-            <Box
-              bg="white"
-              rounded="16px"
-              p={mobile ? 4 : 5}
-              maxW="520px"
-              w="full"
-              boxShadow="0 20px 40px rgba(0,0,0,0.25)"
-            >
-              <Box
-                fontFamily="'Fraunces', Georgia, serif"
-                fontSize="18px"
-                fontWeight="500"
-                color="neutral.800"
-                mb={3}
-                letterSpacing="-0.01em"
-              >
-                Alterar foto de capa
-              </Box>
-              <CoverUploader
-                cover={drafts.cover.cover}
-                hues={drafts.cover.hues}
-                onChange={(c, h) =>
-                  setters.setCover((prev) => ({
-                    cover: c,
-                    hues: h || prev.hues,
-                  }))
-                }
-              />
-              <Box
-                display="flex"
-                gap={2}
-                justifyContent="flex-end"
-                mt={3.5}
-                pt={3.5}
-                borderTopWidth="1px"
-                borderColor="beige.100"
-              >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  fontSize="13px"
-                  fontWeight="550"
-                  onClick={() => {
-                    initDrafts();
-                    setEditingCover(false);
-                  }}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  bg="primary.500"
-                  color="white"
-                  size="sm"
-                  fontSize="13px"
-                  fontWeight="550"
-                  rounded="10px"
-                  display="inline-flex"
-                  alignItems="center"
-                  gap={1.5}
-                  boxShadow="0 6px 14px rgba(196,74,47,0.25)"
-                  loading={uploading}
-                  onClick={() => {
-                    void handlePhotoUpload(new File([], 'cover.jpg'), 'COVER');
-                    setEditingCover(false);
-                  }}
-                >
-                  Salvar
-                </Button>
-              </Box>
-            </Box>
-          </Box>
-        )}
-      </Box>
+      <RecipeCoverSection
+        recipe={recipe}
+        onBack={() => navigate('/receitas')}
+        onDeleteClick={() => setDeleteOpen(true)}
+        onCoverFileChange={onCoverFileChange}
+        coverInputRef={coverInputRef}
+        uploading={uploading}
+        onSavePosition={handleSavePosition}
+      />
 
       <Box
         maxW="900px"
@@ -290,7 +196,6 @@ export default function RecipeDetail() {
           recipe={recipe}
           drafts={drafts}
           setters={setters}
-          allTags={allTags}
           onSave={saveTitleBlock}
           onCancel={initDrafts}
         />
@@ -321,7 +226,7 @@ export default function RecipeDetail() {
           onAddHistory={addHistory}
         />
         <RecipeGallerySection
-          photos={recipe.photos}
+          photos={recipe.photos?.filter((p) => p.type === 'USER')}
           onGalleryFileChange={onGalleryFileChange}
           galleryInputRef={galleryInputRef}
           recipeId={recipeId}

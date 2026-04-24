@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 
 interface Props {
   eyebrow?: string;
-  title?: string;
+  title: string;
   children: React.ReactNode;
   editor: React.ReactNode;
   onSave: () => void | Promise<void>;

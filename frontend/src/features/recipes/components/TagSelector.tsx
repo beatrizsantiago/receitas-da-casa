@@ -155,7 +155,7 @@ export function TagSelector({ selected, onChange }: Props) {
             textTransform="uppercase"
             mb={1.5}
           >
-            Das suas tags
+            Disponíveis
           </Text>
           <Flex gap={1.5} flexWrap="wrap">
             {availableTags.map((t) => (

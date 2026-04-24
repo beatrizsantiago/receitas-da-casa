@@ -2,7 +2,7 @@ import { Box, Flex, Text } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { LuFlame } from 'react-icons/lu';
 import type { Recipe } from '../types';
-import { gradientFromHues } from '@/shared/utils/colors';
+import { COVER_GRADIENT } from '@/shared/utils/constants';
 
 const CATEGORY_META: Record<string, { label: string; tone: string }> = {
   SWEET: { label: 'Doce', tone: 'primary' },
@@ -40,13 +40,13 @@ export function RecipeCard({ recipe }: Props) {
             h="full"
             backgroundImage={`url(${cover.url})`}
             backgroundSize="cover"
-            backgroundPosition="center"
+            backgroundPosition={`center ${cover.positionY ?? 50}%`}
           />
         ) : (
           <Box
             w="full"
             h="full"
-            style={{ background: gradientFromHues(recipe.hues) }}
+            style={{ background: COVER_GRADIENT }}
           />
         )}
 
@@ -70,21 +70,6 @@ export function RecipeCard({ recipe }: Props) {
         >
           {cat?.label ?? recipe.category}
         </Box>
-
-        <Text
-          position="absolute"
-          bottom={2.5}
-          left={3}
-          right={3}
-          fontFamily="'Caveat', cursive"
-          fontSize="22px"
-          color="white"
-          lineHeight={1.15}
-          lineClamp={2}
-          textShadow="0 1px 3px rgba(0,0,0,0.3)"
-        >
-          {recipe.title || 'Sem título'}
-        </Text>
       </Box>
 
       <Box p={3.5} display="flex" flexDirection="column" flex={1} gap={0} justifyContent="space-between">
@@ -116,7 +101,7 @@ export function RecipeCard({ recipe }: Props) {
 
           {recipe.tags && recipe.tags.length > 0 && (
             <Flex gap={1} flexWrap="wrap" mt={2}>
-              {recipe.tags.slice(0, 3).map((t) => (
+              {recipe.tags.map((t) => (
                 <Box
                   key={t.tag.id}
                   as="span"

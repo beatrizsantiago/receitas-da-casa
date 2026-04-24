@@ -178,6 +178,7 @@ export default function RecipeList() {
               transform="translateY(-50%)"
               color="neutral.400"
               pointerEvents="none"
+              zIndex={1}
             >
               <LuSearch size={15} />
             </Box>
@@ -456,7 +457,7 @@ export default function RecipeList() {
         />
       ) : (
         <Grid
-          templateColumns={mobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)'}
+          templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }}
           gap={4}
         >
           {filtered.map((r) => (
