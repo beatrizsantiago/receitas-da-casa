@@ -5,7 +5,7 @@ import { toaster } from './toaster';
 
 interface Props {
   eyebrow?: string;
-  title: string;
+  title?: string;
   children: React.ReactNode;
   editor: React.ReactNode;
   onSave: () => void | Promise<void>;
@@ -56,16 +56,18 @@ export function EditableBlock({ eyebrow, title, children, editor, onSave, onCanc
               {eyebrow}
             </Text>
           )}
-          <Heading
-            fontFamily="'Fraunces', Georgia, serif"
-            fontSize="22px"
-            fontWeight="500"
-            color="neutral.800"
-            letterSpacing="-0.015em"
-            lineHeight={1.15}
-          >
-            {title}
-          </Heading>
+          {title && (
+            <Heading
+              fontFamily="'Fraunces', Georgia, serif"
+              fontSize="22px"
+              fontWeight="500"
+              color="neutral.800"
+              letterSpacing="-0.015em"
+              lineHeight={1.15}
+            >
+              {title}
+            </Heading>
+          )}
         </Box>
         {canEdit && !editing && (
           <Button

@@ -1,13 +1,6 @@
-import { useState } from 'react';
-import {
-  Box,
-  Button,
-  Flex,
-  IconButton,
-  Input,
-  Text,
-  Textarea,
-} from '@chakra-ui/react';
+import { Box, Button, Flex, Textarea } from '@chakra-ui/react';
+import { useState, forwardRef, useImperativeHandle } from 'react';
+import { LuX } from 'react-icons/lu';
 import { toaster } from '@/shared/components/ui/toaster';
 import {
   useAddNoteMutation,
@@ -16,109 +9,165 @@ import {
 } from '../hooks/useRecipes';
 import type { Note } from '../types';
 
+export interface NotesListHandle {
+  save: () => Promise<void>;
+}
+
 interface Props {
   recipeId: number;
   notes: Note[];
 }
 
-export function NotesList({ recipeId, notes }: Props) {
-  const [adding, setAdding] = useState(false);
-  const [content, setContent] = useState('');
-  const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState('0');
-  const [editId, setEditId] = useState<number | null>(null);
-  const [editContent, setEditContent] = useState('');
-
-  const addMut = useAddNoteMutation();
-  const updateMut = useUpdateNoteMutation();
-  const deleteMut = useDeleteNoteMutation();
-
-  async function handleAdd() {
-    if (!content.trim()) return;
-    try {
-      await addMut.mutateAsync({
-        recipeId,
-        dto: {
-          content: content.trim(),
-          ...(description.trim() ? { description: description.trim() } : {}),
-          ...(Number(priority) > 0 ? { priority: Number(priority) } : {}),
-        },
-      });
-      setContent('');
-      setDescription('');
-      setPriority('0');
-      setAdding(false);
-    } catch {
-      toaster.create({ title: 'Erro ao adicionar anotação', type: 'error' });
-    }
-  }
-
-  async function handleUpdate(id: number) {
-    try {
-      await updateMut.mutateAsync({ id, dto: { content: editContent } });
-      setEditId(null);
-    } catch {
-      toaster.create({ title: 'Erro ao atualizar anotação', type: 'error' });
-    }
-  }
-
-  async function handleRemove(id: number) {
-    try {
-      await deleteMut.mutateAsync(id);
-    } catch {
-      toaster.create({ title: 'Erro ao remover anotação', type: 'error' });
-    }
-  }
-
-  const saving = addMut.isPending || updateMut.isPending;
-
-  return (
-    <Box>
-      <Flex justify="space-between" align="center" mb={3}>
-        <Text fontWeight="semibold" fontSize="lg">Anotações</Text>
-        <Button size="sm" colorPalette="primary" variant="ghost" onClick={() => setAdding(true)}>
-          + Adicionar
-        </Button>
-      </Flex>
-
-      <Flex direction="column" gap={3}>
-        {notes.map((note) =>
-          editId === note.id ? (
-            <Flex key={note.id} direction="column" gap={2} bg="beige.50" p={3} rounded="md">
-              <Textarea size="sm" value={editContent} onChange={(e) => setEditContent(e.target.value)} rows={2} />
-              <Flex gap={2}>
-                <IconButton size="sm" aria-label="Salvar" loading={saving} onClick={() => handleUpdate(note.id)}>✓</IconButton>
-                <IconButton size="sm" aria-label="Cancelar" variant="ghost" onClick={() => setEditId(null)}>✕</IconButton>
-              </Flex>
-            </Flex>
-          ) : (
-            <Flex key={note.id} direction="column" gap={1} p={3} bg={note.priority > 0 ? 'yellow.50' : 'beige.50'} rounded="md" role="group">
-              <Flex justify="space-between" align="center">
-                <Text fontWeight="medium" fontSize="sm">{note.content}</Text>
-                <Flex gap={1} opacity={0} _groupHover={{ opacity: 1 }} transition="opacity 0.15s">
-                  <IconButton size="xs" aria-label="Editar" variant="ghost" onClick={() => { setEditId(note.id); setEditContent(note.content); }}>✏️</IconButton>
-                  <IconButton size="xs" aria-label="Remover" variant="ghost" colorPalette="red" onClick={() => handleRemove(note.id)}>🗑</IconButton>
-                </Flex>
-              </Flex>
-              {note.description && (
-                <Text fontSize="xs" color="neutral.500">{note.description}</Text>
-              )}
-            </Flex>
-          )
-        )}
-      </Flex>
-
-      {adding && (
-        <Flex direction="column" gap={2} mt={3} bg="white" p={3} rounded="md" shadow="sm">
-          <Textarea size="sm" placeholder="Conteúdo da anotação" value={content} onChange={(e) => setContent(e.target.value)} rows={2} />
-          <Input size="sm" placeholder="Descrição (opcional)" value={description} onChange={(e) => setDescription(e.target.value)} />
-          <Input size="sm" type="number" placeholder="Prioridade (0+)" value={priority} onChange={(e) => setPriority(e.target.value)} maxW="120px" />
-          <Flex gap={2}>
-            <IconButton size="sm" aria-label="Salvar" loading={saving} onClick={handleAdd}>✓</IconButton>
-            <IconButton size="sm" aria-label="Cancelar" variant="ghost" onClick={() => setAdding(false)}>✕</IconButton>
-          </Flex>
-        </Flex>
-      )}
-    </Box>
-  );
+interface LocalNote {
+  tempId: string;
+  serverId?: number;
+  content: string;
 }
+
+let tempCounter = 0;
+
+export const NotesList = forwardRef<NotesListHandle, Props>(
+  function NotesList({ recipeId, notes }, ref) {
+    const [rows, setRows] = useState<LocalNote[]>(() =>
+      notes.map((n) => ({
+        tempId: `existing-${n.id}`,
+        serverId: n.id,
+        content: n.content,
+      }))
+    );
+    const [deletedIds] = useState(() => new Set<number>());
+
+    const addMut = useAddNoteMutation();
+    const updateMut = useUpdateNoteMutation();
+    const deleteMut = useDeleteNoteMutation();
+
+    useImperativeHandle(ref, () => ({
+      save: async () => {
+        for (const id of deletedIds) {
+          try {
+            await deleteMut.mutateAsync(id);
+          } catch {
+            toaster.create({ title: 'Erro ao remover anotação', type: 'error' });
+          }
+        }
+
+        for (const row of rows) {
+          if (!row.serverId) continue;
+          const original = notes.find((n) => n.id === row.serverId);
+          if (!original) continue;
+          if (row.content === original.content) continue;
+          try {
+            await updateMut.mutateAsync({
+              id: row.serverId,
+              dto: { content: row.content },
+            });
+          } catch {
+            toaster.create({ title: 'Erro ao atualizar anotação', type: 'error' });
+          }
+        }
+
+        for (const row of rows) {
+          if (row.serverId) continue;
+          if (!row.content.trim()) continue;
+          try {
+            await addMut.mutateAsync({
+              recipeId,
+              dto: { content: row.content.trim() },
+            });
+          } catch {
+            toaster.create({ title: 'Erro ao adicionar anotação', type: 'error' });
+          }
+        }
+      },
+    }));
+
+    function addRow() {
+      setRows((prev) => [
+        ...prev,
+        { tempId: `new-${++tempCounter}`, content: '' },
+      ]);
+    }
+
+    function updateContent(tempId: string, value: string) {
+      setRows((prev) =>
+        prev.map((r) => (r.tempId === tempId ? { ...r, content: value } : r))
+      );
+    }
+
+    function removeRow(row: LocalNote) {
+      setRows((prev) => prev.filter((r) => r.tempId !== row.tempId));
+      if (row.serverId !== undefined) {
+        deletedIds.add(row.serverId);
+      }
+    }
+
+    return (
+      <Box>
+        <Flex direction="column" gap={2.5}>
+          {rows.map((row) => (
+            <Flex key={row.tempId} gap={2} align="flex-start">
+              <Textarea
+                flex={1}
+                value={row.content}
+                onChange={(e) => updateContent(row.tempId, e.target.value)}
+                rows={2}
+                rounded="10px"
+                borderColor="yellow.200"
+                bg="yellow.50"
+                fontSize="15px"
+                fontFamily="'Caveat', cursive"
+                color="#4A3B12"
+                px={3.5}
+                py={3}
+                resize="vertical"
+                lineHeight={1.4}
+                _focus={{ borderColor: 'yellow.300', boxShadow: 'none' }}
+                placeholder="Escreva sua anotação..."
+              />
+              <Box
+                as="button"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                w="28px"
+                h="28px"
+                mt="6px"
+                rounded="6px"
+                color="neutral.300"
+                cursor="pointer"
+                border="none"
+                bg="transparent"
+                flexShrink={0}
+                _hover={{ color: 'red.400', bg: 'red.50' }}
+                onClick={() => removeRow(row)}
+              >
+                <LuX size={14} />
+              </Box>
+            </Flex>
+          ))}
+        </Flex>
+
+        <Button
+          w="full"
+          variant="outline"
+          borderStyle="dashed"
+          borderColor="beige.200"
+          color="neutral.500"
+          fontSize="13px"
+          fontWeight="500"
+          rounded="10px"
+          h="38px"
+          mt={2.5}
+          display="inline-flex"
+          alignItems="center"
+          gap={1.5}
+          bg="transparent"
+          _hover={{ bg: 'beige.50' }}
+          onClick={addRow}
+        >
+          + Adicionar anotação
+        </Button>
+      </Box>
+    );
+  }
+);

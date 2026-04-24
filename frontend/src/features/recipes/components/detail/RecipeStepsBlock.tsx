@@ -1,42 +1,42 @@
+import { useRef } from 'react';
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { EditableBlock } from '@/shared/components/ui/EditableBlock';
-import { StepList } from '../StepList';
+import { StepList, type StepListHandle } from '../StepList';
 import type { Recipe } from '../../types';
 
 interface RecipeStepsBlockProps {
   recipe: Recipe;
   recipeId: number;
-  steps: { description: string; order: number }[];
   onCancel: () => void;
 }
 
 export function RecipeStepsBlock({
   recipe,
   recipeId,
-  steps,
   onCancel,
 }: RecipeStepsBlockProps) {
+  const listRef = useRef<StepListHandle>(null);
+
   return (
     <EditableBlock
       eyebrow="modo de preparo"
       title="Passo a passo"
-      onSave={async () => {}}
+      onSave={async () => {
+        await listRef.current?.save();
+      }}
       onCancel={onCancel}
       editor={
         <StepList
+          ref={listRef}
           recipeId={recipeId}
-          steps={steps.map((s, idx) => ({
-            ...s,
-            id: idx,
-            recipeId,
-          }))}
+          steps={recipe.steps ?? []}
         />
       }
     >
       {recipe.steps && recipe.steps.length > 0 ? (
         <Box as="ol" listStyleType="none" p={0} m={0}>
           {recipe.steps.map((step, i) => (
-            <Box key={step.id} as="li" display="flex" gap={3.5} mb={3.5}>
+            <Box key={step.id} as="li" display="flex" alignItems="center" gap={3.5} mb={3.5}>
               <Flex
                 w="32px"
                 h="32px"
@@ -50,7 +50,6 @@ export function RecipeStepsBlock({
                 fontWeight="500"
                 fontStyle="italic"
                 flexShrink={0}
-                mt={1}
               >
                 {i + 1}
               </Flex>
@@ -59,7 +58,6 @@ export function RecipeStepsBlock({
                 fontSize="14px"
                 color="neutral.800"
                 lineHeight={1.55}
-                pt={1}
               >
                 {step.description}
               </Text>

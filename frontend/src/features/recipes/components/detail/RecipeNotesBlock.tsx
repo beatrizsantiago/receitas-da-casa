@@ -1,38 +1,35 @@
+import { useRef } from 'react';
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { EditableBlock } from '@/shared/components/ui/EditableBlock';
-import { NotesList } from '../NotesList';
+import { NotesList, type NotesListHandle } from '../NotesList';
 import type { Recipe } from '../../types';
 
 interface RecipeNotesBlockProps {
   recipe: Recipe;
   recipeId: number;
-  notes: { content: string; description?: string; priority?: number }[];
   onCancel: () => void;
 }
 
 export function RecipeNotesBlock({
   recipe,
   recipeId,
-  notes,
   onCancel,
 }: RecipeNotesBlockProps) {
+  const listRef = useRef<NotesListHandle>(null);
+
   return (
     <EditableBlock
       eyebrow="das suas margens"
       title="Anotações"
-      onSave={async () => {}}
+      onSave={async () => {
+        await listRef.current?.save();
+      }}
       onCancel={onCancel}
       editor={
         <NotesList
+          ref={listRef}
           recipeId={recipeId}
-          notes={notes.map((n, idx) => ({
-            ...n,
-            id: idx,
-            recipeId,
-            priority: n.priority ?? 0,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          }))}
+          notes={recipe.notes ?? []}
         />
       }
     >
@@ -45,23 +42,17 @@ export function RecipeNotesBlock({
               bg="yellow.50"
               rounded="12px"
               p={3.5}
-              pl={5}
               borderLeft="3px solid"
-              borderColor="yellow.400"
+              borderColor="yellow.300"
             >
               <Text
                 fontSize="11px"
                 fontWeight="550"
                 color="#7A5A10"
                 letterSpacing="0.04em"
-                textTransform="uppercase"
                 mb={1}
               >
-                {new Date(note.createdAt).toLocaleDateString('pt-BR', {
-                  day: '2-digit',
-                  month: 'long',
-                  year: 'numeric',
-                })}
+                {note.createdAt?.substring(0, 10) ?? ''}
               </Text>
               <Text
                 fontFamily="'Caveat', cursive"

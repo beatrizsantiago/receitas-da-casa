@@ -47,27 +47,13 @@ export function RecipeCoverSection({
           w="full"
           h={mobile ? '220px' : '320px'}
           style={{ background: gradientFromHues(recipe.hues) }}
-        >
-          <Flex
-            h="full"
-            align="center"
-            justify="center"
-            fontFamily="'Caveat', cursive"
-            fontSize={mobile ? '3xl' : '5xl'}
-            color="white"
-          >
-            sem foto de capa
-          </Flex>
-        </Box>
+        />
       )}
+
       <Box
         position="absolute"
         inset={0}
-        bg={
-          coverPhoto
-            ? 'linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.45))'
-            : 'transparent'
-        }
+        bg="linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.5) 100%)"
       />
 
       <input
@@ -124,7 +110,7 @@ export function RecipeCoverSection({
             <LuCamera size={14} />
             {!mobile && ' Alterar capa'}
           </Button>
-          <Button
+<Button
             w="40px"
             h="40px"
             minW="40px"
@@ -144,38 +130,36 @@ export function RecipeCoverSection({
         </Flex>
       </Flex>
 
-      {coverPhoto && (
-        <Box
-          position="absolute"
-          bottom={5}
-          left={mobile ? 5 : 10}
-          right={mobile ? 5 : 10}
+      <Box
+        position="absolute"
+        bottom={5}
+        left={mobile ? 5 : 10}
+        right={mobile ? 5 : 10}
+      >
+        <Badge
+          bg={cat.tone === 'primary' ? 'primary.50' : 'secondary.50'}
+          color={cat.tone === 'primary' ? 'primary.800' : 'secondary.800'}
+          px={2}
+          py={0.5}
+          rounded="md"
+          fontSize="xs"
+          fontWeight="500"
         >
-          <Badge
-            bg={cat.tone === 'primary' ? 'primary.50' : 'secondary.50'}
-            color={cat.tone === 'primary' ? 'primary.800' : 'secondary.800'}
-            px={2}
-            py={0.5}
-            rounded="md"
-            fontSize="xs"
-            fontWeight="500"
-          >
-            {cat.label}
-          </Badge>
-          <Heading
-            fontFamily="'Fraunces', Georgia, serif"
-            fontSize={mobile ? '30px' : '42px'}
-            fontWeight="500"
-            letterSpacing="-0.02em"
-            color="white"
-            lineHeight={1.05}
-            mt={2}
-            textShadow="0 2px 4px rgba(0,0,0,0.25)"
-          >
-            {recipe.title || 'Receita sem título'}
-          </Heading>
-        </Box>
-      )}
+          {cat.label}
+        </Badge>
+        <Heading
+          fontFamily="'Fraunces', Georgia, serif"
+          fontSize={mobile ? '30px' : '42px'}
+          fontWeight="500"
+          letterSpacing="-0.02em"
+          color="white"
+          lineHeight={1.05}
+          mt={2}
+          textShadow="0 2px 4px rgba(0,0,0,0.25)"
+        >
+          {recipe.title || 'Receita sem título'}
+        </Heading>
+      </Box>
     </Box>
   );
 }

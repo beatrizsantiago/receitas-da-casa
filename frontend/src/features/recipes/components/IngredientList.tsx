@@ -1,12 +1,6 @@
-import {
-  Box,
-  Button,
-  Flex,
-  IconButton,
-  Input,
-  Text,
-} from '@chakra-ui/react';
-import { useState } from 'react';
+import { Box, Button, Flex, Input } from '@chakra-ui/react';
+import { useState, forwardRef, useImperativeHandle } from 'react';
+import { LuX } from 'react-icons/lu';
 import { toaster } from '@/shared/components/ui/toaster';
 import {
   useAddIngredientMutation,
@@ -15,128 +9,216 @@ import {
 } from '../hooks/useRecipes';
 import type { Ingredient } from '../types';
 
+export interface IngredientListHandle {
+  save: () => Promise<void>;
+}
+
 interface Props {
   recipeId: number;
   ingredients: Ingredient[];
 }
 
-interface EditState {
-  id: number;
-  name: string;
+interface LocalRow {
+  tempId: string;
+  serverId?: number;
   quantity: string;
   unit: string;
+  name: string;
 }
 
-export function IngredientList({ recipeId, ingredients }: Props) {
-  const [adding, setAdding] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [newQty, setNewQty] = useState('');
-  const [newUnit, setNewUnit] = useState('');
-  const [edit, setEdit] = useState<EditState | null>(null);
+let tempCounter = 0;
 
-  const addMut = useAddIngredientMutation();
-  const updateMut = useUpdateIngredientMutation();
-  const deleteMut = useDeleteIngredientMutation();
+export const IngredientList = forwardRef<IngredientListHandle, Props>(
+  function IngredientList({ recipeId, ingredients }, ref) {
+    const [rows, setRows] = useState<LocalRow[]>(() =>
+      ingredients.map((i) => ({
+        tempId: `existing-${i.id}`,
+        serverId: i.id,
+        quantity: i.quantity ?? '',
+        unit: i.unit ?? '',
+        name: i.name,
+      }))
+    );
+    const [deletedIds] = useState(() => new Set<number>());
 
-  async function handleAdd() {
-    if (!newName.trim()) return;
-    try {
-      await addMut.mutateAsync({ recipeId, dto: { name: newName.trim(), quantity: newQty || '', unit: newUnit || '' } });
-      setNewName(''); setNewQty(''); setNewUnit('');
-      setAdding(false);
-    } catch {
-      toaster.create({ title: 'Erro ao adicionar ingrediente', type: 'error' });
+    const addMut = useAddIngredientMutation();
+    const updateMut = useUpdateIngredientMutation();
+    const deleteMut = useDeleteIngredientMutation();
+
+    useImperativeHandle(ref, () => ({
+      save: async () => {
+        for (const id of deletedIds) {
+          try {
+            await deleteMut.mutateAsync(id);
+          } catch {
+            toaster.create({ title: 'Erro ao remover ingrediente', type: 'error' });
+          }
+        }
+
+        for (const row of rows) {
+          if (!row.serverId) continue;
+          const original = ingredients.find((i) => i.id === row.serverId);
+          if (!original) continue;
+          const unchanged =
+            row.quantity === (original.quantity ?? '') &&
+            row.unit === (original.unit ?? '') &&
+            row.name === original.name;
+          if (unchanged) continue;
+          try {
+            await updateMut.mutateAsync({
+              id: row.serverId,
+              dto: { name: row.name, quantity: row.quantity, unit: row.unit },
+            });
+          } catch {
+            toaster.create({ title: 'Erro ao atualizar ingrediente', type: 'error' });
+          }
+        }
+
+        for (const row of rows) {
+          if (row.serverId) continue;
+          if (!row.name.trim()) continue;
+          try {
+            await addMut.mutateAsync({
+              recipeId,
+              dto: { name: row.name.trim(), quantity: row.quantity, unit: row.unit },
+            });
+          } catch {
+            toaster.create({ title: 'Erro ao adicionar ingrediente', type: 'error' });
+          }
+        }
+      },
+    }));
+
+    function addRow() {
+      setRows((prev) => [
+        ...prev,
+        { tempId: `new-${++tempCounter}`, quantity: '', unit: '', name: '' },
+      ]);
     }
-  }
 
-  async function handleUpdate() {
-    if (!edit) return;
-    try {
-      await updateMut.mutateAsync({ id: edit.id, dto: { name: edit.name, quantity: edit.quantity || '', unit: edit.unit || '' } });
-      setEdit(null);
-    } catch {
-      toaster.create({ title: 'Erro ao atualizar ingrediente', type: 'error' });
+    function updateRow(
+      tempId: string,
+      field: 'quantity' | 'unit' | 'name',
+      value: string
+    ) {
+      setRows((prev) =>
+        prev.map((r) => (r.tempId === tempId ? { ...r, [field]: value } : r))
+      );
     }
-  }
 
-  async function handleRemove(id: number) {
-    try {
-      await deleteMut.mutateAsync(id);
-    } catch {
-      toaster.create({ title: 'Erro ao remover ingrediente', type: 'error' });
+    function removeRow(row: LocalRow) {
+      setRows((prev) => prev.filter((r) => r.tempId !== row.tempId));
+      if (row.serverId !== undefined) {
+        deletedIds.add(row.serverId);
+      }
     }
-  }
 
-  const saving = addMut.isPending || updateMut.isPending;
-
-  return (
-    <Box>
-      <Flex justify="space-between" align="center" mb={3}>
-        <Text fontWeight="semibold" fontSize="lg">Ingredientes</Text>
-        <Button size="sm" colorPalette="primary" variant="ghost" onClick={() => setAdding(true)}>
-          + Adicionar
-        </Button>
-      </Flex>
-
-      <Flex direction="column" gap={2}>
-        {ingredients.map((ing) =>
-          edit?.id === ing.id ? (
-            <Flex key={ing.id} gap={2} align="center">
-              <Input
-                size="sm"
-                value={edit.name}
-                onChange={(e) => setEdit({ ...edit, name: e.target.value })}
-                placeholder="Nome"
-              />
-              <Input
-                size="sm"
-                value={edit.quantity}
-                onChange={(e) => setEdit({ ...edit, quantity: e.target.value })}
-                placeholder="Qtd"
-                w="80px"
-              />
-              <Input
-                size="sm"
-                value={edit.unit}
-                onChange={(e) => setEdit({ ...edit, unit: e.target.value })}
-                placeholder="Unidade"
-                w="80px"
-              />
-              <IconButton size="sm" aria-label="Salvar" variant="ghost" loading={saving} onClick={handleUpdate}>✓</IconButton>
-              <IconButton size="sm" aria-label="Cancelar" variant="ghost" onClick={() => setEdit(null)}>✕</IconButton>
-            </Flex>
-          ) : (
-            <Flex
-              key={ing.id}
-              align="center"
-              gap={2}
-              p={2}
-              rounded="md"
-              _hover={{ bg: 'beige.100' }}
-              role="group"
-            >
-              <Text flex={1} fontSize="sm">
-                {ing.quantity && <Text as="span" fontWeight="medium">{ing.quantity}{ing.unit ? ` ${ing.unit}` : ''} </Text>}
-                {ing.name}
-              </Text>
-              <Flex gap={1} opacity={0} _groupHover={{ opacity: 1 }} transition="opacity 0.15s">
-                <IconButton size="xs" aria-label="Editar" variant="ghost" onClick={() => setEdit({ id: ing.id, name: ing.name, quantity: ing.quantity ?? '', unit: ing.unit ?? '' })}>✏️</IconButton>
-                <IconButton size="xs" aria-label="Remover" variant="ghost" colorPalette="red" onClick={() => handleRemove(ing.id)}>🗑</IconButton>
+    return (
+      <Box>
+        <Flex direction="column" gap={2}>
+          {rows.map((row) => (
+            <Flex key={row.tempId} align="center" gap={2}>
+              <Flex
+                bg="primary.50"
+                rounded="8px"
+                overflow="hidden"
+                flexShrink={0}
+                align="center"
+              >
+                <Input
+                  value={row.quantity}
+                  onChange={(e) => updateRow(row.tempId, 'quantity', e.target.value)}
+                  fontFamily="'JetBrains Mono', monospace"
+                  fontSize="12px"
+                  fontWeight="600"
+                  color="primary.600"
+                  border="none"
+                  bg="transparent"
+                  px={2.5}
+                  py={2}
+                  h="auto"
+                  w="52px"
+                  _focus={{ boxShadow: 'none' }}
+                  placeholder="Qtd"
+                />
+                <Box w="1px" h="14px" bg="primary.100" flexShrink={0} />
+                <Input
+                  value={row.unit}
+                  onChange={(e) => updateRow(row.tempId, 'unit', e.target.value)}
+                  fontFamily="'JetBrains Mono', monospace"
+                  fontSize="12px"
+                  fontWeight="600"
+                  color="primary.500"
+                  border="none"
+                  bg="transparent"
+                  px={2.5}
+                  py={2}
+                  h="auto"
+                  w="72px"
+                  _focus={{ boxShadow: 'none' }}
+                  placeholder="Unid."
+                />
               </Flex>
-            </Flex>
-          )
-        )}
-      </Flex>
 
-      {adding && (
-        <Flex gap={2} mt={3} align="center">
-          <Input size="sm" placeholder="Nome do ingrediente" value={newName} onChange={(e) => setNewName(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleAdd()} />
-          <Input size="sm" placeholder="Qtd" value={newQty} onChange={(e) => setNewQty(e.target.value)} w="80px" />
-          <Input size="sm" placeholder="Unid." value={newUnit} onChange={(e) => setNewUnit(e.target.value)} w="80px" />
-          <IconButton size="sm" aria-label="Salvar" loading={saving} onClick={handleAdd}>✓</IconButton>
-          <IconButton size="sm" aria-label="Cancelar" variant="ghost" onClick={() => setAdding(false)}>✕</IconButton>
+              <Input
+                value={row.name}
+                onChange={(e) => updateRow(row.tempId, 'name', e.target.value)}
+                flex={1}
+                rounded="10px"
+                borderColor="beige.200"
+                bg="white"
+                fontSize="14px"
+                color="neutral.800"
+                px={3}
+                py={2}
+                h="auto"
+                _focus={{ borderColor: 'primary.300', boxShadow: 'none' }}
+                placeholder="Nome do ingrediente"
+              />
+
+              <Box
+                as="button"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                w="28px"
+                h="28px"
+                flexShrink={0}
+                rounded="6px"
+                color="neutral.300"
+                cursor="pointer"
+                border="none"
+                bg="transparent"
+                _hover={{ color: 'red.400', bg: 'red.50' }}
+                onClick={() => removeRow(row)}
+              >
+                <LuX size={14} />
+              </Box>
+            </Flex>
+          ))}
         </Flex>
-      )}
-    </Box>
-  );
-}
+
+        <Button
+          w="full"
+          variant="outline"
+          borderStyle="dashed"
+          borderColor="beige.200"
+          color="neutral.500"
+          fontSize="13px"
+          fontWeight="500"
+          rounded="10px"
+          h="38px"
+          mt={2.5}
+          display="inline-flex"
+          alignItems="center"
+          gap={1.5}
+          bg="transparent"
+          _hover={{ bg: 'beige.50' }}
+          onClick={addRow}
+        >
+          + Adicionar ingrediente
+        </Button>
+      </Box>
+    );
+  }
+);

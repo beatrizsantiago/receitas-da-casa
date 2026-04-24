@@ -78,9 +78,16 @@ export default function RecipeDetail() {
     }
   }
 
-  async function addHistory() {
+  async function addHistory(notes?: string) {
     try {
-      await addHistoryMut.mutateAsync({ recipeId, dto: { rating: 5 } });
+      await addHistoryMut.mutateAsync({
+        recipeId,
+        dto: {
+          date: new Date().toISOString(),
+          rating: 5,
+          ...(notes ? { notes } : {}),
+        },
+      });
       toaster.create({
         title: 'Bom apetite! Registrado no histórico.',
         type: 'success',
@@ -164,14 +171,14 @@ export default function RecipeDetail() {
 
         {editingCover && (
           <Box
-            position="absolute"
+            position="fixed"
             inset={0}
             bg="rgba(47,30,10,0.55)"
             display="flex"
             alignItems="center"
             justifyContent="center"
             p={mobile ? 4 : 7}
-            zIndex={10}
+            zIndex={1000}
           >
             <Box
               bg="white"
@@ -287,26 +294,22 @@ export default function RecipeDetail() {
           recipe={recipe}
           drafts={drafts}
           setters={setters}
-          allTags={allTags}
           onSave={saveTitleBlock}
           onCancel={initDrafts}
         />
         <RecipeIngredientsBlock
           recipe={recipe}
           recipeId={recipeId}
-          ingredients={drafts.ingredients}
           onCancel={initDrafts}
         />
         <RecipeStepsBlock
           recipe={recipe}
           recipeId={recipeId}
-          steps={drafts.steps}
           onCancel={initDrafts}
         />
         <RecipeNotesBlock
           recipe={recipe}
           recipeId={recipeId}
-          notes={drafts.notes}
           onCancel={initDrafts}
         />
         <RecipeHistorySection

@@ -102,7 +102,7 @@ export interface UpdateNoteDto extends Partial<CreateNoteDto> {}
 export interface CreateCookHistoryDto {
   notes?: string;
   rating: number;
-  cookedAt?: string;
+  date?: string;
 }
 
 export type { PaginatedResponse };

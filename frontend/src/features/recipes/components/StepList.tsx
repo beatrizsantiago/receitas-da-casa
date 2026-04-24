@@ -1,12 +1,6 @@
-import {
-  Box,
-  Button,
-  Flex,
-  IconButton,
-  Text,
-  Textarea,
-} from '@chakra-ui/react';
-import { useState } from 'react';
+import { Box, Button, Flex, Textarea } from '@chakra-ui/react';
+import { useState, forwardRef, useImperativeHandle } from 'react';
+import { LuX } from 'react-icons/lu';
 import { toaster } from '@/shared/components/ui/toaster';
 import {
   useAddStepMutation,
@@ -15,104 +9,180 @@ import {
 } from '../hooks/useRecipes';
 import type { Step } from '../types';
 
+export interface StepListHandle {
+  save: () => Promise<void>;
+}
+
 interface Props {
   recipeId: number;
   steps: Step[];
 }
 
-export function StepList({ recipeId, steps }: Props) {
-  const [adding, setAdding] = useState(false);
-  const [newDesc, setNewDesc] = useState('');
-  const [editId, setEditId] = useState<number | null>(null);
-  const [editDesc, setEditDesc] = useState('');
-
-  const addMut = useAddStepMutation();
-  const updateMut = useUpdateStepMutation();
-  const deleteMut = useDeleteStepMutation();
-
-  async function handleAdd() {
-    if (!newDesc.trim()) return;
-    try {
-      await addMut.mutateAsync({ recipeId, dto: { description: newDesc.trim(), order: steps.length + 1 } });
-      setNewDesc('');
-      setAdding(false);
-    } catch {
-      toaster.create({ title: 'Erro ao adicionar passo', type: 'error' });
-    }
-  }
-
-  async function handleUpdate(id: number) {
-    try {
-      await updateMut.mutateAsync({ id, dto: { description: editDesc } });
-      setEditId(null);
-    } catch {
-      toaster.create({ title: 'Erro ao atualizar passo', type: 'error' });
-    }
-  }
-
-  async function handleRemove(id: number) {
-    try {
-      await deleteMut.mutateAsync(id);
-    } catch {
-      toaster.create({ title: 'Erro ao remover passo', type: 'error' });
-    }
-  }
-
-  const saving = addMut.isPending || updateMut.isPending;
-
-  return (
-    <Box>
-      <Flex justify="space-between" align="center" mb={3}>
-        <Text fontWeight="semibold" fontSize="lg">Modo de Preparo</Text>
-        <Button size="sm" colorPalette="primary" variant="ghost" onClick={() => setAdding(true)}>
-          + Adicionar
-        </Button>
-      </Flex>
-
-      <Flex direction="column" gap={3}>
-        {steps.map((step, index) => (
-          <Flex key={step.id} gap={3} align="flex-start" role="group">
-            <Flex w={8} h={8} rounded="full" bg="primary.500" color="white" align="center" justify="center" fontWeight="bold" fontSize="sm" flexShrink={0} mt={editId === step.id ? 0 : 1}>
-              {index + 1}
-            </Flex>
-
-            {editId === step.id ? (
-              <Flex flex={1} direction="column" gap={2}>
-                <Textarea size="sm" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={3} />
-                <Flex gap={2}>
-                  <IconButton size="sm" aria-label="Salvar" loading={saving} onClick={() => handleUpdate(step.id)}>✓</IconButton>
-                  <IconButton size="sm" aria-label="Cancelar" variant="ghost" onClick={() => setEditId(null)}>✕</IconButton>
-                </Flex>
-              </Flex>
-            ) : (
-              <Flex flex={1} align="flex-start" gap={2}>
-                <Text flex={1} fontSize="sm" pt={1}>{step.description}</Text>
-                <Flex gap={1} opacity={0} _groupHover={{ opacity: 1 }} transition="opacity 0.15s">
-                  <IconButton size="xs" aria-label="Editar" variant="ghost" onClick={() => { setEditId(step.id); setEditDesc(step.description); }}>✏️</IconButton>
-                  <IconButton size="xs" aria-label="Remover" variant="ghost" colorPalette="red" onClick={() => handleRemove(step.id)}>🗑</IconButton>
-                </Flex>
-              </Flex>
-            )}
-          </Flex>
-        ))}
-      </Flex>
-
-      {adding && (
-        <Box mt={4}>
-          <Flex gap={3} align="flex-start">
-            <Flex w={8} h={8} rounded="full" bg="neutral.200" color="neutral.600" align="center" justify="center" fontWeight="bold" fontSize="sm" flexShrink={0}>
-              {steps.length + 1}
-            </Flex>
-            <Flex flex={1} direction="column" gap={2}>
-              <Textarea size="sm" placeholder="Descreva o passo..." value={newDesc} onChange={(e) => setNewDesc(e.target.value)} rows={3} />
-              <Flex gap={2}>
-                <IconButton size="sm" aria-label="Salvar" loading={saving} onClick={handleAdd}>✓</IconButton>
-                <IconButton size="sm" aria-label="Cancelar" variant="ghost" onClick={() => setAdding(false)}>✕</IconButton>
-              </Flex>
-            </Flex>
-          </Flex>
-        </Box>
-      )}
-    </Box>
-  );
+interface LocalStep {
+  tempId: string;
+  serverId?: number;
+  description: string;
 }
+
+let tempCounter = 0;
+
+export const StepList = forwardRef<StepListHandle, Props>(
+  function StepList({ recipeId, steps }, ref) {
+    const [rows, setRows] = useState<LocalStep[]>(() =>
+      steps.map((s) => ({
+        tempId: `existing-${s.id}`,
+        serverId: s.id,
+        description: s.description,
+      }))
+    );
+    const [deletedIds] = useState(() => new Set<number>());
+
+    const addMut = useAddStepMutation();
+    const updateMut = useUpdateStepMutation();
+    const deleteMut = useDeleteStepMutation();
+
+    useImperativeHandle(ref, () => ({
+      save: async () => {
+        for (const id of deletedIds) {
+          try {
+            await deleteMut.mutateAsync(id);
+          } catch {
+            toaster.create({ title: 'Erro ao remover passo', type: 'error' });
+          }
+        }
+
+        for (const row of rows) {
+          if (!row.serverId) continue;
+          const original = steps.find((s) => s.id === row.serverId);
+          if (!original) continue;
+          if (row.description === original.description) continue;
+          try {
+            await updateMut.mutateAsync({
+              id: row.serverId,
+              dto: { description: row.description },
+            });
+          } catch {
+            toaster.create({ title: 'Erro ao atualizar passo', type: 'error' });
+          }
+        }
+
+        for (const [idx, row] of rows.entries()) {
+          if (row.serverId) continue;
+          if (!row.description.trim()) continue;
+          try {
+            await addMut.mutateAsync({
+              recipeId,
+              dto: { description: row.description.trim(), order: idx + 1 },
+            });
+          } catch {
+            toaster.create({ title: 'Erro ao adicionar passo', type: 'error' });
+          }
+        }
+      },
+    }));
+
+    function addRow() {
+      setRows((prev) => [
+        ...prev,
+        { tempId: `new-${++tempCounter}`, description: '' },
+      ]);
+    }
+
+    function updateDescription(tempId: string, value: string) {
+      setRows((prev) =>
+        prev.map((r) => (r.tempId === tempId ? { ...r, description: value } : r))
+      );
+    }
+
+    function removeRow(row: LocalStep) {
+      setRows((prev) => prev.filter((r) => r.tempId !== row.tempId));
+      if (row.serverId !== undefined) {
+        deletedIds.add(row.serverId);
+      }
+    }
+
+    return (
+      <Box>
+        <Flex direction="column" gap={3}>
+          {rows.map((row, index) => (
+            <Flex key={row.tempId} gap={3} align="flex-start">
+              <Flex
+                w="32px"
+                h="32px"
+                rounded="full"
+                bg="primary.500"
+                color="white"
+                align="center"
+                justify="center"
+                fontFamily="'Fraunces', Georgia, serif"
+                fontSize="14px"
+                fontWeight="500"
+                fontStyle="italic"
+                flexShrink={0}
+                mt="6px"
+              >
+                {index + 1}
+              </Flex>
+              <Textarea
+                flex={1}
+                value={row.description}
+                onChange={(e) => updateDescription(row.tempId, e.target.value)}
+                rows={2}
+                rounded="10px"
+                borderColor="beige.200"
+                bg="white"
+                fontSize="14px"
+                px={3}
+                py={2.5}
+                resize="vertical"
+                lineHeight={1.5}
+                _focus={{ borderColor: 'primary.300', boxShadow: 'none' }}
+                placeholder="Descreva o passo..."
+              />
+              <Box
+                as="button"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                w="28px"
+                h="28px"
+                mt="6px"
+                rounded="6px"
+                color="neutral.300"
+                cursor="pointer"
+                border="none"
+                bg="transparent"
+                flexShrink={0}
+                _hover={{ color: 'red.400', bg: 'red.50' }}
+                onClick={() => removeRow(row)}
+              >
+                <LuX size={14} />
+              </Box>
+            </Flex>
+          ))}
+        </Flex>
+
+        <Button
+          w="full"
+          variant="outline"
+          borderStyle="dashed"
+          borderColor="beige.200"
+          color="neutral.500"
+          fontSize="13px"
+          fontWeight="500"
+          rounded="10px"
+          h="38px"
+          mt={3}
+          display="inline-flex"
+          alignItems="center"
+          gap={1.5}
+          bg="transparent"
+          _hover={{ bg: 'beige.50' }}
+          onClick={addRow}
+        >
+          + Adicionar passo
+        </Button>
+      </Box>
+    );
+  }
+);

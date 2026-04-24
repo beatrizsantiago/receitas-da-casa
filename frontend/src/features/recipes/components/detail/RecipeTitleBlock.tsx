@@ -30,7 +30,6 @@ export function RecipeTitleBlock({
   return (
     <EditableBlock
       eyebrow="como essa receita se chama"
-      title="Título, descrição & categoria"
       onSave={onSave}
       onCancel={onCancel}
       editor={

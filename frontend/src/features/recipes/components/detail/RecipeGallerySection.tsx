@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Heading, Image, Text } from '@chakra-ui/react';
+import { Box, Button, Heading, Image, Text } from '@chakra-ui/react';
 import { useBreakpointValue } from '@chakra-ui/react';
 import { LuImages } from 'react-icons/lu';
 import type { Photo } from '../../types';
@@ -25,28 +25,27 @@ export function RecipeGallerySection({
       borderColor="beige.100"
       p={5}
     >
-      <Flex justify="space-between" align="flex-end" mb={4} gap={4}>
-        <Box>
-          <Text
-            fontFamily="'Caveat', cursive"
-            fontSize="18px"
-            color="primary.500"
-            lineHeight={1}
-            mb={2}
-          >
-            lembranças
-          </Text>
-          <Heading
-            fontFamily="'Fraunces', Georgia, serif"
-            fontSize="22px"
-            fontWeight="500"
-            color="neutral.800"
-            letterSpacing="-0.015em"
-            lineHeight={1.15}
-          >
-            Fotos da receita
-          </Heading>
-        </Box>
+      <Box mb={4}>
+        <Text
+          fontFamily="'Caveat', cursive"
+          fontSize="18px"
+          color="primary.500"
+          lineHeight={1}
+          mb={2}
+        >
+          lembranças
+        </Text>
+        <Heading
+          fontFamily="'Fraunces', Georgia, serif"
+          fontSize="22px"
+          fontWeight="500"
+          color="neutral.800"
+          letterSpacing="-0.015em"
+          lineHeight={1.15}
+          mb={3}
+        >
+          Fotos da receita
+        </Heading>
         <Button
           size="sm"
           variant="outline"
@@ -56,6 +55,8 @@ export function RecipeGallerySection({
           borderColor="beige.200"
           bg="transparent"
           rounded="12px"
+          w={mobile ? 'full' : 'auto'}
+          justifyContent={mobile ? 'center' : 'flex-start'}
           onClick={() => galleryInputRef.current?.click()}
           display="inline-flex"
           alignItems="center"
@@ -66,7 +67,7 @@ export function RecipeGallerySection({
           <LuImages size={14} />
           Adicionar foto
         </Button>
-      </Flex>
+      </Box>
 
       <input
         type="file"

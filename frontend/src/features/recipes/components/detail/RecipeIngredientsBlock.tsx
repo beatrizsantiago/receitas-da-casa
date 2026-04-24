@@ -1,55 +1,48 @@
-import { Box, Text } from '@chakra-ui/react';
+import { useRef } from 'react';
+import { Box, Flex, Text } from '@chakra-ui/react';
 import { EditableBlock } from '@/shared/components/ui/EditableBlock';
-import { IngredientList } from '../IngredientList';
+import { IngredientList, type IngredientListHandle } from '../IngredientList';
 import type { Recipe } from '../../types';
 
 interface RecipeIngredientsBlockProps {
   recipe: Recipe;
   recipeId: number;
-  ingredients: { name: string; quantity: string; unit: string }[];
   onCancel: () => void;
 }
 
 export function RecipeIngredientsBlock({
   recipe,
   recipeId,
-  ingredients,
   onCancel,
 }: RecipeIngredientsBlockProps) {
+  const listRef = useRef<IngredientListHandle>(null);
+
   return (
     <EditableBlock
       eyebrow="você vai precisar de"
       title="Ingredientes"
-      onSave={async () => {}}
+      onSave={async () => {
+        await listRef.current?.save();
+      }}
       onCancel={onCancel}
       editor={
         <IngredientList
+          ref={listRef}
           recipeId={recipeId}
-          ingredients={ingredients.map((i, idx) => ({
-            ...i,
-            id: idx,
-            recipeId,
-            order: idx,
-          }))}
+          ingredients={recipe.ingredients ?? []}
         />
       }
     >
       {recipe.ingredients && recipe.ingredients.length > 0 ? (
-        <Box as="ul" listStyleType="none" p={0} m={0}>
+        <Flex direction="column" gap={2}>
           {recipe.ingredients.map((ing) => (
             <Box
               key={ing.id}
-              as="li"
               display="flex"
-              alignItems="baseline"
-              gap={3}
-              py={2.5}
-              px={3.5}
+              alignItems="center"
               bg="beige.50"
               rounded="10px"
-              mb={2.5}
-              fontSize="14px"
-              color="neutral.800"
+              gap={3}
             >
               <Text
                 as="span"
@@ -57,15 +50,20 @@ export function RecipeIngredientsBlock({
                 fontSize="12px"
                 color="primary.500"
                 fontWeight="600"
-                minW="72px"
+                px={3.5}
+                py={2.5}
+                minW="90px"
+                flexShrink={0}
               >
                 {ing.quantity}
                 {ing.unit ? ` ${ing.unit}` : ''}
               </Text>
-              <Text as="span">{ing.name}</Text>
+              <Text as="span" flex={1} fontSize="14px" color="neutral.800">
+                {ing.name}
+              </Text>
             </Box>
           ))}
-        </Box>
+        </Flex>
       ) : (
         <Box
           textAlign="center"
