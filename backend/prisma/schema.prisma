@@ -94,9 +94,10 @@ model Step {
 }
 
 model RecipePhoto {
-  id   Int       @id @default(autoincrement())
-  url  String
-  type PhotoType
+  id        Int       @id @default(autoincrement())
+  url       String
+  type      PhotoType
+  positionY Int       @default(50)
 
   recipeId Int
   recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)

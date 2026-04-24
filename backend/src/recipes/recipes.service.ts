@@ -38,6 +38,7 @@ export class RecipesService {
         orderBy: { createdAt: 'desc' },
         include: {
           tags: { include: { tag: true } },
+          photos: { where: { type: 'COVER' } },
           _count: { select: { cookHistory: true } },
           cookHistory: { orderBy: { date: 'desc' }, take: 1 },
         },

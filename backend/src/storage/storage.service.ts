@@ -1,8 +1,10 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { randomUUID } from 'crypto';
 
 @Injectable()
 export class StorageService {
@@ -23,19 +25,26 @@ export class StorageService {
     });
   }
 
-  async generateUploadUrl(fileName: string, contentType: string) {
-    const ext = fileName.split('.').pop();
-    const key = `recipes/${randomUUID()}.${ext}`;
+  async uploadFile(
+    buffer: Buffer,
+    key: string,
+    contentType: string,
+  ): Promise<string> {
+    await this.s3.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        Body: buffer,
+        ContentType: contentType,
+      }),
+    );
+    return `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`;
+  }
 
-    const command = new PutObjectCommand({
-      Bucket: this.bucket,
-      Key: key,
-      ContentType: contentType,
-    });
-
-    const uploadUrl = await getSignedUrl(this.s3, command, { expiresIn: 300 });
-    const fileUrl = `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`;
-
-    return { uploadUrl, fileUrl };
+  async deleteFile(url: string): Promise<void> {
+    const key = new URL(url).pathname.slice(1);
+    await this.s3.send(
+      new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
+    );
   }
 }

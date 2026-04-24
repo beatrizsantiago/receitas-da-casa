@@ -1,9 +1,24 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { CreatePhotoDto } from './dto/create-photo.dto';
-import { GenerateUploadUrlDto } from './dto/generate-upload-url.dto';
+import { UpdatePhotoDto } from './dto/update-photo.dto';
 import { PhotosService } from './photos.service';
 
 @ApiTags('photos')
@@ -12,15 +27,25 @@ import { PhotosService } from './photos.service';
 export class PhotosController {
   constructor(private photos: PhotosService) {}
 
-  @Post('upload-url')
-  @ApiOperation({ summary: 'Gerar URL pré-assinada para upload no S3' })
-  generateUploadUrl(@Body() dto: GenerateUploadUrlDto) {
-    return this.photos.generateUploadUrl(dto);
+  @Post()
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Fazer upload de foto para uma receita' })
+  create(
+    @CurrentUser() user: JwtPayload,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() dto: CreatePhotoDto,
+  ) {
+    return this.photos.create(user.sub, file, dto);
   }
 
-  @Post()
-  @ApiOperation({ summary: 'Salvar metadados da foto após upload no S3' })
-  create(@CurrentUser() user: JwtPayload, @Body() dto: CreatePhotoDto) {
-    return this.photos.create(user.sub, dto);
+  @Patch(':id')
+  @ApiOperation({ summary: 'Atualizar posição vertical da foto de capa' })
+  updatePosition(
+    @CurrentUser() user: JwtPayload,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdatePhotoDto,
+  ) {
+    return this.photos.updatePosition(user.sub, id, dto.positionY);
   }
 }
