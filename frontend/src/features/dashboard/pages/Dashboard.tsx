@@ -42,7 +42,7 @@ export default function Dashboard() {
 
           <Box mt={8} display="grid" gridTemplateColumns={mobile ? '1fr' : '1.4fr 1fr'} gap={6}>
             <MostCookedSection recipes={mostCooked} onRecipeClick={(id) => navigate(`/receitas/${id}`)} />
-            <CategorySummarySection categories={categoryCounts} onViewAll={() => navigate('/receitas')} />
+            <CategorySummarySection categories={categoryCounts} onSelectCategory={(cat) => navigate(`/receitas?categoria=${cat}`)} />
           </Box>
         </>
       )}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -25,6 +25,7 @@ const CATEGORY_META: Record<string, { label: string; color: string }> = {
 
 export default function RecipeList() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const mobile = useBreakpointValue({ base: true, md: false });
 
   const [inputValue, setInputValue] = useState('');
@@ -42,6 +43,14 @@ export default function RecipeList() {
   const [draftCategory, setDraftCategory] = useState<RecipeCategory | 'all'>('all');
   const [draftTags, setDraftTags] = useState<string[]>([]);
   const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const catParam = searchParams.get('categoria');
+    if (catParam === 'SWEET' || catParam === 'SAVORY') {
+      setCategory(catParam);
+      setDraftCategory(catParam);
+    }
+  }, []);
 
   useEffect(() => {
     if (!filterOpen) return;

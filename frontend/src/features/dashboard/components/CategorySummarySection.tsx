@@ -8,10 +8,10 @@ interface CategoryCount {
 
 interface Props {
   categories: CategoryCount[];
-  onViewAll: () => void;
+  onSelectCategory: (cat: string) => void;
 }
 
-export function CategorySummarySection({ categories, onViewAll }: Props) {
+export function CategorySummarySection({ categories, onSelectCategory }: Props) {
   if (categories.length === 0) return null;
 
   return (
@@ -51,7 +51,7 @@ export function CategorySummarySection({ categories, onViewAll }: Props) {
             cursor="pointer"
             _hover={{ opacity: 0.85 }}
             transition="opacity 120ms"
-            onClick={onViewAll}
+            onClick={() => onSelectCategory(c.cat)}
           >
             <Text
               fontFamily="'Fraunces', Georgia, serif"
