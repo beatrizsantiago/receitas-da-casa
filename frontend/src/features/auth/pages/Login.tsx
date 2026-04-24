@@ -6,13 +6,12 @@ import {
   Heading,
   Image,
   Input,
-  Link,
   Text,
   chakra,
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import { LuMail, LuLock } from 'react-icons/lu';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';
 import smallLogo from '@/assets/logo.png';
@@ -91,7 +90,7 @@ const Login = () => {
         maxW="380px"
       >
         <Heading size="lg" mb={1} color="neutral.800" fontWeight="700" textAlign="center">
-          Bem-vinda de volta
+          Bem-vindo(a) de volta
         </Heading>
         <Text color="neutral.500" mb={6} fontSize="sm" textAlign="center">
           Que bom te ver por aqui de novo.
@@ -140,18 +139,6 @@ const Login = () => {
             <Field.ErrorText>{errors.password}</Field.ErrorText>
           </Field.Root>
 
-          <Flex justify="flex-end" mt="-8px">
-            <Link
-              asChild
-              color="neutral.500"
-              fontSize="sm"
-              textDecoration="underline"
-              _hover={{ color: 'primary.500' }}
-            >
-              <RouterLink to="/esqueci-senha">Esqueci minha senha</RouterLink>
-            </Link>
-          </Flex>
-
           <Button
             type="submit"
             bg="primary.500"
@@ -165,12 +152,6 @@ const Login = () => {
           </Button>
         </Flex>
 
-        <Text textAlign="center" mt={5} color="neutral.500" fontSize="sm">
-          Ainda não tem conta?{' '}
-          <Link asChild color="primary.500" fontWeight="600" _hover={{ textDecoration: 'underline' }}>
-            <RouterLink to="/registro">Criar uma agora</RouterLink>
-          </Link>
-        </Text>
       </chakra.form>
     </Flex>
   );
