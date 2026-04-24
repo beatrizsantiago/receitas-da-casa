@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Textarea } from '@chakra-ui/react';
 import { useState, forwardRef, useImperativeHandle } from 'react';
 import { LuX } from 'react-icons/lu';
-import { toaster } from '@/shared/components/ui/toaster';
+import { toast } from 'react-toastify';
 import {
   useAddStepMutation,
   useUpdateStepMutation,
@@ -47,7 +47,7 @@ export const StepList = forwardRef<StepListHandle, Props>(
           try {
             await deleteMut.mutateAsync(id);
           } catch {
-            toaster.create({ title: 'Erro ao remover passo', type: 'error' });
+            toast.error('Erro ao remover passo');
           }
         }
 
@@ -62,7 +62,7 @@ export const StepList = forwardRef<StepListHandle, Props>(
               dto: { description: row.description },
             });
           } catch {
-            toaster.create({ title: 'Erro ao atualizar passo', type: 'error' });
+            toast.error('Erro ao atualizar passo');
           }
         }
 
@@ -75,7 +75,7 @@ export const StepList = forwardRef<StepListHandle, Props>(
               dto: { description: row.description.trim(), order: idx + 1 },
             });
           } catch {
-            toaster.create({ title: 'Erro ao adicionar passo', type: 'error' });
+            toast.error('Erro ao adicionar passo');
           }
         }
       },

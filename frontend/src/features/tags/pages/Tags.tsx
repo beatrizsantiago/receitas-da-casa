@@ -11,7 +11,7 @@ import { useRecipesQuery } from '@/features/recipes/hooks/useRecipes';
 import { useTagStats } from '../hooks/useTagStats';
 import { TagForm } from '../components/TagForm';
 import { TagList } from '../components/TagList';
-import { toaster } from '@/shared/components/ui/toaster';
+import { toast } from 'react-toastify';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { getApiErrorMessage } from '@/shared/utils/parseError';
 
@@ -54,10 +54,10 @@ export default function TagsPage() {
     if (!name) return;
     try {
       await createTag.mutateAsync({ name, color: draft.color });
-      toaster.create({ title: 'Tag criada', type: 'success' });
+      toast.success('Tag criada');
       cancel();
     } catch (err: unknown) {
-      toaster.create({ title: getApiErrorMessage(err, 'Erro ao salvar tag'), type: 'error' });
+      toast.error(getApiErrorMessage(err, 'Erro ao salvar tag'));
     }
   };
 
@@ -65,9 +65,9 @@ export default function TagsPage() {
     if (deleteTagId == null) return;
     try {
       await deleteTag.mutateAsync(deleteTagId);
-      toaster.create({ title: 'Tag removida', type: 'success' });
+      toast.success('Tag removida');
     } catch (err: unknown) {
-      toaster.create({ title: getApiErrorMessage(err, 'Erro ao remover tag'), type: 'error' });
+      toast.error(getApiErrorMessage(err, 'Erro ao remover tag'));
     } finally {
       setDeleteTagId(null);
     }

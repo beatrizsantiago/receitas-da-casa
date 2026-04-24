@@ -13,7 +13,7 @@ import {
 import { useState } from 'react';
 import { LuMail, LuLock } from 'react-icons/lu';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { toaster } from '@/shared/components/ui/toaster';
+import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';
 import smallLogo from '@/assets/logo.png';
 
@@ -40,7 +40,7 @@ const Login = () => {
 
     login({ email, password })
       .then(() => navigate('/dashboard'))
-      .catch(() => toaster.create({ title: 'Email ou senha inválidos', type: 'error' }));
+      .catch(() => toast.error('Email ou senha inválidos'));
   };
 
   return (

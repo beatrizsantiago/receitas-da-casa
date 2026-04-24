@@ -14,7 +14,7 @@ import { LuCheck, LuChevronLeft } from 'react-icons/lu';
 import { useCreateRecipeMutation } from '../hooks/useRecipes';
 import { CoverUploader } from '@/shared/components/ui/CoverUploader';
 import { randomHues } from '@/shared/utils/colors';
-import { toaster } from '@/shared/components/ui/toaster';
+import { toast } from 'react-toastify';
 import type { RecipeCategory } from '../types';
 
 export default function RecipeCreate() {
@@ -40,16 +40,13 @@ export default function RecipeCreate() {
         description: description.trim() || undefined,
         category,
       });
-      toaster.create({ title: 'Receita criada!', type: 'success' });
+      toast.success('Receita criada!');
       navigate(`/receitas/${created.id}`);
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data
           ?.message ?? 'Erro ao criar receita';
-      toaster.create({
-        title: Array.isArray(msg) ? msg[0] : msg,
-        type: 'error',
-      });
+      toast.error(Array.isArray(msg) ? msg[0] : msg);
     }
   };
 

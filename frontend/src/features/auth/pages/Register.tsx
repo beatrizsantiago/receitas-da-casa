@@ -14,7 +14,7 @@ import {
 import { useState } from 'react';
 import { LuUser, LuMail, LuLock } from 'react-icons/lu';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { toaster } from '@/shared/components/ui/toaster';
+import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';
 import smallLogo from '@/assets/logo.png';
 
@@ -47,7 +47,7 @@ const Register = () => {
       .catch((err: unknown) => {
         const msg = (err as { response?: { data?: { message?: string } } })
           ?.response?.data?.message ?? 'Erro ao criar conta';
-        toaster.create({ title: Array.isArray(msg) ? msg[0] : msg, type: 'error' });
+        toast.error(Array.isArray(msg) ? msg[0] : msg);
       });
   };
 

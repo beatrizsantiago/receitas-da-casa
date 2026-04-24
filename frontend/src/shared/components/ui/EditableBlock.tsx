@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Box, Button, Flex, Heading, Text } from '@chakra-ui/react';
 import { LuCheck, LuPencil } from 'react-icons/lu';
-import { toaster } from './toaster';
+import { toast } from 'react-toastify';
 
 interface Props {
   eyebrow?: string;
@@ -23,7 +23,7 @@ export function EditableBlock({ eyebrow, title, children, editor, onSave, onCanc
       await onSave();
       setEditing(false);
     } catch {
-      toaster.create({ title: 'Erro ao salvar', type: 'error' });
+      toast.error('Erro ao salvar');
     } finally {
       setSaving(false);
     }

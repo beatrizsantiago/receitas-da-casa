@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { toaster } from '@/shared/components/ui/toaster';
+import { toast } from 'react-toastify';
 import {
   useUploadPhotoMutation,
   useCreatePhotoMutation,
@@ -26,12 +26,9 @@ export function useRecipePhotoUpload(recipeId: number) {
         headers: { 'Content-Type': file.type },
       });
       await createPhotoMut.mutateAsync({ url: publicUrl, type, recipeId });
-      toaster.create({
-        title: type === 'COVER' ? 'Capa atualizada!' : 'Foto adicionada!',
-        type: 'success',
-      });
+      toast.success(type === 'COVER' ? 'Capa atualizada!' : 'Foto adicionada!');
     } catch {
-      toaster.create({ title: 'Erro ao enviar foto', type: 'error' });
+      toast.error('Erro ao enviar foto');
     } finally {
       setUploading(false);
     }

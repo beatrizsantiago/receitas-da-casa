@@ -1,9 +1,10 @@
-import { ChakraProvider, Toaster, Toast } from '@chakra-ui/react';
+import { ChakraProvider } from '@chakra-ui/react';
 import { RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { toaster } from '@/shared/components/ui/toaster';
+import { ToastContainer } from 'react-toastify';
 import { system } from './theme';
 import { router } from './routes';
+import 'react-toastify/dist/ReactToastify.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,15 +20,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ChakraProvider value={system}>
-        <Toaster toaster={toaster}>
-          {(toast) => (
-            <Toast.Root key={toast.id}>
-              <Toast.Title>{toast.title}</Toast.Title>
-              <Toast.Description>{toast.description}</Toast.Description>
-              <Toast.CloseTrigger />
-            </Toast.Root>
-          )}
-        </Toaster>
+        <ToastContainer position="top-right" autoClose={3000} />
         <RouterProvider router={router} />
       </ChakraProvider>
     </QueryClientProvider>

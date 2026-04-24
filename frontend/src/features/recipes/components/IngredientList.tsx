@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Input } from '@chakra-ui/react';
 import { useState, forwardRef, useImperativeHandle } from 'react';
 import { LuX } from 'react-icons/lu';
-import { toaster } from '@/shared/components/ui/toaster';
+import { toast } from 'react-toastify';
 import {
   useAddIngredientMutation,
   useUpdateIngredientMutation,
@@ -53,7 +53,7 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
           try {
             await deleteMut.mutateAsync(id);
           } catch {
-            toaster.create({ title: 'Erro ao remover ingrediente', type: 'error' });
+            toast.error('Erro ao remover ingrediente');
           }
         }
 
@@ -78,7 +78,7 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
               },
             });
           } catch {
-            toaster.create({ title: 'Erro ao atualizar ingrediente', type: 'error' });
+            toast.error('Erro ao atualizar ingrediente');
           }
         }
 
@@ -96,7 +96,7 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
               },
             });
           } catch {
-            toaster.create({ title: 'Erro ao adicionar ingrediente', type: 'error' });
+            toast.error('Erro ao adicionar ingrediente');
           }
         }
       },

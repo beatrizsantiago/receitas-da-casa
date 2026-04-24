@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Textarea } from '@chakra-ui/react';
 import { useState, forwardRef, useImperativeHandle } from 'react';
 import { LuX } from 'react-icons/lu';
-import { toaster } from '@/shared/components/ui/toaster';
+import { toast } from 'react-toastify';
 import {
   useAddNoteMutation,
   useUpdateNoteMutation,
@@ -47,7 +47,7 @@ export const NotesList = forwardRef<NotesListHandle, Props>(
           try {
             await deleteMut.mutateAsync(id);
           } catch {
-            toaster.create({ title: 'Erro ao remover anotação', type: 'error' });
+            toast.error('Erro ao remover anotação');
           }
         }
 
@@ -62,7 +62,7 @@ export const NotesList = forwardRef<NotesListHandle, Props>(
               dto: { content: row.content },
             });
           } catch {
-            toaster.create({ title: 'Erro ao atualizar anotação', type: 'error' });
+            toast.error('Erro ao atualizar anotação');
           }
         }
 
@@ -75,7 +75,7 @@ export const NotesList = forwardRef<NotesListHandle, Props>(
               dto: { content: row.content.trim() },
             });
           } catch {
-            toaster.create({ title: 'Erro ao adicionar anotação', type: 'error' });
+            toast.error('Erro ao adicionar anotação');
           }
         }
       },

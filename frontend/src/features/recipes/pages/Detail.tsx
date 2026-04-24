@@ -6,7 +6,7 @@ import { CoverUploader } from '@/shared/components/ui/CoverUploader';
 import { LoadingSpinner } from '@/shared/components/ui/LoadingSpinner';
 import { EmptyState } from '@/shared/components/ui/EmptyState';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
-import { toaster } from '@/shared/components/ui/toaster';
+import { toast } from 'react-toastify';
 import {
   useRecipeQuery,
   useUpdateRecipeMutation,
@@ -68,10 +68,10 @@ export default function RecipeDetail() {
     setDeleting(true);
     try {
       await deleteRecipe.mutateAsync(recipeId);
-      toaster.create({ title: 'Receita apagada', type: 'success' });
+      toast.success('Receita apagada');
       navigate('/receitas');
     } catch {
-      toaster.create({ title: 'Erro ao excluir receita', type: 'error' });
+      toast.error('Erro ao excluir receita');
     } finally {
       setDeleting(false);
       setDeleteOpen(false);
@@ -87,12 +87,9 @@ export default function RecipeDetail() {
           ...(notes ? { notes } : {}),
         },
       });
-      toaster.create({
-        title: 'Bom apetite! Registrado no histórico.',
-        type: 'success',
-      });
+      toast.success('Bom apetite! Registrado no histórico.');
     } catch {
-      toaster.create({ title: 'Erro ao registrar histórico', type: 'error' });
+      toast.error('Erro ao registrar histórico');
     }
   }
 
