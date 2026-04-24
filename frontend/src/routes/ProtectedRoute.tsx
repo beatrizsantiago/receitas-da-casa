@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../features/auth/hooks/useAuth';
-import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { LoadingSpinner } from '@/shared/components/ui/LoadingSpinner';
 import { Box } from '@chakra-ui/react';
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {

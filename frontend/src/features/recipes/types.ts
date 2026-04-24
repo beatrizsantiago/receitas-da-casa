@@ -1,11 +1,8 @@
+import type { Tag } from '@/features/tags/types';
+import type { PaginatedResponse } from '@/shared/types';
+
 export type RecipeCategory = 'SWEET' | 'SAVORY';
 export type PhotoType = 'COVER' | 'USER';
-
-export interface Tag {
-  id: number;
-  name: string;
-  color: string;
-}
 
 export interface Ingredient {
   id: number;
@@ -65,6 +62,9 @@ export interface Recipe {
   photos?: Photo[];
   cookHistory?: CookHistory[];
   _count?: { cookHistory: number };
+  cooks?: number;
+  lastCooked?: string | null;
+  hues?: [number, number];
 }
 
 export interface CreateRecipeDto {
@@ -105,17 +105,5 @@ export interface CreateCookHistoryDto {
   cookedAt?: string;
 }
 
-export interface AddTagDto {
-  name: string;
-  color: string;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    lastPage: number;
-  };
-}
+export type { PaginatedResponse };
+export type { Tag };

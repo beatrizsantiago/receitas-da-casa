@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Badge, Box, Button, Flex, Input, Text } from '@chakra-ui/react';
-import { recipesService } from '../services/recipes.service';
-import type { Tag } from '../types';
+import { useTagsQuery } from '@/features/tags/hooks/useTags';
 
 interface SelectedTag {
   name: string;
@@ -23,13 +22,11 @@ function randomColor(): string {
 }
 
 export function TagSelector({ selected, onChange }: Props) {
-  const [available, setAvailable] = useState<Tag[]>([]);
   const [input, setInput] = useState('');
   const [newColor, setNewColor] = useState(randomColor);
 
-  useEffect(() => {
-    recipesService.listTags().then(setAvailable).catch(() => {});
-  }, []);
+  const { data: tagsData } = useTagsQuery();
+  const available = tagsData ?? [];
 
   const availableTags = useMemo(
     () => available.filter((t) => !selected.some((s) => s.name.toLowerCase() === t.name.toLowerCase())),

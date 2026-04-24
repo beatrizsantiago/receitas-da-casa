@@ -7,14 +7,17 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import { toaster } from '../../../components/ui/toaster';
-import { recipesService } from '../services/recipes.service';
+import { toaster } from '@/shared/components/ui/toaster';
+import {
+  useAddIngredientMutation,
+  useUpdateIngredientMutation,
+  useDeleteIngredientMutation,
+} from '../hooks/useRecipes';
 import type { Ingredient } from '../types';
 
 interface Props {
   recipeId: number;
   ingredients: Ingredient[];
-  onRefresh: () => void;
 }
 
 interface EditState {
@@ -24,59 +27,47 @@ interface EditState {
   unit: string;
 }
 
-export function IngredientList({ recipeId, ingredients, onRefresh }: Props) {
+export function IngredientList({ recipeId, ingredients }: Props) {
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState('');
   const [newQty, setNewQty] = useState('');
   const [newUnit, setNewUnit] = useState('');
-  const [saving, setSaving] = useState(false);
   const [edit, setEdit] = useState<EditState | null>(null);
+
+  const addMut = useAddIngredientMutation();
+  const updateMut = useUpdateIngredientMutation();
+  const deleteMut = useDeleteIngredientMutation();
 
   async function handleAdd() {
     if (!newName.trim()) return;
-    setSaving(true);
     try {
-      await recipesService.addIngredient(recipeId, {
-        name: newName.trim(),
-        quantity: newQty || '',
-        unit: newUnit || '',
-      });
+      await addMut.mutateAsync({ recipeId, dto: { name: newName.trim(), quantity: newQty || '', unit: newUnit || '' } });
       setNewName(''); setNewQty(''); setNewUnit('');
       setAdding(false);
-      onRefresh();
     } catch {
       toaster.create({ title: 'Erro ao adicionar ingrediente', type: 'error' });
-    } finally {
-      setSaving(false);
     }
   }
 
   async function handleUpdate() {
     if (!edit) return;
-    setSaving(true);
     try {
-      await recipesService.updateIngredient(edit.id, {
-        name: edit.name,
-        quantity: edit.quantity || '',
-        unit: edit.unit || '',
-      });
+      await updateMut.mutateAsync({ id: edit.id, dto: { name: edit.name, quantity: edit.quantity || '', unit: edit.unit || '' } });
       setEdit(null);
-      onRefresh();
     } catch {
       toaster.create({ title: 'Erro ao atualizar ingrediente', type: 'error' });
-    } finally {
-      setSaving(false);
     }
   }
 
   async function handleRemove(id: number) {
     try {
-      await recipesService.removeIngredient(id);
-      onRefresh();
+      await deleteMut.mutateAsync(id);
     } catch {
       toaster.create({ title: 'Erro ao remover ingrediente', type: 'error' });
     }
   }
+
+  const saving = addMut.isPending || updateMut.isPending;
 
   return (
     <Box>
@@ -111,19 +102,8 @@ export function IngredientList({ recipeId, ingredients, onRefresh }: Props) {
                 placeholder="Unidade"
                 w="80px"
               />
-              <IconButton
-                size="sm"
-                aria-label="Salvar"
-                variant="ghost"
-                loading={saving}
-                onClick={handleUpdate}
-              >✓</IconButton>
-              <IconButton
-                size="sm"
-                aria-label="Cancelar"
-                variant="ghost"
-                onClick={() => setEdit(null)}
-              >✕</IconButton>
+              <IconButton size="sm" aria-label="Salvar" variant="ghost" loading={saving} onClick={handleUpdate}>✓</IconButton>
+              <IconButton size="sm" aria-label="Cancelar" variant="ghost" onClick={() => setEdit(null)}>✕</IconButton>
             </Flex>
           ) : (
             <Flex
@@ -140,19 +120,8 @@ export function IngredientList({ recipeId, ingredients, onRefresh }: Props) {
                 {ing.name}
               </Text>
               <Flex gap={1} opacity={0} _groupHover={{ opacity: 1 }} transition="opacity 0.15s">
-                <IconButton
-                  size="xs"
-                  aria-label="Editar"
-                  variant="ghost"
-                  onClick={() => setEdit({ id: ing.id, name: ing.name, quantity: ing.quantity ?? '', unit: ing.unit ?? '' })}
-                >✏️</IconButton>
-                <IconButton
-                  size="xs"
-                  aria-label="Remover"
-                  variant="ghost"
-                  colorPalette="red"
-                  onClick={() => handleRemove(ing.id)}
-                >🗑</IconButton>
+                <IconButton size="xs" aria-label="Editar" variant="ghost" onClick={() => setEdit({ id: ing.id, name: ing.name, quantity: ing.quantity ?? '', unit: ing.unit ?? '' })}>✏️</IconButton>
+                <IconButton size="xs" aria-label="Remover" variant="ghost" colorPalette="red" onClick={() => handleRemove(ing.id)}>🗑</IconButton>
               </Flex>
             </Flex>
           )
@@ -161,27 +130,9 @@ export function IngredientList({ recipeId, ingredients, onRefresh }: Props) {
 
       {adding && (
         <Flex gap={2} mt={3} align="center">
-          <Input
-            size="sm"
-            placeholder="Nome do ingrediente"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-          />
-          <Input
-            size="sm"
-            placeholder="Qtd"
-            value={newQty}
-            onChange={(e) => setNewQty(e.target.value)}
-            w="80px"
-          />
-          <Input
-            size="sm"
-            placeholder="Unid."
-            value={newUnit}
-            onChange={(e) => setNewUnit(e.target.value)}
-            w="80px"
-          />
+          <Input size="sm" placeholder="Nome do ingrediente" value={newName} onChange={(e) => setNewName(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleAdd()} />
+          <Input size="sm" placeholder="Qtd" value={newQty} onChange={(e) => setNewQty(e.target.value)} w="80px" />
+          <Input size="sm" placeholder="Unid." value={newUnit} onChange={(e) => setNewUnit(e.target.value)} w="80px" />
           <IconButton size="sm" aria-label="Salvar" loading={saving} onClick={handleAdd}>✓</IconButton>
           <IconButton size="sm" aria-label="Cancelar" variant="ghost" onClick={() => setAdding(false)}>✕</IconButton>
         </Flex>

@@ -13,9 +13,9 @@ import {
 import { useState } from 'react';
 import { LuMail, LuLock } from 'react-icons/lu';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { toaster } from '../../../components/ui/toaster';
+import { toaster } from '@/shared/components/ui/toaster';
 import { useAuth } from '../hooks/useAuth';
-import smallLogo from '../../../assets/logo.png';
+import smallLogo from '@/assets/logo.png';
 
 const Login = () => {
   const navigate = useNavigate();

@@ -1,0 +1,253 @@
+import { Badge, Box, Button, Flex, Input, Text, Textarea } from '@chakra-ui/react';
+import { EditableBlock } from '@/shared/components/ui/EditableBlock';
+import { TagSelector } from '../TagSelector';
+import type { Recipe, Tag } from '../../types';
+import type { RecipeDrafts, RecipeDraftSetters } from '../../hooks/useRecipeDrafts';
+import type { RecipeCategory } from '../../types';
+
+interface RecipeTitleBlockProps {
+  recipe: Recipe;
+  drafts: RecipeDrafts;
+  setters: RecipeDraftSetters;
+  allTags: Tag[];
+  onSave: () => void | Promise<void>;
+  onCancel: () => void;
+}
+
+export function RecipeTitleBlock({
+  recipe,
+  drafts,
+  setters,
+  allTags,
+  onSave,
+  onCancel,
+}: RecipeTitleBlockProps) {
+  const cat =
+    recipe.category === 'SWEET'
+      ? { label: 'Doce', tone: 'primary' as const }
+      : { label: 'Salgado', tone: 'secondary' as const };
+
+  return (
+    <EditableBlock
+      eyebrow="como essa receita se chama"
+      title="Título, descrição & categoria"
+      onSave={onSave}
+      onCancel={onCancel}
+      editor={
+        <Flex direction="column" gap={3.5}>
+          <Box>
+            <Text
+              fontSize="13px"
+              fontWeight="550"
+              color="neutral.600"
+              mb={1.5}
+              letterSpacing="-0.005em"
+            >
+              Título
+            </Text>
+            <Input
+              value={drafts.title}
+              onChange={(e) => setters.setTitle(e.target.value)}
+              placeholder="Ex: Bolo de fubá da vovó"
+              h="48px"
+              rounded="12px"
+              borderColor="beige.200"
+              bg="white"
+              fontSize="15px"
+              px={3.5}
+              _focus={{ borderColor: 'primary.300', boxShadow: 'none' }}
+            />
+          </Box>
+          <Box>
+            <Text
+              fontSize="13px"
+              fontWeight="550"
+              color="neutral.600"
+              mb={1.5}
+              letterSpacing="-0.005em"
+            >
+              Descrição
+            </Text>
+            <Textarea
+              value={drafts.description}
+              onChange={(e) => setters.setDescription(e.target.value)}
+              rows={3}
+              rounded="12px"
+              borderColor="beige.200"
+              bg="white"
+              fontSize="15px"
+              px={3.5}
+              py={3}
+              resize="vertical"
+              lineHeight={1.5}
+              _focus={{ borderColor: 'primary.300', boxShadow: 'none' }}
+              placeholder="Conte a história dessa receita..."
+            />
+          </Box>
+          <Box>
+            <Text
+              fontSize="13px"
+              fontWeight="550"
+              color="neutral.600"
+              mb={2}
+              letterSpacing="-0.005em"
+            >
+              Categoria
+            </Text>
+            <Flex gap={2} flexWrap="wrap">
+              {[
+                { id: 'SAVORY' as RecipeCategory, label: 'Salgado' },
+                { id: 'SWEET' as RecipeCategory, label: 'Doce' },
+              ].map((c) => (
+                <Button
+                  key={c.id}
+                  size="sm"
+                  rounded="999px"
+                  fontSize="12px"
+                  fontWeight="550"
+                  px={3}
+                  py={1.5}
+                  h="26px"
+                  onClick={() => setters.setCategory(c.id)}
+                  bg={
+                    drafts.category === c.id ? 'neutral.800' : 'transparent'
+                  }
+                  color={
+                    drafts.category === c.id ? 'beige.50' : 'neutral.500'
+                  }
+                  borderWidth="1px"
+                  borderColor={
+                    drafts.category === c.id ? 'transparent' : 'beige.200'
+                  }
+                  _hover={{
+                    bg:
+                      drafts.category === c.id ? 'neutral.800' : 'beige.50',
+                  }}
+                >
+                  {c.label}
+                </Button>
+              ))}
+            </Flex>
+          </Box>
+          <TagSelector selected={drafts.tags} onChange={setters.setTags} />
+          {allTags.length > 0 && (
+            <Box mt={1}>
+              <Text
+                fontSize="11px"
+                color="neutral.500"
+                fontWeight="600"
+                letterSpacing="0.05em"
+                textTransform="uppercase"
+                mb={1.5}
+              >
+                Das suas tags
+              </Text>
+              <Flex gap={1.5} flexWrap="wrap">
+                {allTags
+                  .filter(
+                    (ut) =>
+                      !drafts.tags.some(
+                        (t) => t.name === ut.name.toLowerCase()
+                      )
+                  )
+                  .map((ut) => (
+                    <Box
+                      key={ut.id}
+                      as="span"
+                      display="inline-flex"
+                      alignItems="center"
+                      gap={1}
+                      px={2.5}
+                      py={1}
+                      rounded="full"
+                      fontSize="12px"
+                      fontWeight="600"
+                      cursor="pointer"
+                      style={{
+                        backgroundColor: ut.color + '22',
+                        color: ut.color,
+                        border: `1px solid ${ut.color}44`,
+                      }}
+                      onClick={() =>
+                        setters.setTags((prev) => [
+                          ...prev,
+                          { name: ut.name.toLowerCase(), color: ut.color },
+                        ])
+                      }
+                    >
+                      + #{ut.name}
+                    </Box>
+                  ))}
+              </Flex>
+            </Box>
+          )}
+        </Flex>
+      }
+    >
+      <Flex direction="column" gap={2.5}>
+        <Flex align="center" gap={2.5} flexWrap="wrap">
+          <Text
+            fontFamily="'Fraunces', Georgia, serif"
+            fontSize="24px"
+            color="neutral.800"
+            fontWeight="500"
+            letterSpacing="-0.015em"
+            lineHeight={1.15}
+          >
+            {recipe.title || (
+              <Text
+                as="span"
+                color="neutral.400"
+                fontStyle="italic"
+                fontSize="16px"
+              >
+                Sem título
+              </Text>
+            )}
+          </Text>
+          <Badge
+            bg={cat.tone === 'primary' ? 'primary.50' : 'secondary.50'}
+            color={cat.tone === 'primary' ? 'primary.800' : 'secondary.800'}
+            px={2}
+            py={0.5}
+            rounded="md"
+            fontSize="xs"
+            fontWeight="500"
+          >
+            {cat.label}
+          </Badge>
+        </Flex>
+        <Text fontSize="14px" color="neutral.600" lineHeight={1.65}>
+          {recipe.description || (
+            <Text as="span" color="neutral.400" fontStyle="italic">
+              Nenhuma descrição ainda.
+            </Text>
+          )}
+        </Text>
+        {recipe.tags && recipe.tags.length > 0 && (
+          <Flex gap={1.5} flexWrap="wrap" mt={0.5}>
+            {recipe.tags.map((t) => (
+              <Box
+                key={t.tag.id}
+                as="span"
+                display="inline-flex"
+                px={2.5}
+                py={1}
+                rounded="full"
+                fontSize="12px"
+                fontWeight="600"
+                style={{
+                  backgroundColor: t.tag.color + '22',
+                  color: t.tag.color,
+                  border: `1px solid ${t.tag.color}44`,
+                }}
+              >
+                #{t.tag.name}
+              </Box>
+            ))}
+          </Flex>
+        )}
+      </Flex>
+    </EditableBlock>
+  );
+}

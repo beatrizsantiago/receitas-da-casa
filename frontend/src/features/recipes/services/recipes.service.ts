@@ -1,6 +1,5 @@
-import api from '../../../services/api';
+import api from '@/shared/services/api';
 import type {
-  AddTagDto,
   CookHistory,
   CreateCookHistoryDto,
   CreateIngredientDto,
@@ -10,14 +9,15 @@ import type {
   Ingredient,
   Note,
   PaginatedResponse,
+  Photo,
   Recipe,
   Step,
-  Tag,
   UpdateIngredientDto,
   UpdateNoteDto,
   UpdateRecipeDto,
   UpdateStepDto,
 } from '../types';
+import type { AddTagDto } from '@/features/tags/types';
 
 export const recipesService = {
   async list(params?: { page?: number; limit?: number; category?: string }): Promise<PaginatedResponse<Recipe>> {
@@ -101,11 +101,6 @@ export const recipesService = {
     await api.delete(`/notes/${id}`);
   },
 
-  async listTags(): Promise<Tag[]> {
-    const { data } = await api.get<Tag[]>('/tags');
-    return data;
-  },
-
   async addTag(recipeId: number, dto: AddTagDto): Promise<void> {
     await api.post(`/recipes/${recipeId}/tags`, dto);
   },
@@ -121,6 +116,16 @@ export const recipesService = {
 
   async addHistory(recipeId: number, dto: CreateCookHistoryDto): Promise<CookHistory> {
     const { data } = await api.post<CookHistory>(`/recipes/${recipeId}/history`, dto);
+    return data;
+  },
+
+  async generateUploadUrl(fileName: string, contentType: string): Promise<{ uploadUrl: string; publicUrl: string }> {
+    const { data } = await api.post<{ uploadUrl: string; publicUrl: string }>('/photos/upload-url', { fileName, contentType });
+    return data;
+  },
+
+  async createPhoto(dto: { url: string; type: 'COVER' | 'USER'; recipeId: number }): Promise<Photo> {
+    const { data } = await api.post<Photo>('/photos', dto);
     return data;
   },
 };

@@ -1,123 +1,130 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Box, Button, useBreakpointValue } from '@chakra-ui/react';
+import { LuCheck, LuPencil } from 'react-icons/lu';
+import { CoverUploader } from '@/shared/components/ui/CoverUploader';
+import { LoadingSpinner } from '@/shared/components/ui/LoadingSpinner';
+import { EmptyState } from '@/shared/components/ui/EmptyState';
+import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
+import { toaster } from '@/shared/components/ui/toaster';
 import {
-  Badge,
-  Box,
-  Button,
-  Field,
-  Flex,
-  Grid,
-  Heading,
-  Image,
-  Input,
-  NativeSelect,
-  Text,
-  Textarea,
-  VStack,
-} from '@chakra-ui/react';
-import { useRecipe } from '../hooks/useRecipes';
-import { recipesService } from '../services/recipes.service';
-import { IngredientList } from '../components/IngredientList';
-import { StepList } from '../components/StepList';
-import { NotesList } from '../components/NotesList';
-import { TagSelector } from '../components/TagSelector';
-import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
-import { EmptyState } from '../../../components/ui/EmptyState';
-import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
-import { toaster } from '../../../components/ui/toaster';
-import type { RecipeCategory } from '../types';
-
-const CATEGORY_LABEL: Record<string, string> = {
-  SWEET: 'Doce',
-  SAVORY: 'Salgado',
-};
+  useRecipeQuery,
+  useUpdateRecipeMutation,
+  useDeleteRecipeMutation,
+  useAddTagToRecipeMutation,
+  useRemoveTagFromRecipeMutation,
+  useAddHistoryMutation,
+} from '../hooks/useRecipes';
+import { useRecipeDrafts } from '../hooks/useRecipeDrafts';
+import { useRecipePhotoUpload } from '../hooks/useRecipePhotoUpload';
+import { tagsService } from '@/features/tags/services/tags.service';
+import { RecipeCoverSection } from '../components/detail/RecipeCoverSection';
+import { RecipeTitleBlock } from '../components/detail/RecipeTitleBlock';
+import { RecipeTagsBlock } from '../components/detail/RecipeTagsBlock';
+import { RecipeIngredientsBlock } from '../components/detail/RecipeIngredientsBlock';
+import { RecipeStepsBlock } from '../components/detail/RecipeStepsBlock';
+import { RecipeNotesBlock } from '../components/detail/RecipeNotesBlock';
+import { RecipeHistorySection } from '../components/detail/RecipeHistorySection';
+import { RecipeGallerySection } from '../components/detail/RecipeGallerySection';
+import type { Tag } from '../types';
 
 export default function RecipeDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const recipeId = Number(id);
-  const { recipe, isLoading, error, refetch } = useRecipe(recipeId);
+  const { data: recipe, isLoading, error } = useRecipeQuery(recipeId);
+  const mobile = useBreakpointValue({ base: true, md: false });
 
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [editingCover, setEditingCover] = useState(false);
+  const [allTags, setAllTags] = useState<Tag[]>([]);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState('');
-  const [editDescription, setEditDescription] = useState('');
-  const [editCategory, setEditCategory] = useState<RecipeCategory>('SAVORY');
-  const [editTags, setEditTags] = useState<{ name: string; color: string }[]>([]);
-  const [savingBasic, setSavingBasic] = useState(false);
+  const { drafts, setters, initDrafts } = useRecipeDrafts();
+  const {
+    uploading,
+    coverInputRef,
+    galleryInputRef,
+    onCoverFileChange,
+    onGalleryFileChange,
+    handlePhotoUpload,
+  } = useRecipePhotoUpload(recipeId);
 
-  function startEditing() {
-    if (!recipe) return;
-    setEditTitle(recipe.title);
-    setEditDescription(recipe.description ?? '');
-    setEditCategory(recipe.category);
-    setEditTags(recipe.tags?.map((t) => ({ name: t.tag.name.toLowerCase(), color: t.tag.color })) ?? []);
-    setIsEditing(true);
-  }
+  const updateRecipe = useUpdateRecipeMutation();
+  const deleteRecipe = useDeleteRecipeMutation();
+  const addTagMut = useAddTagToRecipeMutation();
+  const removeTagMut = useRemoveTagFromRecipeMutation();
+  const addHistoryMut = useAddHistoryMutation();
 
-  function cancelEditing() {
-    setIsEditing(false);
-  }
+  useEffect(() => {
+    tagsService.list().then(setAllTags).catch(() => {});
+  }, []);
 
-  async function saveBasicInfo() {
-    if (!editTitle.trim()) {
-      toaster.create({ title: 'Título é obrigatório', type: 'error' });
-      return;
-    }
-    setSavingBasic(true);
-    try {
-      await recipesService.update(recipeId, {
-        title: editTitle.trim(),
-        description: editDescription.trim() || undefined,
-        category: editCategory,
-      });
-
-      // sync tags: remove old, add new
-      const currentTags = recipe?.tags?.map((t) => ({ id: t.tag.id, name: t.tag.name.toLowerCase() })) ?? [];
-      const newTagNames = editTags.map((t) => t.name);
-
-      for (const ct of currentTags) {
-        if (!newTagNames.includes(ct.name)) {
-          try {
-            await recipesService.removeTag(recipeId, ct.id);
-          } catch { /* ignore */ }
-        }
-      }
-
-      for (const nt of editTags) {
-        if (!currentTags.some((ct) => ct.name === nt.name)) {
-          try {
-            await recipesService.addTag(recipeId, { name: nt.name, color: nt.color });
-          } catch { /* ignore */ }
-        }
-      }
-
-      toaster.create({ title: 'Receita atualizada', type: 'success' });
-      setIsEditing(false);
-      refetch();
-    } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message ?? 'Erro ao atualizar receita';
-      toaster.create({ title: Array.isArray(msg) ? msg[0] : msg, type: 'error' });
-    } finally {
-      setSavingBasic(false);
-    }
-  }
+  useEffect(() => {
+    initDrafts(recipe);
+  }, [recipe?.id]);
 
   async function handleDelete() {
     setDeleting(true);
     try {
-      await recipesService.remove(recipeId);
-      toaster.create({ title: 'Receita excluída', type: 'success' });
+      await deleteRecipe.mutateAsync(recipeId);
+      toaster.create({ title: 'Receita apagada', type: 'success' });
       navigate('/receitas');
     } catch {
       toaster.create({ title: 'Erro ao excluir receita', type: 'error' });
     } finally {
       setDeleting(false);
       setDeleteOpen(false);
+    }
+  }
+
+  async function addHistory() {
+    try {
+      await addHistoryMut.mutateAsync({ recipeId, dto: { rating: 5 } });
+      toaster.create({
+        title: 'Bom apetite! Registrado no histórico.',
+        type: 'success',
+      });
+    } catch {
+      toaster.create({ title: 'Erro ao registrar histórico', type: 'error' });
+    }
+  }
+
+  async function saveTitleBlock() {
+    await updateRecipe.mutateAsync({
+      id: recipeId,
+      dto: {
+        title: drafts.title.trim(),
+        description: drafts.description.trim() || undefined,
+        category: drafts.category,
+      },
+    });
+    const currentTags =
+      recipe?.tags?.map((t) => ({
+        id: t.tag.id,
+        name: t.tag.name.toLowerCase(),
+      })) ?? [];
+    const newNames = drafts.tags.map((t) => t.name);
+    for (const ct of currentTags) {
+      if (!newNames.includes(ct.name)) {
+        try {
+          await removeTagMut.mutateAsync({ recipeId, tagId: ct.id });
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    for (const nt of drafts.tags) {
+      if (!currentTags.some((ct) => ct.name === nt.name)) {
+        try {
+          await addTagMut.mutateAsync({
+            recipeId,
+            dto: { name: nt.name, color: nt.color },
+          });
+        } catch {
+          /* ignore */
+        }
+      }
     }
   }
 
@@ -137,163 +144,189 @@ export default function RecipeDetail() {
     );
   }
 
-  const cover = recipe.photos?.find((p) => p.type === 'COVER');
+  const isEmpty = !recipe.title?.trim();
 
   return (
-    <Box minH="100vh" bg="beige.100">
-      <Flex as="nav" bg="white" shadow="sm" px={6} py={4} justify="space-between" align="center">
-        <Heading size="lg" color="primary.600">Receitas da Casa</Heading>
-        <Flex gap={4}>
-          <Button variant="ghost" onClick={() => navigate('/receitas')}>Minhas Receitas</Button>
-          <Button colorPalette="primary" onClick={() => navigate('/receitas/nova')}>+ Nova Receita</Button>
-        </Flex>
-      </Flex>
+    <Box minH="100vh" bg="beige.100" pb={mobile ? 20 : 16}>
+      <Box position="relative">
+        <RecipeCoverSection
+          recipe={recipe}
+          onBack={() => navigate('/receitas')}
+          onDeleteClick={() => setDeleteOpen(true)}
+          onEditCover={() => {
+            initDrafts();
+            setEditingCover(true);
+          }}
+          onCoverFileChange={onCoverFileChange}
+          coverInputRef={coverInputRef}
+          uploading={uploading}
+        />
 
-      <Box maxW="900px" mx="auto" p={6}>
-        <VStack align="start" gap={6} w="full">
-          <Box bg="white" p={5} rounded="xl" shadow="sm" w="full">
-            <Flex w="full" justify="space-between" align="flex-start" flexWrap="wrap" gap={4}>
-              {isEditing ? (
-                <VStack align="stretch" gap={3} flex={1}>
-                  <Field.Root>
-                    <Field.Label>Título</Field.Label>
-                    <Input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
-                  </Field.Root>
-                  <Field.Root>
-                    <Field.Label>Descrição</Field.Label>
-                    <Textarea
-                      value={editDescription}
-                      onChange={(e) => setEditDescription(e.target.value)}
-                      rows={2}
-                    />
-                  </Field.Root>
-                  <Field.Root maxW="200px">
-                    <Field.Label>Categoria</Field.Label>
-                    <NativeSelect.Root>
-                      <NativeSelect.Field
-                        value={editCategory}
-                        onChange={(e) => setEditCategory(e.target.value as RecipeCategory)}
-                      >
-                        <option value="SAVORY">Salgado</option>
-                        <option value="SWEET">Doce</option>
-                      </NativeSelect.Field>
-                      <NativeSelect.Indicator />
-                    </NativeSelect.Root>
-                  </Field.Root>
-                  <TagSelector selected={editTags} onChange={setEditTags} />
-                </VStack>
-              ) : (
-                <Box>
-                  <Flex gap={3} align="center" mb={2}>
-                    <Heading size="xl">{recipe.title}</Heading>
-                    <Badge colorPalette={recipe.category === 'SWEET' ? 'yellow' : 'secondary'}>
-                      {CATEGORY_LABEL[recipe.category]}
-                    </Badge>
-                  </Flex>
-                  {recipe.description && <Text color="neutral.600">{recipe.description}</Text>}
-                  {recipe.tags && recipe.tags.length > 0 && (
-                    <Flex gap={1} mt={2} flexWrap="wrap">
-                      {recipe.tags.map((t) => (
-                        <Badge
-                          key={t.tag.id}
-                          px={2}
-                          py={0.5}
-                          rounded="md"
-                          fontSize="xs"
-                          style={{ backgroundColor: t.tag.color, color: '#fff' }}
-                        >
-                          {t.tag.name}
-                        </Badge>
-                      ))}
-                    </Flex>
-                  )}
-                </Box>
-              )}
-
-              <Flex gap={2}>
-                {isEditing ? (
-                  <>
-                    <Button size="sm" variant="outline" onClick={cancelEditing} disabled={savingBasic}>
-                      Cancelar
-                    </Button>
-                    <Button size="sm" colorPalette="primary" loading={savingBasic} onClick={saveBasicInfo}>
-                      Salvar
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button size="sm" variant="outline" onClick={startEditing}>
-                      Editar
-                    </Button>
-                    <Button size="sm" colorPalette="red" variant="outline" onClick={() => setDeleteOpen(true)}>
-                      Excluir
-                    </Button>
-                  </>
-                )}
-              </Flex>
-            </Flex>
-
-            {cover && (
-              <Image
-                src={cover.url}
-                alt={recipe.title}
-                w="full"
-                h="300px"
-                objectFit="cover"
-                rounded="xl"
-                mt={4}
+        {editingCover && (
+          <Box
+            position="absolute"
+            inset={0}
+            bg="rgba(47,30,10,0.55)"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            p={mobile ? 4 : 7}
+            zIndex={10}
+          >
+            <Box
+              bg="white"
+              rounded="16px"
+              p={mobile ? 4 : 5}
+              maxW="520px"
+              w="full"
+              boxShadow="0 20px 40px rgba(0,0,0,0.25)"
+            >
+              <Box
+                fontFamily="'Fraunces', Georgia, serif"
+                fontSize="18px"
+                fontWeight="500"
+                color="neutral.800"
+                mb={3}
+                letterSpacing="-0.01em"
+              >
+                Alterar foto de capa
+              </Box>
+              <CoverUploader
+                cover={drafts.cover.cover}
+                hues={drafts.cover.hues}
+                onChange={(c, h) =>
+                  setters.setCover((prev) => ({
+                    cover: c,
+                    hues: h || prev.hues,
+                  }))
+                }
               />
-            )}
+              <Box
+                display="flex"
+                gap={2}
+                justifyContent="flex-end"
+                mt={3.5}
+                pt={3.5}
+                borderTopWidth="1px"
+                borderColor="beige.100"
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  fontSize="13px"
+                  fontWeight="550"
+                  onClick={() => {
+                    initDrafts();
+                    setEditingCover(false);
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  bg="primary.500"
+                  color="white"
+                  size="sm"
+                  fontSize="13px"
+                  fontWeight="550"
+                  rounded="10px"
+                  display="inline-flex"
+                  alignItems="center"
+                  gap={1.5}
+                  boxShadow="0 6px 14px rgba(196,74,47,0.25)"
+                  loading={uploading}
+                  onClick={() => {
+                    void handlePhotoUpload(new File([], 'cover.jpg'), 'COVER');
+                    setEditingCover(false);
+                  }}
+                >
+                  <LuCheck size={14} />
+                  Salvar
+                </Button>
+              </Box>
+            </Box>
           </Box>
+        )}
+      </Box>
 
-          <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={6} w="full">
-            <Box bg="white" p={5} rounded="xl" shadow="sm">
-              <IngredientList
-                recipeId={recipe.id}
-                ingredients={recipe.ingredients ?? []}
-                onRefresh={refetch}
-              />
+      <Box
+        maxW="900px"
+        mx="auto"
+        px={mobile ? 5 : 10}
+        py={mobile ? 5 : 7}
+        display="flex"
+        flexDirection="column"
+        gap={4}
+      >
+        {isEmpty && (
+          <Box
+            bg="yellow.50"
+            rounded="12px"
+            p={3}
+            fontSize="13px"
+            color="#7A5A10"
+            display="flex"
+            alignItems="center"
+            gap={2.5}
+          >
+            <Box color="yellow.500" display="flex">
+              <LuPencil size={16} />
             </Box>
-            <Box bg="white" p={5} rounded="xl" shadow="sm">
-              <StepList recipeId={recipe.id} steps={recipe.steps ?? []} onRefresh={refetch} />
-            </Box>
-          </Grid>
-
-          <Box bg="white" p={5} rounded="xl" shadow="sm" w="full">
-            <NotesList recipeId={recipe.id} notes={recipe.notes ?? []} onRefresh={refetch} />
+            Edite os blocos abaixo para preencher sua nova receita.
           </Box>
+        )}
 
-          {recipe.cookHistory && recipe.cookHistory.length > 0 && (
-            <Box bg="white" p={5} rounded="xl" shadow="sm" w="full">
-              <Heading size="md" mb={4}>Histórico de Cozinhadas</Heading>
-              <VStack align="start" gap={3}>
-                {recipe.cookHistory.map((h) => (
-                  <Box key={h.id} p={3} bg="beige.50" rounded="md" w="full">
-                    <Flex justify="space-between">
-                      <Text fontWeight="medium">
-                        {new Date(h.date).toLocaleDateString('pt-BR')}
-                      </Text>
-                      {h.rating != null && <Text>⭐ {h.rating}/5</Text>}
-                    </Flex>
-                    {h.notes && (
-                      <Text fontSize="sm" color="neutral.600" mt={1}>
-                        {h.notes}
-                      </Text>
-                    )}
-                  </Box>
-                ))}
-              </VStack>
-            </Box>
-          )}
-        </VStack>
+        <RecipeTitleBlock
+          recipe={recipe}
+          drafts={drafts}
+          setters={setters}
+          allTags={allTags}
+          onSave={saveTitleBlock}
+          onCancel={initDrafts}
+        />
+        <RecipeTagsBlock
+          recipe={recipe}
+          drafts={drafts}
+          setters={setters}
+          allTags={allTags}
+          onSave={saveTitleBlock}
+          onCancel={initDrafts}
+        />
+        <RecipeIngredientsBlock
+          recipe={recipe}
+          recipeId={recipeId}
+          ingredients={drafts.ingredients}
+          onCancel={initDrafts}
+        />
+        <RecipeStepsBlock
+          recipe={recipe}
+          recipeId={recipeId}
+          steps={drafts.steps}
+          onCancel={initDrafts}
+        />
+        <RecipeNotesBlock
+          recipe={recipe}
+          recipeId={recipeId}
+          notes={drafts.notes}
+          onCancel={initDrafts}
+        />
+        <RecipeHistorySection
+          history={recipe.cookHistory}
+          onAddHistory={addHistory}
+        />
+        <RecipeGallerySection
+          photos={recipe.photos}
+          onGalleryFileChange={onGalleryFileChange}
+          galleryInputRef={galleryInputRef}
+          recipeId={recipeId}
+        />
       </Box>
 
       <ConfirmDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-        title="Excluir receita"
-        description="Tem certeza que deseja excluir esta receita? Esta ação não pode ser desfeita."
-        confirmLabel="Excluir"
+        title={`Apagar "${recipe.title || 'esta receita'}"?`}
+        description="Essa ação não pode ser desfeita. A receita, suas anotações e seu histórico serão removidos para sempre do seu caderno."
+        confirmLabel="Apagar receita"
         onConfirm={handleDelete}
         loading={deleting}
       />

@@ -1,4 +1,4 @@
-import api from '../../../services/api';
+import api from '@/shared/services/api';
 import type { AuthResponse, LoginDto, RegisterDto } from '../types';
 
 export const authService = {
