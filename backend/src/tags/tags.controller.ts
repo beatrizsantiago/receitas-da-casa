@@ -25,6 +25,12 @@ export class TagsController {
     return this.tags.findAll();
   }
 
+  @Post('tags')
+  @ApiOperation({ summary: 'Criar uma nova tag' })
+  createTag(@Body() dto: AddTagDto) {
+    return this.tags.createTag(dto);
+  }
+
   @Post('recipes/:recipeId/tags')
   @ApiOperation({ summary: 'Adicionar tag a uma receita (cria se não existir)' })
   addToRecipe(
@@ -43,5 +49,14 @@ export class TagsController {
     @Param('tagId', ParseIntPipe) tagId: number,
   ) {
     return this.tags.removeFromRecipe(user.sub, recipeId, tagId);
+  }
+
+  @Delete('tags/:id')
+  @ApiOperation({ summary: 'Deletar uma tag (apenas se não estiver em uso)' })
+  removeTag(
+    @CurrentUser() _user: JwtPayload,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.tags.removeTag(id);
   }
 }

@@ -4,6 +4,14 @@ import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { FilterRecipesDto } from './dto/filter-recipes.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 
+function mapRecipe<T extends { id: number; _count: { cookHistory: number }; cookHistory: { date: Date }[] }>(recipe: T) {
+  return {
+    ...recipe,
+    cooks: recipe._count.cookHistory,
+    lastCooked: recipe.cookHistory[0]?.date ?? null,
+  };
+}
+
 @Injectable()
 export class RecipesService {
   constructor(private prisma: PrismaService) {}
@@ -28,13 +36,17 @@ export class RecipesService {
         skip: filter.skip,
         take: filter.limit,
         orderBy: { createdAt: 'desc' },
-        include: { tags: { include: { tag: true } } },
+        include: {
+          tags: { include: { tag: true } },
+          _count: { select: { cookHistory: true } },
+          cookHistory: { orderBy: { date: 'desc' }, take: 1 },
+        },
       }),
       this.prisma.recipe.count({ where }),
     ]);
 
     return {
-      data,
+      data: data.map(mapRecipe),
       meta: {
         total,
         page: filter.page,
@@ -54,10 +66,11 @@ export class RecipesService {
         notes: { orderBy: { priority: 'desc' } },
         photos: true,
         cookHistory: { orderBy: { date: 'desc' } },
+        _count: { select: { cookHistory: true } },
       },
     });
     if (!recipe) throw new NotFoundException('Recipe not found');
-    return recipe;
+    return mapRecipe(recipe);
   }
 
   async update(userId: number, id: number, dto: UpdateRecipeDto) {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RecipesService } from '../recipes/recipes.service';
 import { AddTagDto } from './dto/add-tag.dto';
@@ -35,5 +35,19 @@ export class TagsService {
     return this.prisma.recipeTag.delete({
       where: { recipeId_tagId: { recipeId, tagId } },
     });
+  }
+
+  async createTag(dto: AddTagDto) {
+    return this.prisma.tag.create({
+      data: { name: dto.name, color: dto.color },
+    });
+  }
+
+  async removeTag(id: number) {
+    const usageCount = await this.prisma.recipeTag.count({ where: { tagId: id } });
+    if (usageCount > 0) {
+      throw new BadRequestException('Não é possível excluir uma tag que está sendo usada em receitas');
+    }
+    return this.prisma.tag.delete({ where: { id } });
   }
 }
