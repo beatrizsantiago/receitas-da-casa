@@ -37,36 +37,36 @@ export function Navbar() {
         left={0}
         right={0}
         zIndex={50}
-        bg="rgba(255,251,243,0.95)"
-        backdropFilter="blur(20px) saturate(180%)"
+        bg="#FFFBF5"
         borderTopWidth="1px"
         borderColor="beige.200"
-        px={4}
-        pb={4}
+        style={{ paddingBottom: 'calc(8px + env(safe-area-inset-bottom, 0px))' }}
         pt={2}
       >
-        <Flex justify="space-around">
+        <Flex>
           {NAV_ITEMS.map((it) => {
             const Icon = it.icon;
             const active = activePath === it.id || (it.id !== '/dashboard' && activePath.startsWith(it.id));
             return (
-              <Button
+              <Box
                 key={it.id}
-                variant="ghost"
-                onClick={() => navigate(it.id)}
-                color={active ? 'primary.600' : 'neutral.500'}
+                as="button"
+                flex={1}
                 display="flex"
                 flexDirection="column"
+                alignItems="center"
                 gap={1}
-                py={2}
-                px={3}
-                height="auto"
-                fontSize="xs"
-                fontWeight={600}
+                py={1}
+                onClick={() => navigate(it.id)}
+                color={active ? 'primary.500' : 'neutral.400'}
+                fontSize="10px"
+                fontWeight={active ? 600 : 400}
+                letterSpacing="0.01em"
+                transition="color 120ms"
               >
-                <Icon size={20} />
+                <Icon size={20} strokeWidth={active ? 2 : 1.5} />
                 {it.label}
-              </Button>
+              </Box>
             );
           })}
         </Flex>
@@ -125,7 +125,6 @@ export function Navbar() {
           justify="center"
           fontFamily="'Caveat', cursive"
           fontSize="md"
-          fontStyle="italic"
         >
           {user?.name?.charAt(0).toUpperCase() ?? '?'}
         </Flex>
