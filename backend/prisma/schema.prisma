@@ -73,6 +73,7 @@ model Ingredient {
   name     String
   quantity String
   unit     String
+  order    Int
 
   recipeId Int
   recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)

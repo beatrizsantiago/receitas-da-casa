@@ -18,7 +18,7 @@ export class IngredientsService {
 
   async findAll(userId: number, recipeId: number) {
     await this.recipes.findOne(userId, recipeId);
-    return this.prisma.ingredient.findMany({ where: { recipeId } });
+    return this.prisma.ingredient.findMany({ where: { recipeId }, orderBy: { order: 'asc' } });
   }
 
   async update(userId: number, id: number, dto: UpdateIngredientDto) {

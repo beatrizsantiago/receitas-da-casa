@@ -8,8 +8,8 @@ export interface Ingredient {
   id: number;
   recipeId: number;
   name: string;
-  quantity?: string;
-  unit?: string;
+  quantity: string;
+  unit: string;
   order: number;
 }
 
@@ -50,14 +50,12 @@ export interface Recipe {
   category: RecipeCategory;
   createdAt: string;
   updatedAt: string;
-  deletedAt?: string;
   ingredients?: Ingredient[];
   steps?: Step[];
   notes?: Note[];
   tags?: { tag: Tag }[];
   photos?: Photo[];
   cookHistory?: CookHistory[];
-  _count?: { cookHistory: number };
   cooks?: number;
   lastCooked?: string | null;
   hues?: [number, number];
@@ -75,6 +73,7 @@ export interface CreateIngredientDto {
   name: string;
   quantity: string;
   unit: string;
+  order: number;
 }
 
 export interface UpdateIngredientDto extends Partial<CreateIngredientDto> {}

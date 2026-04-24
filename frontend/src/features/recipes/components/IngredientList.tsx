@@ -24,6 +24,7 @@ interface LocalRow {
   quantity: string;
   unit: string;
   name: string;
+  order: number;
 }
 
 let tempCounter = 0;
@@ -34,9 +35,10 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
       ingredients.map((i) => ({
         tempId: `existing-${i.id}`,
         serverId: i.id,
-        quantity: i.quantity ?? '',
-        unit: i.unit ?? '',
+        quantity: i.quantity,
+        unit: i.unit,
         name: i.name,
+        order: i.order,
       }))
     );
     const [deletedIds] = useState(() => new Set<number>());
@@ -55,32 +57,43 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
           }
         }
 
-        for (const row of rows) {
+        for (const [idx, row] of rows.entries()) {
           if (!row.serverId) continue;
           const original = ingredients.find((i) => i.id === row.serverId);
           if (!original) continue;
           const unchanged =
-            row.quantity === (original.quantity ?? '') &&
-            row.unit === (original.unit ?? '') &&
-            row.name === original.name;
+            row.quantity === original.quantity &&
+            row.unit === original.unit &&
+            row.name === original.name &&
+            row.order === original.order;
           if (unchanged) continue;
           try {
             await updateMut.mutateAsync({
               id: row.serverId,
-              dto: { name: row.name, quantity: row.quantity, unit: row.unit },
+              dto: {
+                name: row.name,
+                quantity: row.quantity,
+                unit: row.unit,
+                order: idx + 1,
+              },
             });
           } catch {
             toaster.create({ title: 'Erro ao atualizar ingrediente', type: 'error' });
           }
         }
 
-        for (const row of rows) {
+        for (const [idx, row] of rows.entries()) {
           if (row.serverId) continue;
           if (!row.name.trim()) continue;
           try {
             await addMut.mutateAsync({
               recipeId,
-              dto: { name: row.name.trim(), quantity: row.quantity, unit: row.unit },
+              dto: {
+                name: row.name.trim(),
+                quantity: row.quantity,
+                unit: row.unit,
+                order: idx + 1,
+              },
             });
           } catch {
             toaster.create({ title: 'Erro ao adicionar ingrediente', type: 'error' });
@@ -92,7 +105,13 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
     function addRow() {
       setRows((prev) => [
         ...prev,
-        { tempId: `new-${++tempCounter}`, quantity: '', unit: '', name: '' },
+        {
+          tempId: `new-${++tempCounter}`,
+          quantity: '',
+          unit: '',
+          name: '',
+          order: prev.length + 1,
+        },
       ]);
     }
 
@@ -107,7 +126,11 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
     }
 
     function removeRow(row: LocalRow) {
-      setRows((prev) => prev.filter((r) => r.tempId !== row.tempId));
+      setRows((prev) =>
+        prev
+          .filter((r) => r.tempId !== row.tempId)
+          .map((r, idx) => ({ ...r, order: idx + 1 }))
+      );
       if (row.serverId !== undefined) {
         deletedIds.add(row.serverId);
       }
