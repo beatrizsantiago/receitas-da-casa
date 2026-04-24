@@ -19,28 +19,49 @@ import smallLogo from '@/assets/logo.png';
 
 const Login = () => {
   const navigate = useNavigate();
-  
   const { login, isLoading } = useAuth();
-  
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     const form = e.currentTarget;
+    if (!form.checkValidity()) return;
+
     const data = new FormData(form);
     const email = data.get('email') as string;
     const password = data.get('password') as string;
 
-    const errs: Record<string, string> = {};
-    if (!email) errs.email = 'Email é obrigatório';
-    if (!password) errs.password = 'Senha é obrigatória';
-    if (Object.keys(errs).length) { setErrors(errs); return; }
     setErrors({});
 
     login({ email, password })
       .then(() => navigate('/dashboard'))
-      .catch(() => toast.error('Email ou senha inválidos'));
+      .catch(() => toast.error('E-mail ou senha inválidos'));
+  };
+
+  const handleInvalid = (
+    e: React.InvalidEvent<HTMLInputElement>,
+    field: string
+  ) => {
+    e.preventDefault();
+    const input = e.currentTarget;
+    let msg = input.validationMessage;
+    // Traduz mensagens padrão do HTML5
+    if (input.validity.valueMissing) {
+      if (field === 'email') msg = 'E-mail é obrigatório';
+      if (field === 'password') msg = 'Senha é obrigatória';
+    }
+    if (input.validity.typeMismatch && field === 'email') {
+      msg = 'Digite um e-mail válido';
+    }
+    setErrors((prev) => ({ ...prev, [field]: msg }));
+  };
+
+  const clearError = (field: string) => {
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
   };
 
   return (
@@ -78,7 +99,9 @@ const Login = () => {
 
         <Flex direction="column" gap={4}>
           <Field.Root invalid={!!errors.email}>
-            <Field.Label fontSize="sm" fontWeight="500" color="neutral.700">E-mail</Field.Label>
+            <Field.Label fontSize="sm" fontWeight="500" color="neutral.700">
+              E-mail
+            </Field.Label>
             <Box position="relative" w="full">
               <Box position="absolute" left="12px" top="50%" transform="translateY(-50%)" color="neutral.400" pointerEvents="none" display="flex" alignItems="center">
                 <LuMail size={16} />
@@ -91,13 +114,18 @@ const Login = () => {
                 borderColor="neutral.200"
                 _hover={{ borderColor: 'neutral.300' }}
                 _focus={{ borderColor: 'primary.400', boxShadow: '0 0 0 1px var(--chakra-colors-primary-400)' }}
+                required
+                onInvalid={(e) => handleInvalid(e, 'email')}
+                onInput={() => clearError('email')}
               />
             </Box>
             <Field.ErrorText>{errors.email}</Field.ErrorText>
           </Field.Root>
 
           <Field.Root invalid={!!errors.password}>
-            <Field.Label fontSize="sm" fontWeight="500" color="neutral.700">Senha</Field.Label>
+            <Field.Label fontSize="sm" fontWeight="500" color="neutral.700">
+              Senha
+            </Field.Label>
             <Box position="relative" w="full">
               <Box position="absolute" left="12px" top="50%" transform="translateY(-50%)" color="neutral.400" pointerEvents="none" display="flex" alignItems="center">
                 <LuLock size={16} />
@@ -110,6 +138,9 @@ const Login = () => {
                 borderColor="neutral.200"
                 _hover={{ borderColor: 'neutral.300' }}
                 _focus={{ borderColor: 'primary.400', boxShadow: '0 0 0 1px var(--chakra-colors-primary-400)' }}
+                required
+                onInvalid={(e) => handleInvalid(e, 'password')}
+                onInput={() => clearError('password')}
               />
             </Box>
             <Field.ErrorText>{errors.password}</Field.ErrorText>

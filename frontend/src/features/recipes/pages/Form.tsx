@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
+  Field,
   Flex,
   Heading,
   Input,
@@ -11,43 +12,46 @@ import {
 } from '@chakra-ui/react';
 import { useBreakpointValue } from '@chakra-ui/react';
 import { LuCheck, LuChevronLeft } from 'react-icons/lu';
+import { AxiosError } from 'axios';
 import { useCreateRecipeMutation } from '../hooks/useRecipes';
 import { CoverUploader } from '@/shared/components/ui/CoverUploader';
 import { randomHues } from '@/shared/utils/colors';
 import { toast } from 'react-toastify';
+import { getApiErrorMessage, type ApiErrorResponse } from '@/shared/utils/parseError';
 import type { RecipeCategory } from '../types';
 
 export default function RecipeCreate() {
   const navigate = useNavigate();
   const mobile = useBreakpointValue({ base: true, md: false });
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
   const [category, setCategory] = useState<RecipeCategory>('SAVORY');
   const [cover, setCover] = useState(false);
   const [hues, setHues] = useState<[number, number]>([25, 35]);
   const [defaultHues] = useState<[number, number]>(() => randomHues());
 
   const createRecipe = useCreateRecipeMutation();
-  const canSave = title.trim().length > 0;
 
-  const submit = async (e?: React.FormEvent) => {
-    e?.preventDefault?.();
-    if (!canSave) return;
+  const validationErrors = (createRecipe.error as AxiosError<ApiErrorResponse> | null)?.response?.data?.validation_errors;
 
-    try {
-      const created = await createRecipe.mutateAsync({
-        title: title.trim(),
-        description: description.trim() || undefined,
-        category,
-      });
-      toast.success('Receita criada!');
-      navigate(`/receitas/${created.id}`);
-    } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message ?? 'Erro ao criar receita';
-      toast.error(Array.isArray(msg) ? msg[0] : msg);
-    }
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const data = new FormData(form);
+
+    const title = (data.get('title') as string).trim();
+    const description = (data.get('description') as string).trim() || undefined;
+
+    createRecipe.mutate(
+      { title, description, category },
+      {
+        onSuccess: (created) => {
+          toast.success('Receita criada!');
+          navigate(`/receitas/${created.id}`);
+        },
+        onError: (err) => {
+          toast.error(getApiErrorMessage(err, 'Erro ao criar receita'));
+        },
+      }
+    );
   };
 
   return (
@@ -121,15 +125,14 @@ export default function RecipeCreate() {
         </Flex>
 
         {/* Form */}
-        <Box
-          px={mobile ? 5 : 6}
-          py={mobile ? 5 : 6}
-          display="flex"
-          flexDirection="column"
-          gap={5}
-          as="form"
-          onSubmit={submit}
-        >
+        <form onSubmit={handleSubmit}>
+          <Box
+            px={mobile ? 5 : 6}
+            py={mobile ? 5 : 6}
+            display="flex"
+            flexDirection="column"
+            gap={5}
+          >
           {/* Foto de capa */}
           <Box>
             <Text
@@ -154,19 +157,13 @@ export default function RecipeCreate() {
           </Box>
 
           {/* Título */}
-          <Box>
-            <Text
-              fontSize="13px"
-              fontWeight="550"
-              color="neutral.600"
-              mb={1.5}
-              letterSpacing="-0.005em"
-            >
+          <Field.Root required invalid={!!validationErrors?.title}>
+            <Field.Label fontSize="13px" fontWeight="550" color="neutral.600" letterSpacing="-0.005em">
               Título
-            </Text>
+              <Field.RequiredIndicator />
+            </Field.Label>
             <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              name="title"
               placeholder="Ex: Bolo de chocolate"
               autoFocus
               h="48px"
@@ -177,25 +174,18 @@ export default function RecipeCreate() {
               px={3.5}
               _focus={{ borderColor: 'primary.300', boxShadow: 'none', bg: 'white' }}
             />
-          </Box>
+            {validationErrors?.title?.map((error, index) => (
+              <Field.ErrorText key={index}>{error}</Field.ErrorText>
+            ))}
+          </Field.Root>
 
           {/* Descrição */}
-          <Box>
-            <Text
-              fontSize="13px"
-              fontWeight="550"
-              color="neutral.600"
-              mb={1.5}
-              letterSpacing="-0.005em"
-            >
-              Descrição{' '}
-              <Box as="span" fontWeight="400" color="neutral.400">
-                (opcional)
-              </Box>
-            </Text>
+          <Field.Root invalid={!!validationErrors?.description}>
+            <Field.Label fontSize="13px" fontWeight="550" color="neutral.600" letterSpacing="-0.005em">
+              Descrição <Box as="span" fontWeight="400" color="neutral.400">(opcional)</Box>
+            </Field.Label>
             <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              name="description"
               placeholder="Ex: Receita da vovó, sempre um sucesso!"
               rows={3}
               rounded="12px"
@@ -208,19 +198,18 @@ export default function RecipeCreate() {
               lineHeight={1.5}
               _focus={{ borderColor: 'primary.300', boxShadow: 'none', bg: 'white' }}
             />
-          </Box>
+            {validationErrors?.description?.map((error, index) => (
+              <Field.ErrorText key={index}>{error}</Field.ErrorText>
+            ))}
+          </Field.Root>
 
           {/* Categoria */}
-          <Box>
-            <Text
-              fontSize="13px"
-              fontWeight="550"
-              color="neutral.600"
-              mb={2}
-              letterSpacing="-0.005em"
-            >
+          <Field.Root required invalid={!!validationErrors?.category}>
+            <Field.Label fontSize="13px" fontWeight="550" color="neutral.600" mb={2} letterSpacing="-0.005em">
               Categoria
-            </Text>
+              <Field.RequiredIndicator />
+            </Field.Label>
+            <input type="hidden" name="category" value={category} />
             <Flex gap={2}>
               {[
                 { id: 'SAVORY' as RecipeCategory, label: 'Salgado', tone: 'secondary' },
@@ -231,6 +220,7 @@ export default function RecipeCreate() {
                 return (
                   <Button
                     key={c.id}
+                    type="button"
                     size="sm"
                     rounded="999px"
                     fontSize="13px"
@@ -264,7 +254,10 @@ export default function RecipeCreate() {
                 );
               })}
             </Flex>
-          </Box>
+            {validationErrors?.category?.map((error, index) => (
+              <Field.ErrorText key={index}>{error}</Field.ErrorText>
+            ))}
+          </Field.Root>
 
           {/* Footer actions */}
           <Flex
@@ -301,19 +294,18 @@ export default function RecipeCreate() {
               rounded="14px"
               h="52px"
               loading={createRecipe.isPending}
-              disabled={!canSave}
-              opacity={canSave ? 1 : 0.5}
               display="inline-flex"
               alignItems="center"
               gap={2}
               boxShadow="0 6px 14px rgba(196,74,47,0.25)"
-              _hover={{ bg: canSave ? 'primary.600' : 'primary.500' }}
+              _hover={{ bg: 'primary.600' }}
             >
               <LuCheck size={16} />
               Criar receita
             </Button>
           </Flex>
-        </Box>
+          </Box>
+        </form>
       </Box>
 
       {!mobile && (

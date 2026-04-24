@@ -131,6 +131,7 @@ export default function TagsPage() {
           onCancel={cancel}
           isPending={createTag.isPending}
           mobile={!!mobile}
+          mutationError={createTag.error as never}
         />
       )}
 

@@ -23,23 +23,22 @@ const Register = () => {
   const { register, isLoading } = useAuth();
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     const form = e.currentTarget;
+    if (!form.checkValidity()) return;
+
     const data = new FormData(form);
     const name = data.get('name') as string;
     const email = data.get('email') as string;
     const password = data.get('password') as string;
     const confirmPassword = data.get('confirmPassword') as string;
 
-    const errs: Record<string, string> = {};
-    if (!name.trim()) errs.name = 'Nome é obrigatório';
-    if (!email) errs.email = 'Email é obrigatório';
-    if (!password) errs.password = 'Senha é obrigatória';
-    if (password.length < 6) errs.password = 'Senha deve ter no mínimo 6 caracteres';
-    if (password !== confirmPassword) errs.confirmPassword = 'As senhas não conferem';
-    if (Object.keys(errs).length) { setErrors(errs); return; }
+    if (password !== confirmPassword) {
+      setErrors({ confirmPassword: 'As senhas não conferem' });
+      return;
+    }
+
     setErrors({});
 
     register({ name, email, password })
@@ -49,6 +48,36 @@ const Register = () => {
           ?.response?.data?.message ?? 'Erro ao criar conta';
         toast.error(Array.isArray(msg) ? msg[0] : msg);
       });
+  };
+
+  const handleInvalid = (
+    e: React.InvalidEvent<HTMLInputElement>,
+    field: string
+  ) => {
+    e.preventDefault();
+    const input = e.currentTarget;
+    let msg = input.validationMessage;
+    if (input.validity.valueMissing) {
+      if (field === 'name') msg = 'Nome é obrigatório';
+      if (field === 'email') msg = 'E-mail é obrigatório';
+      if (field === 'password') msg = 'Senha é obrigatória';
+      if (field === 'confirmPassword') msg = 'Confirme sua senha';
+    }
+    if (input.validity.tooShort && field === 'password') {
+      msg = 'A senha deve ter no mínimo 8 caracteres';
+    }
+    if (input.validity.typeMismatch && field === 'email') {
+      msg = 'Digite um e-mail válido';
+    }
+    setErrors((prev) => ({ ...prev, [field]: msg }));
+  };
+
+  const clearError = (field: string) => {
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
   };
 
   return (
@@ -93,6 +122,9 @@ const Register = () => {
                 borderColor="neutral.200"
                 _hover={{ borderColor: 'neutral.300' }}
                 _focus={{ borderColor: 'primary.400', boxShadow: '0 0 0 1px var(--chakra-colors-primary-400)' }}
+                required
+                onInvalid={(e) => handleInvalid(e, 'name')}
+                onInput={() => clearError('name')}
               />
             </Box>
             <Field.ErrorText>{errors.name}</Field.ErrorText>
@@ -112,6 +144,9 @@ const Register = () => {
                 borderColor="neutral.200"
                 _hover={{ borderColor: 'neutral.300' }}
                 _focus={{ borderColor: 'primary.400', boxShadow: '0 0 0 1px var(--chakra-colors-primary-400)' }}
+                required
+                onInvalid={(e) => handleInvalid(e, 'email')}
+                onInput={() => clearError('email')}
               />
             </Box>
             <Field.ErrorText>{errors.email}</Field.ErrorText>
@@ -132,6 +167,10 @@ const Register = () => {
                   borderColor="neutral.200"
                   _hover={{ borderColor: 'neutral.300' }}
                   _focus={{ borderColor: 'primary.400', boxShadow: '0 0 0 1px var(--chakra-colors-primary-400)' }}
+                  required
+                  minLength={8}
+                  onInvalid={(e) => handleInvalid(e, 'password')}
+                  onInput={() => clearError('password')}
                 />
               </Box>
               <Field.ErrorText>{errors.password}</Field.ErrorText>
@@ -151,6 +190,9 @@ const Register = () => {
                   borderColor="neutral.200"
                   _hover={{ borderColor: 'neutral.300' }}
                   _focus={{ borderColor: 'primary.400', boxShadow: '0 0 0 1px var(--chakra-colors-primary-400)' }}
+                  required
+                  onInvalid={(e) => handleInvalid(e, 'confirmPassword')}
+                  onInput={() => clearError('confirmPassword')}
                 />
               </Box>
               <Field.ErrorText>{errors.confirmPassword}</Field.ErrorText>
