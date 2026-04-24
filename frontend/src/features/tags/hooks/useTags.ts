@@ -18,6 +18,15 @@ export function useCreateTagMutation() {
   });
 }
 
+export function useUpdateTagMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, dto }: { id: number; dto: { name: string; color: string } }) =>
+      tagsService.update(id, dto),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [TAGS_KEY] }),
+  });
+}
+
 export function useDeleteTagMutation() {
   const qc = useQueryClient();
   return useMutation({

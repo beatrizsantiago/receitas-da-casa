@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Grid, Text } from '@chakra-ui/react';
+import { Box, Flex, Grid, Text } from '@chakra-ui/react';
 import { LuTrash2 } from 'react-icons/lu';
 import type { Tag } from '../types';
 
@@ -13,7 +13,7 @@ export function TagList({ tags, countFor, onDelete, mobile }: Props) {
   if (tags.length === 0) return null;
 
   return (
-    <Grid templateColumns={mobile ? '1fr' : 'repeat(auto-fill, minmax(280px, 1fr))'} gap={2.5}>
+    <Grid templateColumns={mobile ? '1fr 1fr' : 'repeat(4, 1fr)'} gap={3}>
       {tags.map((tag) => (
         <Flex
           key={tag.id}
@@ -24,11 +24,12 @@ export function TagList({ tags, countFor, onDelete, mobile }: Props) {
           rounded="14px"
           borderWidth="1px"
           borderColor="beige.100"
+          boxShadow="0 1px 3px rgba(47,30,10,0.05)"
         >
           <Box
-            w="28px"
-            h="28px"
-            rounded="8px"
+            w="32px"
+            h="32px"
+            rounded="10px"
             flexShrink={0}
             style={{
               backgroundColor: tag.color,
@@ -36,30 +37,36 @@ export function TagList({ tags, countFor, onDelete, mobile }: Props) {
             }}
           />
           <Box flex={1} minW={0}>
-            <Text fontSize="14px" fontWeight="600" color="neutral.800">
+            <Text
+              fontSize="13px"
+              fontWeight="600"
+              color="neutral.800"
+              truncate
+            >
               #{tag.name}
             </Text>
-            <Text fontSize="11px" color="neutral.500" mt={0.5}>
+            <Text fontSize="11px" color="neutral.400" mt={0.5}>
               {countFor(tag.name)} {countFor(tag.name) === 1 ? 'receita' : 'receitas'}
             </Text>
           </Box>
-          <Button
-            w="32px"
-            h="32px"
-            minW="32px"
-            p={0}
-            rounded="8px"
-            variant="ghost"
-            color="red.500"
-            borderWidth="1px"
-            borderColor="beige.200"
-            onClick={() => onDelete(tag.id)}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <LuTrash2 size={14} />
-          </Button>
+          <Flex gap={1} flexShrink={0}>
+            <Box
+              as="button"
+              w="28px"
+              h="28px"
+              rounded="8px"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              color="neutral.400"
+              cursor="pointer"
+              _hover={{ bg: 'red.50', color: 'red.500' }}
+              transition="all 120ms"
+              onClick={() => onDelete(tag.id)}
+            >
+              <LuTrash2 size={13} />
+            </Box>
+          </Flex>
         </Flex>
       ))}
     </Grid>
