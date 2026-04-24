@@ -73,8 +73,6 @@ export function RecipeHistorySection({
             onChange={(e) => setNoteText(e.target.value)}
             placeholder="Como foi dessa vez?"
             rows={2}
-            rounded="10px"
-            borderColor="beige.200"
             bg="beige.50"
             fontSize="14px"
             color="neutral.800"
@@ -83,7 +81,6 @@ export function RecipeHistorySection({
             resize="none"
             lineHeight={1.5}
             mb={2.5}
-            _focus={{ borderColor: 'primary.300', boxShadow: 'none' }}
           />
           <Flex gap={2} justify="flex-end">
             <Button
@@ -120,20 +117,19 @@ export function RecipeHistorySection({
       ) : (
         <Button
           w="full"
+          variant="outline"
           justifyContent="flex-start"
           gap={2.5}
           color="neutral.500"
           borderStyle="dashed"
-          borderWidth="1.5px"
           borderColor="beige.200"
           bg="transparent"
-          rounded="12px"
           py={3}
           px={3.5}
-          h="auto"
           fontSize="13px"
           fontWeight="500"
           mb={2}
+          _hover={{ bg: 'beige.50' }}
           onClick={() => setIsAdding(true)}
         >
           <Box color="primary.500" display="flex">

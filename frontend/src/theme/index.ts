@@ -1,6 +1,14 @@
 import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react';
 
 const config = defineConfig({
+  globalCss: {
+    'input:focus-visible, textarea:focus-visible, select:focus-visible': {
+      outline: 'none !important',
+    },
+    'input:focus, textarea:focus, select:focus': {
+      borderColor: '#D96450 !important',
+    },
+  },
   theme: {
     tokens: {
       fonts: {
@@ -75,6 +83,42 @@ const config = defineConfig({
       colors: {
         'chakra-body-bg':   { value: '{colors.beige.100}' },
         'chakra-body-text': { value: '{colors.neutral.800}' },
+      },
+    },
+    recipes: {
+      input: {
+        base: {
+          borderRadius: '12px',
+          borderWidth: '1px',
+          borderColor: 'beige.200',
+          _focus: {
+            borderColor: 'primary.400',
+            boxShadow: 'none',
+          },
+          _invalid: {
+            borderColor: 'red.300',
+          },
+        },
+      },
+      textarea: {
+        base: {
+          borderRadius: '12px',
+          borderWidth: '1px',
+          borderColor: 'beige.200',
+          _focus: {
+            borderColor: 'primary.400',
+            boxShadow: 'none',
+          },
+          _invalid: {
+            borderColor: 'red.300',
+          },
+        },
+      },
+      button: {
+        base: {
+          borderRadius: '12px',
+          h: '40px',
+        },
       },
     },
   },

@@ -87,10 +87,8 @@ export default function RecipeCreate() {
         >
           <Button
             w="38px"
-            h="38px"
             minW="38px"
             p={0}
-            rounded="full"
             variant="outline"
             borderColor="beige.200"
             bg="white"
@@ -166,13 +164,10 @@ export default function RecipeCreate() {
               name="title"
               placeholder="Ex: Bolo de chocolate"
               autoFocus
-              h="48px"
-              rounded="12px"
-              borderColor="beige.200"
               bg="beige.50"
               fontSize="15px"
               px={3.5}
-              _focus={{ borderColor: 'primary.300', boxShadow: 'none', bg: 'white' }}
+              _focus={{ bg: 'white' }}
             />
             {validationErrors?.title?.map((error, index) => (
               <Field.ErrorText key={index}>{error}</Field.ErrorText>
@@ -188,15 +183,13 @@ export default function RecipeCreate() {
               name="description"
               placeholder="Ex: Receita da vovó, sempre um sucesso!"
               rows={3}
-              rounded="12px"
-              borderColor="beige.200"
               bg="beige.50"
               fontSize="15px"
               px={3.5}
               py={3}
               resize="vertical"
               lineHeight={1.5}
-              _focus={{ borderColor: 'primary.300', boxShadow: 'none', bg: 'white' }}
+              _focus={{ bg: 'white' }}
             />
             {validationErrors?.description?.map((error, index) => (
               <Field.ErrorText key={index}>{error}</Field.ErrorText>
@@ -222,11 +215,9 @@ export default function RecipeCreate() {
                     key={c.id}
                     type="button"
                     size="sm"
-                    rounded="999px"
                     fontSize="13px"
                     fontWeight="550"
                     px={4}
-                    h="32px"
                     onClick={() => setCategory(c.id)}
                     bg={
                       active
@@ -272,12 +263,7 @@ export default function RecipeCreate() {
             <Button
               type="button"
               variant="ghost"
-              size="lg"
               w={mobile ? 'full' : 'auto'}
-              fontWeight="550"
-              fontSize="15px"
-              rounded="14px"
-              h="52px"
               color="neutral.500"
               onClick={() => navigate('/receitas')}
             >
@@ -287,12 +273,7 @@ export default function RecipeCreate() {
               type="submit"
               bg="primary.500"
               color="white"
-              size="lg"
               w={mobile ? 'full' : 'auto'}
-              fontWeight="550"
-              fontSize="15px"
-              rounded="14px"
-              h="52px"
               loading={createRecipe.isPending}
               display="inline-flex"
               alignItems="center"

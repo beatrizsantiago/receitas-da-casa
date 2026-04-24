@@ -187,15 +187,12 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
                 value={row.name}
                 onChange={(e) => updateRow(row.tempId, 'name', e.target.value)}
                 flex={1}
-                rounded="10px"
-                borderColor="beige.200"
                 bg="white"
                 fontSize="14px"
                 color="neutral.800"
                 px={3}
                 py={2}
                 h="auto"
-                _focus={{ borderColor: 'primary.300', boxShadow: 'none' }}
                 placeholder="Nome do ingrediente"
               />
 
@@ -229,8 +226,6 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
           color="neutral.500"
           fontSize="13px"
           fontWeight="500"
-          rounded="10px"
-          h="38px"
           mt={2.5}
           display="inline-flex"
           alignItems="center"

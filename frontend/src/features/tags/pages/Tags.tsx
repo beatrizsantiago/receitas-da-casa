@@ -106,9 +106,7 @@ export default function TagsPage() {
             color="white"
             fontWeight="550"
             fontSize="13px"
-            rounded="10px"
             px={4}
-            h="38px"
             flexShrink={0}
             _hover={{ bg: 'primary.600' }}
             onClick={startNew}
@@ -163,9 +161,7 @@ export default function TagsPage() {
               color="white"
               fontWeight="550"
               fontSize="13px"
-              rounded="10px"
               px={4}
-              h="38px"
               _hover={{ bg: 'primary.600' }}
               onClick={startNew}
               display="inline-flex"

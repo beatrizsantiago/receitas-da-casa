@@ -51,10 +51,8 @@ export function RecipeGallerySection({
           variant="outline"
           color="neutral.500"
           borderStyle="dashed"
-          borderWidth="1.5px"
           borderColor="beige.200"
           bg="transparent"
-          rounded="12px"
           w={mobile ? 'full' : 'auto'}
           justifyContent={mobile ? 'center' : 'flex-start'}
           onClick={() => galleryInputRef.current?.click()}
@@ -63,6 +61,7 @@ export function RecipeGallerySection({
           gap={2}
           fontSize="13px"
           fontWeight="500"
+          _hover={{ bg: 'beige.50' }}
         >
           <LuImages size={14} />
           Adicionar foto

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Button, useBreakpointValue } from '@chakra-ui/react';
-import { LuCheck, LuPencil } from 'react-icons/lu';
+import { LuPencil } from 'react-icons/lu';
 import { CoverUploader } from '@/shared/components/ui/CoverUploader';
 import { LoadingSpinner } from '@/shared/components/ui/LoadingSpinner';
 import { EmptyState } from '@/shared/components/ui/EmptyState';
@@ -251,7 +251,6 @@ export default function RecipeDetail() {
                     setEditingCover(false);
                   }}
                 >
-                  <LuCheck size={14} />
                   Salvar
                 </Button>
               </Box>

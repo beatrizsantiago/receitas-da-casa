@@ -48,13 +48,9 @@ export function RecipeTitleBlock({
               value={drafts.title}
               onChange={(e) => setters.setTitle(e.target.value)}
               placeholder="Ex: Bolo de fubá da vovó"
-              h="48px"
-              rounded="12px"
-              borderColor="beige.200"
               bg="white"
               fontSize="15px"
               px={3.5}
-              _focus={{ borderColor: 'primary.300', boxShadow: 'none' }}
             />
           </Box>
           <Box>
@@ -71,15 +67,12 @@ export function RecipeTitleBlock({
               value={drafts.description}
               onChange={(e) => setters.setDescription(e.target.value)}
               rows={3}
-              rounded="12px"
-              borderColor="beige.200"
               bg="white"
               fontSize="15px"
               px={3.5}
               py={3}
               resize="vertical"
               lineHeight={1.5}
-              _focus={{ borderColor: 'primary.300', boxShadow: 'none' }}
               placeholder="Conte a história dessa receita..."
             />
           </Box>
@@ -101,12 +94,10 @@ export function RecipeTitleBlock({
                 <Button
                   key={c.id}
                   size="sm"
-                  rounded="999px"
                   fontSize="12px"
                   fontWeight="550"
                   px={3}
                   py={1.5}
-                  h="26px"
                   onClick={() => setters.setCategory(c.id)}
                   bg={
                     drafts.category === c.id ? 'neutral.800' : 'transparent'

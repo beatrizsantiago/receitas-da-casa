@@ -42,7 +42,6 @@ export function RecentRecipesSection({ recipes, mobile, onViewAll }: Props) {
             variant="outline"
             borderColor="beige.200"
             color="neutral.500"
-            rounded="full"
             fontSize="13px"
             fontWeight="500"
             display="inline-flex"

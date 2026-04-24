@@ -128,15 +128,12 @@ export const StepList = forwardRef<StepListHandle, Props>(
                 value={row.description}
                 onChange={(e) => updateDescription(row.tempId, e.target.value)}
                 rows={2}
-                rounded="10px"
-                borderColor="beige.200"
                 bg="white"
                 fontSize="14px"
                 px={3}
                 py={2.5}
                 resize="vertical"
                 lineHeight={1.5}
-                _focus={{ borderColor: 'primary.300', boxShadow: 'none' }}
                 placeholder="Descreva o passo..."
               />
               <Box
@@ -170,8 +167,6 @@ export const StepList = forwardRef<StepListHandle, Props>(
           color="neutral.500"
           fontSize="13px"
           fontWeight="500"
-          rounded="10px"
-          h="38px"
           mt={3}
           display="inline-flex"
           alignItems="center"

@@ -74,10 +74,8 @@ export function RecipeCoverSection({
       >
         <Button
           w="40px"
-          h="40px"
           minW="40px"
           p={0}
-          rounded="full"
           bg="rgba(255,251,243,0.95)"
           color="neutral.800"
           border="none"
@@ -91,10 +89,8 @@ export function RecipeCoverSection({
         </Button>
         <Flex gap={2}>
           <Button
-            h="40px"
             px={3.5}
             py={1.5}
-            rounded="full"
             bg="rgba(255,251,243,0.95)"
             color="neutral.800"
             border="none"
@@ -110,12 +106,10 @@ export function RecipeCoverSection({
             <LuCamera size={14} />
             {!mobile && ' Alterar capa'}
           </Button>
-<Button
+          <Button
             w="40px"
-            h="40px"
             minW="40px"
             p={0}
-            rounded="full"
             bg="rgba(255,251,243,0.95)"
             color="red.600"
             border="none"

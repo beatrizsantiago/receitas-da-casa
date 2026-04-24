@@ -96,13 +96,10 @@ export function TagForm({ draft, onChange, onSave, onCancel, isPending, mobile, 
               onChange={(e) => onChange({ ...draft, name: e.target.value.replace(/^#/, '') })}
               placeholder="ex: domingo"
               autoFocus
-              h="44px"
-              rounded="12px"
-              borderColor="beige.200"
               bg="beige.50"
               fontSize="15px"
               px={3.5}
-              _focus={{ borderColor: 'primary.300', boxShadow: 'none', bg: 'white' }}
+              _focus={{ bg: 'white' }}
             />
             {validationErrors?.name?.map((error, index) => (
               <Field.ErrorText key={index}>{error}</Field.ErrorText>

@@ -178,24 +178,18 @@ export default function RecipeList() {
               onChange={(e) => setInputValue(e.target.value)}
               pl="38px"
               bg="white"
-              borderColor="beige.200"
-              rounded="12px"
               fontSize="14px"
               _placeholder={{ color: 'neutral.400' }}
-              _hover={{ borderColor: 'beige.300' }}
-              _focus={{ borderColor: 'primary.300', boxShadow: 'none' }}
             />
           </Box>
 
           <Box ref={filterRef} position="relative" flexShrink={0}>
             <Button
-              h="40px"
               px={3}
               bg={filterOpen || activeFilterCount > 0 ? 'primary.50' : 'white'}
               color={filterOpen || activeFilterCount > 0 ? 'primary.700' : 'neutral.600'}
               borderWidth="1px"
               borderColor={filterOpen || activeFilterCount > 0 ? 'primary.200' : 'beige.200'}
-              rounded="12px"
               fontSize="13px"
               fontWeight="500"
               display="inline-flex"

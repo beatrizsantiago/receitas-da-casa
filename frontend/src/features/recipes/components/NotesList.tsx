@@ -111,7 +111,6 @@ export const NotesList = forwardRef<NotesListHandle, Props>(
                 value={row.content}
                 onChange={(e) => updateContent(row.tempId, e.target.value)}
                 rows={2}
-                rounded="10px"
                 borderColor="yellow.200"
                 bg="yellow.50"
                 fontSize="15px"
@@ -155,8 +154,6 @@ export const NotesList = forwardRef<NotesListHandle, Props>(
           color="neutral.500"
           fontSize="13px"
           fontWeight="500"
-          rounded="10px"
-          h="38px"
           mt={2.5}
           display="inline-flex"
           alignItems="center"

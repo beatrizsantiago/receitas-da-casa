@@ -71,23 +71,17 @@ export function EditableBlock({ eyebrow, title, children, editor, onSave, onCanc
         </Box>
         {canEdit && !editing && (
           <Button
-            size="sm"
+            p={0}
             variant="outline"
-            onClick={() => setEditing(true)}
-            display="inline-flex"
+            borderColor="primary.500"
+            color="primary.500"
+            display="flex"
             alignItems="center"
-            gap={1.5}
-            fontSize="12px"
-            fontWeight="600"
-            color="neutral.500"
-            borderColor="beige.200"
-            rounded="8px"
-            px={2.5}
-            py={1.5}
-            h="auto"
+            justifyContent="center"
+            onClick={() => setEditing(true)}
+            size="xs"
           >
-            <LuPencil size={13} />
-            Editar
+            <LuPencil size={14} />
           </Button>
         )}
       </Flex>
@@ -104,7 +98,6 @@ export function EditableBlock({ eyebrow, title, children, editor, onSave, onCanc
             borderColor="beige.100"
           >
             <Button
-              size="sm"
               variant="ghost"
               fontSize="13px"
               fontWeight="550"
@@ -116,12 +109,10 @@ export function EditableBlock({ eyebrow, title, children, editor, onSave, onCanc
               Cancelar
             </Button>
             <Button
-              size="sm"
               bg="primary.500"
               color="white"
               fontSize="13px"
               fontWeight="550"
-              rounded="10px"
               loading={saving}
               onClick={handleSave}
               display="inline-flex"

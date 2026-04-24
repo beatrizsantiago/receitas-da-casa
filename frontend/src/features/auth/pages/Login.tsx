@@ -111,9 +111,6 @@ const Login = () => {
                 type="email"
                 placeholder="seu@email.com"
                 pl="38px"
-                borderColor="neutral.200"
-                _hover={{ borderColor: 'neutral.300' }}
-                _focus={{ borderColor: 'primary.400', boxShadow: '0 0 0 1px var(--chakra-colors-primary-400)' }}
                 required
                 onInvalid={(e) => handleInvalid(e, 'email')}
                 onInput={() => clearError('email')}
@@ -135,9 +132,6 @@ const Login = () => {
                 type="password"
                 placeholder="••••••••"
                 pl="38px"
-                borderColor="neutral.200"
-                _hover={{ borderColor: 'neutral.300' }}
-                _focus={{ borderColor: 'primary.400', boxShadow: '0 0 0 1px var(--chakra-colors-primary-400)' }}
                 required
                 onInvalid={(e) => handleInvalid(e, 'password')}
                 onInput={() => clearError('password')}
@@ -164,10 +158,6 @@ const Login = () => {
             color="white"
             loading={isLoading}
             w="full"
-            borderRadius="md"
-            fontWeight="600"
-            fontSize="md"
-            py={6}
             _hover={{ bg: 'primary.600' }}
             _active={{ bg: 'primary.700' }}
           >
