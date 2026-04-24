@@ -1,5 +1,4 @@
-import { Box, Button, Flex, Heading, Text } from '@chakra-ui/react';
-import { LuChevronRight } from 'react-icons/lu';
+import { Box, Flex, Heading, Text } from '@chakra-ui/react';
 
 interface CategoryCount {
   cat: string;
@@ -17,46 +16,27 @@ export function CategorySummarySection({ categories, onViewAll }: Props) {
 
   return (
     <Box>
-      <Flex justify="space-between" align="flex-end" mb={4}>
-        <Box>
-          <Text
-            fontFamily="'Caveat', cursive"
-            fontSize="18px"
-            color="primary.500"
-            lineHeight={1}
-          >
-            organizadas
-          </Text>
-          <Heading
-            fontFamily="'Fraunces', Georgia, serif"
-            fontSize="28px"
-            fontWeight="500"
-            color="neutral.800"
-            letterSpacing="-0.02em"
-            lineHeight={1.1}
-            mt={0.5}
-          >
-            Por categoria
-          </Heading>
-        </Box>
-        <Button
-          size="sm"
-          variant="outline"
-          borderColor="beige.200"
-          color="neutral.500"
-          fontSize="13px"
-          fontWeight="500"
-          display="inline-flex"
-          alignItems="center"
-          gap={1}
-          px={3.5}
-          _hover={{ bg: 'beige.50', borderColor: 'beige.300' }}
-          onClick={onViewAll}
+      <Box mb={4}>
+        <Text
+          fontFamily="'Caveat', cursive"
+          fontSize="18px"
+          color="primary.500"
+          lineHeight={1}
         >
-          Tags
-          <LuChevronRight size={13} />
-        </Button>
-      </Flex>
+          organizadas
+        </Text>
+        <Heading
+          fontFamily="'Fraunces', Georgia, serif"
+          fontSize="28px"
+          fontWeight="500"
+          color="neutral.800"
+          letterSpacing="-0.02em"
+          lineHeight={1.1}
+          mt={0.5}
+        >
+          Por categoria
+        </Heading>
+      </Box>
 
       <Flex direction="column" gap={2}>
         {categories.map((c) => (
