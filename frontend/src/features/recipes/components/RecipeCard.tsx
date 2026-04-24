@@ -87,58 +87,64 @@ export function RecipeCard({ recipe }: Props) {
         </Text>
       </Box>
 
-      <Box p={3.5} display="flex" flexDirection="column" flex={1} gap={0}>
-        <Text
-          fontFamily="'Fraunces', Georgia, serif"
-          fontSize="15px"
-          fontWeight="500"
-          color="neutral.800"
-          letterSpacing="-0.01em"
-          lineHeight={1.25}
-          lineClamp={2}
-        >
-          {recipe.title || 'Sem título'}
-        </Text>
+      <Box p={3.5} display="flex" flexDirection="column" flex={1} gap={0} justifyContent="space-between">
+        <Box>
 
-        {recipe.description && (
           <Text
-            fontSize="12px"
-            color="neutral.500"
-            mt={1}
+            fontFamily="'Fraunces', Georgia, serif"
+            fontSize="15px"
+            fontWeight="500"
+            color="neutral.800"
+            letterSpacing="-0.01em"
+            lineHeight={1.25}
             lineClamp={2}
-            lineHeight={1.5}
           >
-            {recipe.description}
+            {recipe.title || 'Sem título'}
           </Text>
-        )}
 
-        {recipe.tags && recipe.tags.length > 0 && (
-          <Flex gap={1} flexWrap="wrap" mt={2}>
-            {recipe.tags.slice(0, 3).map((t) => (
-              <Box
-                key={t.tag.id}
-                as="span"
-                display="inline-flex"
-                px={2}
-                py={0.5}
-                rounded="full"
-                fontSize="10px"
-                fontWeight="600"
-                style={{
-                  backgroundColor: t.tag.color + '18',
-                  color: t.tag.color,
-                }}
-              >
-                #{t.tag.name}
-              </Box>
-            ))}
+          {recipe.description && (
+            <Text
+              fontSize="12px"
+              color="neutral.500"
+              mt={1}
+              lineClamp={2}
+              lineHeight={1.5}
+            >
+              {recipe.description}
+            </Text>
+          )}
+
+          {recipe.tags && recipe.tags.length > 0 && (
+            <Flex gap={1} flexWrap="wrap" mt={2}>
+              {recipe.tags.slice(0, 3).map((t) => (
+                <Box
+                  key={t.tag.id}
+                  as="span"
+                  display="inline-flex"
+                  px={2}
+                  py={0.5}
+                  rounded="full"
+                  fontSize="10px"
+                  fontWeight="600"
+                  style={{
+                    backgroundColor: t.tag.color + '18',
+                    color: t.tag.color,
+                  }}
+                >
+                  #{t.tag.name}
+                </Box>
+              ))}
+            </Flex>
+          )}
+        </Box>
+
+        <Box mt={3}>
+          <hr />
+          <Flex align="center" gap={1} mt="auto" pt={2.5} fontSize="11px" color="neutral.400">
+            <LuFlame size={13} color="var(--chakra-colors-secondary-500)" />
+            <Text>{recipe.cooks ?? 0}x feita</Text>
           </Flex>
-        )}
-
-        <Flex align="center" gap={1} mt="auto" pt={2.5} fontSize="11px" color="neutral.400">
-          <LuFlame size={13} color="var(--chakra-colors-secondary-500)" />
-          <Text>{recipe.cooks ?? 0}x feita</Text>
-        </Flex>
+        </Box>
       </Box>
     </Box>
   );
