@@ -10,18 +10,21 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { useBreakpointValue } from '@chakra-ui/react';
-import { LuCheck, LuPlus, LuSearch, LuSlidersHorizontal, LuX } from 'react-icons/lu';
+import { LuPlus, LuSearch, LuSlidersHorizontal } from 'react-icons/lu';
 import { useRecipesQuery } from '../hooks/useRecipes';
 import { useTagsQuery } from '@/features/tags/hooks/useTags';
 import { RecipeCard } from '../components/RecipeCard';
+import { FilterDropdown } from '@/shared/components/ui/FilterDropdown';
+import { ActiveFilters } from '@/shared/components/ui/ActiveFilters';
 import { LoadingSpinner } from '@/shared/components/ui/LoadingSpinner';
 import { EmptyState } from '@/shared/components/ui/EmptyState';
+import { CATEGORY_META } from '@/shared';
 import type { RecipeCategory } from '../types';
 
-const CATEGORY_META: Record<string, { label: string; color: string }> = {
-  SWEET: { label: 'Doce', color: 'primary' },
-  SAVORY: { label: 'Salgado', color: 'secondary' },
-};
+const CATEGORY_OPTIONS = [
+  { key: 'all', label: 'Todas' },
+  ...Object.entries(CATEGORY_META).map(([key, m]) => ({ key, label: m.label })),
+];
 
 export default function RecipeList() {
   const navigate = useNavigate();
@@ -229,213 +232,28 @@ export default function RecipeList() {
             </Button>
 
             {filterOpen && (
-              <Box
-                position="absolute"
-                top="calc(100% + 8px)"
-                right={0}
-                zIndex={300}
-                bg="white"
-                rounded="16px"
-                boxShadow="0 8px 32px rgba(47,30,10,0.14)"
-                borderWidth="1px"
-                borderColor="beige.200"
-                p={4}
-                minW="260px"
-                maxW="320px"
-              >
-                <Text
-                  fontSize="11px"
-                  fontWeight="700"
-                  color="neutral.500"
-                  letterSpacing="0.07em"
-                  textTransform="uppercase"
-                  mb={2}
-                >
-                  Categoria
-                </Text>
-                <Flex direction="column" gap={1} mb={4}>
-                  {[
-                    { key: 'all', label: 'Todas' },
-                    ...Object.entries(CATEGORY_META).map(([key, m]) => ({ key, label: m.label })),
-                  ].map(({ key, label }) => (
-                    <Box
-                      as="button"
-                      key={key}
-                      display="flex"
-                      alignItems="center"
-                      gap={2.5}
-                      px={2.5}
-                      py={1.5}
-                      rounded="10px"
-                      fontSize="13px"
-                      fontWeight="500"
-                      color={draftCategory === key ? 'primary.700' : 'neutral.700'}
-                      bg={draftCategory === key ? 'primary.50' : 'transparent'}
-                      transition="all 0.12s"
-                      onClick={() => setDraftCategory(key as RecipeCategory | 'all')}
-                    >
-                      <Box
-                        w="16px"
-                        h="16px"
-                        rounded="full"
-                        borderWidth="1.5px"
-                        borderColor={draftCategory === key ? 'primary.500' : 'neutral.300'}
-                        bg={draftCategory === key ? 'primary.500' : 'transparent'}
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="center"
-                        flexShrink={0}
-                      >
-                        {draftCategory === key && (
-                          <Box w="6px" h="6px" rounded="full" bg="white" />
-                        )}
-                      </Box>
-                      {label}
-                    </Box>
-                  ))}
-                </Flex>
-
-                {allTags.length > 0 && (
-                  <>
-                    <Text
-                      fontSize="11px"
-                      fontWeight="700"
-                      color="neutral.500"
-                      letterSpacing="0.07em"
-                      textTransform="uppercase"
-                      mb={2}
-                    >
-                      Tags
-                    </Text>
-                    <Flex direction="column" gap={1} mb={4}>
-                      {allTags.map((t) => {
-                        const checked = draftTags.includes(t.name);
-                        return (
-                          <Box
-                            as="button"
-                            key={t.id}
-                            display="flex"
-                            alignItems="center"
-                            gap={2.5}
-                            px={2.5}
-                            py={1.5}
-                            rounded="10px"
-                            fontSize="13px"
-                            fontWeight="500"
-                            color="neutral.700"
-                            bg={checked ? t.color + '12' : 'transparent'}
-                            transition="all 0.12s"
-                            onClick={() => toggleDraftTag(t.name)}
-                          >
-                            <Box
-                              w="16px"
-                              h="16px"
-                              rounded="4px"
-                              borderWidth="1.5px"
-                              borderColor={checked ? t.color : 'neutral.300'}
-                              bg={checked ? t.color : 'transparent'}
-                              display="flex"
-                              alignItems="center"
-                              justifyContent="center"
-                              flexShrink={0}
-                            >
-                              {checked && <LuCheck size={10} color="white" />}
-                            </Box>
-                            <Box
-                              as="span"
-                              style={{ color: t.color }}
-                              fontWeight="600"
-                            >
-                              #{t.name}
-                            </Box>
-                          </Box>
-                        );
-                      })}
-                    </Flex>
-                  </>
-                )}
-
-                <Flex gap={2} borderTopWidth="1px" borderColor="beige.100" pt={3}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    flex={1}
-                    fontSize="13px"
-                    fontWeight="500"
-                    color="neutral.500"
-                    onClick={() => {
-                      setDraftCategory('all');
-                      setDraftTags([]);
-                    }}
-                  >
-                    Limpar
-                  </Button>
-                  <Button
-                    bg="primary.500"
-                    color="white"
-                    size="sm"
-                    flex={1}
-                    fontSize="13px"
-                    fontWeight="550"
-                    rounded="10px"
-                    onClick={applyFilter}
-                  >
-                    Filtrar
-                  </Button>
-                </Flex>
-              </Box>
+              <FilterDropdown
+                categoryOptions={CATEGORY_OPTIONS}
+                tags={allTags}
+                draftCategory={draftCategory}
+                draftTags={draftTags}
+                onCategoryChange={(key) => setDraftCategory(key as RecipeCategory | 'all')}
+                onTagToggle={toggleDraftTag}
+                onApply={applyFilter}
+                onClear={() => { setDraftCategory('all'); setDraftTags([]); }}
+              />
             )}
           </Box>
         </Flex>
 
         {activeFilterCount > 0 && (
-          <Flex gap={2} flexWrap="wrap" mt={3}>
-            {category !== 'all' && (
-              <Flex
-                as="button"
-                align="center"
-                gap={1.5}
-                px={2.5}
-                py={1}
-                rounded="full"
-                fontSize="12px"
-                fontWeight="600"
-                bg={CATEGORY_META[category]?.color === 'primary' ? 'primary.50' : 'secondary.50'}
-                color={CATEGORY_META[category]?.color === 'primary' ? 'primary.700' : 'secondary.700'}
-                borderWidth="1px"
-                borderColor={CATEGORY_META[category]?.color === 'primary' ? 'primary.200' : 'secondary.200'}
-                onClick={removeCategory}
-              >
-                {CATEGORY_META[category]?.label}
-                <LuX size={11} />
-              </Flex>
-            )}
-            {tagFilter.map((name) => {
-              const tag = allTags.find((t) => t.name === name);
-              return (
-                <Flex
-                  as="button"
-                  key={name}
-                  align="center"
-                  gap={1.5}
-                  px={2.5}
-                  py={1}
-                  rounded="full"
-                  fontSize="12px"
-                  fontWeight="600"
-                  style={
-                    tag
-                      ? { backgroundColor: tag.color + '20', color: tag.color, border: `1px solid ${tag.color}44` }
-                      : { backgroundColor: '#f5f5f5', color: '#555' }
-                  }
-                  onClick={() => removeTagFilter(name)}
-                >
-                  #{name}
-                  <LuX size={11} />
-                </Flex>
-              );
-            })}
-          </Flex>
+          <ActiveFilters
+            activeCategory={category !== 'all' ? CATEGORY_META[category] : undefined}
+            tagFilter={tagFilter}
+            allTags={allTags}
+            onRemoveCategory={removeCategory}
+            onRemoveTag={removeTagFilter}
+          />
         )}
       </Box>
 

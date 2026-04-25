@@ -1,16 +1,11 @@
 import { Box, Flex, Heading, Image, Text } from '@chakra-ui/react';
-import { COVER_GRADIENT } from '@/shared/utils/constants';
+import { CATEGORY_META, COVER_GRADIENT } from '@/shared';
 import type { Recipe } from '@/features/recipes/types';
 
 interface Props {
   recipes: Recipe[];
   onRecipeClick: (id: number) => void;
 }
-
-const CATEGORY_META: Record<string, { label: string }> = {
-  SWEET: { label: 'Doce' },
-  SAVORY: { label: 'Salgado' },
-};
 
 export function MostCookedSection({ recipes, onRecipeClick }: Props) {
   if (recipes.length === 0) return null;

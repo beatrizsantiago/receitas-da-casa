@@ -4,12 +4,7 @@ import { useBreakpointValue } from '@chakra-ui/react';
 import { LuCamera, LuChevronLeft, LuMove, LuTrash2 } from 'react-icons/lu';
 import type { Recipe } from '../../types';
 
-const CATEGORY_META: Record<string, { label: string; tone: string }> = {
-  SWEET: { label: 'Doce', tone: 'primary' },
-  SAVORY: { label: 'Salgado', tone: 'secondary' },
-};
-
-import { COVER_GRADIENT } from '@/shared/utils/constants';
+import { CATEGORY_META, COVER_GRADIENT } from '@/shared';
 
 interface RecipeCoverSectionProps {
   recipe: Recipe;
@@ -265,8 +260,8 @@ export function RecipeCoverSection({
             right={mobile ? 5 : 10}
           >
             <Badge
-              bg={cat.tone === 'primary' ? 'primary.50' : 'secondary.50'}
-              color={cat.tone === 'primary' ? 'primary.800' : 'secondary.800'}
+              bg={cat.bg}
+              color={cat.fg}
               px={2}
               py={0.5}
               rounded="md"

@@ -8,6 +8,8 @@ import RecipeList from '@/features/recipes/pages/List';
 import RecipeDetail from '@/features/recipes/pages/Detail';
 import RecipeForm from '@/features/recipes/pages/Form';
 import TagsPage from '@/features/tags/pages/Tags';
+import PublicRecipeList from '@/features/public/pages/PublicRecipeList';
+import PublicRecipeDetail from '@/features/public/pages/PublicRecipeDetail';
 
 const PublicLayout = () => (
   <PublicRoute>
@@ -33,6 +35,8 @@ export const router = createBrowserRouter([
       { path: '/tags', element: <TagsPage /> },
     ],
   },
+  { path: '/lista-de-receitas', element: <PublicRecipeList /> },
+  { path: '/detalhes-da-receita/:id', element: <PublicRecipeDetail /> },
   {
     path: '*',
     element: <Navigate to="/" replace />,

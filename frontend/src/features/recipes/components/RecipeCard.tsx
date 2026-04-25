@@ -2,12 +2,7 @@ import { Box, Flex, Text } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { LuFlame } from 'react-icons/lu';
 import type { Recipe } from '../types';
-import { COVER_GRADIENT } from '@/shared/utils/constants';
-
-const CATEGORY_META: Record<string, { label: string; tone: string }> = {
-  SWEET: { label: 'Doce', tone: 'primary' },
-  SAVORY: { label: 'Salgado', tone: 'secondary' },
-};
+import { CATEGORY_META, COVER_GRADIENT } from '@/shared';
 
 interface Props {
   recipe: Recipe;
@@ -65,8 +60,8 @@ export function RecipeCard({ recipe }: Props) {
           rounded="md"
           fontSize="11px"
           fontWeight="500"
-          bg={cat?.tone === 'primary' ? 'primary.50' : 'secondary.50'}
-          color={cat?.tone === 'primary' ? 'primary.800' : 'secondary.800'}
+          bg={cat?.bg}
+          color={cat?.fg}
         >
           {cat?.label ?? recipe.category}
         </Box>

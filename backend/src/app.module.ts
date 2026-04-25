@@ -8,6 +8,7 @@ import { HistoryModule } from './history/history.module';
 import { IngredientsModule } from './ingredients/ingredients.module';
 import { PhotosModule } from './photos/photos.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { PublicRecipesModule } from './public-recipes/public-recipes.module';
 import { RecipeNotesModule } from './recipe-notes/recipe-notes.module';
 import { RecipesModule } from './recipes/recipes.module';
 import { StepsModule } from './steps/steps.module';
@@ -22,6 +23,7 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     UsersModule,
     RecipesModule,
+    PublicRecipesModule,
     RecipeNotesModule,
     IngredientsModule,
     StepsModule,

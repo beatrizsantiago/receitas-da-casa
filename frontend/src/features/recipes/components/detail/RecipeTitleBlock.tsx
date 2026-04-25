@@ -1,5 +1,6 @@
 import { Badge, Box, Button, Flex, Input, Text, Textarea } from '@chakra-ui/react';
 import { EditableBlock } from '@/shared/components/ui/EditableBlock';
+import { CATEGORY_META } from '@/shared';
 import type { Recipe } from '../../types';
 import type { RecipeDrafts, RecipeDraftSetters } from '../../hooks/useRecipeDrafts';
 import type { RecipeCategory } from '../../types';
@@ -19,10 +20,7 @@ export function RecipeTitleBlock({
   onSave,
   onCancel,
 }: RecipeTitleBlockProps) {
-  const cat =
-    recipe.category === 'SWEET'
-      ? { label: 'Doce', tone: 'primary' as const }
-      : { label: 'Salgado', tone: 'secondary' as const };
+  const cat = CATEGORY_META[recipe.category];
 
   return (
     <EditableBlock
@@ -118,8 +116,8 @@ export function RecipeTitleBlock({
       <Flex direction="column" gap={2.5}>
         <Flex align="center" gap={2.5} flexWrap="wrap">
           <Badge
-            bg={cat.tone === 'primary' ? 'primary.50' : 'secondary.50'}
-            color={cat.tone === 'primary' ? 'primary.800' : 'secondary.800'}
+            bg={cat?.bg}
+            color={cat?.fg}
             px={2}
             py={0.5}
             rounded="md"
