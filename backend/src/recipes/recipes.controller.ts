@@ -31,8 +31,8 @@ export class RecipesController {
 
   @Get()
   @ApiOperation({ summary: 'Listar receitas com filtros e paginação' })
-  findAll(@CurrentUser() user: JwtPayload, @Query() filter: FilterRecipesDto) {
-    return this.recipes.findAll(user.sub, filter);
+  findAll(@Query() filter: FilterRecipesDto) {
+    return this.recipes.findAll(filter);
   }
 
   @Get(':id')
