@@ -14,7 +14,7 @@ export interface RecipeFiltersState {
   setDraftTags: (tags: string[]) => void;
   filterOpen: boolean;
   setFilterOpen: (open: boolean) => void;
-  filterRef: React.RefObject<HTMLDivElement>;
+  filterRef: React.RefObject<HTMLDivElement | null>;
   allTags: PublicTag[];
   filtered: PublicRecipeSummary[];
   activeFilterCount: number;

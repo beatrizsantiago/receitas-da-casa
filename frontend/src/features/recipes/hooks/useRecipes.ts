@@ -168,20 +168,3 @@ export function useRemoveTagFromRecipeMutation() {
     onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: [RECIPE_KEY, vars.recipeId] }),
   });
 }
-
-// ─── Photos ───
-export function useUploadPhotoMutation() {
-  return useMutation({
-    mutationFn: ({ fileName, contentType }: { fileName: string; contentType: string }) =>
-      recipesService.generateUploadUrl(fileName, contentType),
-  });
-}
-
-export function useCreatePhotoMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (dto: { url: string; type: 'COVER' | 'USER'; recipeId: number }) =>
-      recipesService.createPhoto(dto),
-    onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: [RECIPE_KEY, vars.recipeId] }),
-  });
-}
