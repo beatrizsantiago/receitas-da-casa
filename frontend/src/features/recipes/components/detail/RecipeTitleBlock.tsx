@@ -84,7 +84,7 @@ export function RecipeTitleBlock({
             </Text>
             <Flex gap={2} flexWrap="wrap">
               {[
-                { id: 'SAVORY' as RecipeCategory, label: 'Salgado' },
+                { id: 'SAVORY' as RecipeCategory, label: 'Salgada' },
                 { id: 'SWEET' as RecipeCategory, label: 'Doce' },
               ].map((c) => (
                 <Button

@@ -187,4 +187,4 @@ npm run dev
 - Upload de fotos via URL pre-assinada do S3
 - Historico de cozinhadas com avaliacao
 - Soft delete de receitas
-- Filtro por categoria (Doce / Salgado)
+- Filtro por categoria (Doce / Salgada)

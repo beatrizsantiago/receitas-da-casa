@@ -14,7 +14,7 @@ export class CreateRecipeDto {
   description?: string;
 
   @ApiProperty({ enum: RecipeCategory, example: RecipeCategory.SWEET })
-  @IsEnum(RecipeCategory, { message: 'A categoria deve ser Doce ou Salgado' })
+  @IsEnum(RecipeCategory, { message: 'A categoria deve ser Doce ou Salgada' })
   @IsNotEmpty({ message: 'A categoria é obrigatória' })
   category: RecipeCategory;
 }

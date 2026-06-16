@@ -176,7 +176,7 @@ export default function RecipeCreate() {
             <input type="hidden" name="category" value={category} />
             <Flex gap={2}>
               {[
-                { id: 'SAVORY' as RecipeCategory, label: 'Salgado', tone: 'secondary' },
+                { id: 'SAVORY' as RecipeCategory, label: 'Salgada', tone: 'secondary' },
                 { id: 'SWEET' as RecipeCategory, label: 'Doce', tone: 'primary' },
               ].map((c) => {
                 const active = category === c.id;
