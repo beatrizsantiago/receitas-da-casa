@@ -7,15 +7,10 @@ export class CreateIngredientDto {
   @IsNotEmpty({ message: 'O nome é obrigatório' })
   name: string;
 
-  @ApiProperty({ example: '2' })
+  @ApiProperty({ example: '2 xícaras' })
   @IsString({ message: 'A quantidade deve ser um texto' })
   @IsNotEmpty({ message: 'A quantidade é obrigatória' })
-  quantity: string;
-
-  @ApiProperty({ example: 'xícaras' })
-  @IsString({ message: 'A unidade deve ser um texto' })
-  @IsNotEmpty({ message: 'A unidade é obrigatória' })
-  unit: string;
+  amount: string;
 
   @ApiProperty({ example: 1, minimum: 1 })
   @IsInt()

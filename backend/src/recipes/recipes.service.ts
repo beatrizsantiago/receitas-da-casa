@@ -58,7 +58,7 @@ export class RecipesService {
 
   async findOne(userId: number, id: number) {
     const recipe = await this.prisma.recipe.findFirst({
-      where: { id, userId, deletedAt: null },
+      where: { id, deletedAt: null },
       include: {
         tags: { include: { tag: true } },
         ingredients: true,

@@ -59,7 +59,7 @@ export class PublicRecipesService {
           select: { url: true, positionY: true },
         },
         ingredients: {
-          select: { id: true, name: true, quantity: true, unit: true, order: true },
+          select: { id: true, name: true, amount: true, order: true },
           orderBy: { order: 'asc' },
         },
         steps: {

@@ -51,10 +51,9 @@ export class PhotosService {
   async updatePosition(userId: number, photoId: number, positionY: number) {
     const photo = await this.prisma.recipePhoto.findUnique({
       where: { id: photoId },
-      include: { recipe: { select: { userId: true } } },
     });
 
-    if (!photo || photo.recipe.userId !== userId) {
+    if (!photo) {
       throw new NotFoundException('Foto não encontrada');
     }
 

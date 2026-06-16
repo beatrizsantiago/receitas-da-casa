@@ -70,10 +70,9 @@ model RecipeNote {
 
 model Ingredient {
   id       Int    @id @default(autoincrement())
-  name     String
-  quantity String
-  unit     String
-  order    Int
+  name   String
+  amount String
+  order  Int
 
   recipeId Int
   recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
