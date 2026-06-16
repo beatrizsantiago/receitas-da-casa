@@ -8,8 +8,7 @@ export interface Ingredient {
   id: number;
   recipeId: number;
   name: string;
-  quantity: string;
-  unit: string;
+  amount: string;
   order: number;
 }
 
@@ -71,8 +70,7 @@ export interface UpdateRecipeDto extends Partial<CreateRecipeDto> {}
 
 export interface CreateIngredientDto {
   name: string;
-  quantity: string;
-  unit: string;
+  amount: string;
   order: number;
 }
 

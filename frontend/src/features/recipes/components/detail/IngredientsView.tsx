@@ -3,8 +3,7 @@ import { Box, Flex, Text } from '@chakra-ui/react';
 interface IngredientRow {
   id: number;
   name: string;
-  quantity?: string | null;
-  unit?: string | null;
+  amount?: string | null;
 }
 
 interface Props {
@@ -51,8 +50,7 @@ export function IngredientsView({ ingredients }: Props) {
             minW="90px"
             flexShrink={0}
           >
-            {ing.quantity}
-            {ing.unit ? ` ${ing.unit}` : ''}
+            {ing.amount}
           </Text>
           <Text as="span" flex={1} fontSize="14px" color="neutral.800">
             {ing.name}

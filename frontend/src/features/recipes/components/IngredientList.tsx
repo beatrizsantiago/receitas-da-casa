@@ -21,8 +21,7 @@ interface Props {
 interface LocalRow {
   tempId: string;
   serverId?: number;
-  quantity: string;
-  unit: string;
+  amount: string;
   name: string;
   order: number;
 }
@@ -35,8 +34,7 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
       ingredients.map((i) => ({
         tempId: `existing-${i.id}`,
         serverId: i.id,
-        quantity: i.quantity,
-        unit: i.unit,
+        amount: i.amount,
         name: i.name,
         order: i.order,
       }))
@@ -62,8 +60,7 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
           const original = ingredients.find((i) => i.id === row.serverId);
           if (!original) continue;
           const unchanged =
-            row.quantity === original.quantity &&
-            row.unit === original.unit &&
+            row.amount === original.amount &&
             row.name === original.name &&
             row.order === original.order;
           if (unchanged) continue;
@@ -72,8 +69,7 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
               id: row.serverId,
               dto: {
                 name: row.name,
-                quantity: row.quantity,
-                unit: row.unit,
+                amount: row.amount,
                 order: idx + 1,
               },
             });
@@ -90,8 +86,7 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
               recipeId,
               dto: {
                 name: row.name.trim(),
-                quantity: row.quantity,
-                unit: row.unit,
+                amount: row.amount,
                 order: idx + 1,
               },
             });
@@ -107,8 +102,7 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
         ...prev,
         {
           tempId: `new-${++tempCounter}`,
-          quantity: '',
-          unit: '',
+          amount: '',
           name: '',
           order: prev.length + 1,
         },
@@ -117,7 +111,7 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
 
     function updateRow(
       tempId: string,
-      field: 'quantity' | 'unit' | 'name',
+      field: 'amount' | 'name',
       value: string
     ) {
       setRows((prev) =>
@@ -141,47 +135,24 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
         <Flex direction="column" gap={2}>
           {rows.map((row) => (
             <Flex key={row.tempId} align="center" gap={2}>
-              <Flex
+              <Input
+                value={row.amount}
+                onChange={(e) => updateRow(row.tempId, 'amount', e.target.value)}
+                fontFamily="'JetBrains Mono', monospace"
+                fontSize="12px"
+                fontWeight="600"
+                color="primary.600"
                 bg="primary.50"
+                border="none"
                 rounded="8px"
-                overflow="hidden"
+                px={2.5}
+                py={2}
+                h="auto"
+                w="120px"
                 flexShrink={0}
-                align="center"
-              >
-                <Input
-                  value={row.quantity}
-                  onChange={(e) => updateRow(row.tempId, 'quantity', e.target.value)}
-                  fontFamily="'JetBrains Mono', monospace"
-                  fontSize="12px"
-                  fontWeight="600"
-                  color="primary.600"
-                  border="none"
-                  bg="transparent"
-                  px={2.5}
-                  py={2}
-                  h="auto"
-                  w="52px"
-                  _focus={{ boxShadow: 'none' }}
-                  placeholder="Qtd"
-                />
-                <Box w="1px" h="14px" bg="primary.100" flexShrink={0} />
-                <Input
-                  value={row.unit}
-                  onChange={(e) => updateRow(row.tempId, 'unit', e.target.value)}
-                  fontFamily="'JetBrains Mono', monospace"
-                  fontSize="12px"
-                  fontWeight="600"
-                  color="primary.500"
-                  border="none"
-                  bg="transparent"
-                  px={2.5}
-                  py={2}
-                  h="auto"
-                  w="72px"
-                  _focus={{ boxShadow: 'none' }}
-                  placeholder="Unid."
-                />
-              </Flex>
+                _focus={{ boxShadow: 'none' }}
+                placeholder="Ex: 2 xícaras"
+              />
 
               <Input
                 value={row.name}

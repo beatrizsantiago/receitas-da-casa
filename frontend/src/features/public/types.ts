@@ -22,8 +22,7 @@ export interface PublicRecipeSummary {
 export interface PublicIngredient {
   id: number;
   name: string;
-  quantity: string | null;
-  unit: string | null;
+  amount: string | null;
   order: number;
 }
 

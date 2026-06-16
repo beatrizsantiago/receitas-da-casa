@@ -6,7 +6,7 @@ export interface RecipeDrafts {
   description: string;
   category: RecipeCategory;
   tags: { name: string; color: string }[];
-  ingredients: { name: string; quantity: string; unit: string }[];
+  ingredients: { name: string; amount: string }[];
   steps: { description: string; order: number }[];
   notes: { content: string }[];
 }
@@ -16,7 +16,7 @@ export interface RecipeDraftSetters {
   setDescription: React.Dispatch<React.SetStateAction<string>>;
   setCategory: React.Dispatch<React.SetStateAction<RecipeCategory>>;
   setTags: React.Dispatch<React.SetStateAction<{ name: string; color: string }[]>>;
-  setIngredients: React.Dispatch<React.SetStateAction<{ name: string; quantity: string; unit: string }[]>>;
+  setIngredients: React.Dispatch<React.SetStateAction<{ name: string; amount: string }[]>>;
   setSteps: React.Dispatch<React.SetStateAction<{ description: string; order: number }[]>>;
   setNotes: React.Dispatch<React.SetStateAction<{ content: string }[]>>;
 }
@@ -26,7 +26,7 @@ export function useRecipeDrafts() {
   const [descDraft, setDescDraft] = useState('');
   const [catDraft, setCatDraft] = useState<RecipeCategory>('SAVORY');
   const [tagsDraft, setTagsDraft] = useState<{ name: string; color: string }[]>([]);
-  const [ingDraft, setIngDraft] = useState<{ name: string; quantity: string; unit: string }[]>([]);
+  const [ingDraft, setIngDraft] = useState<{ name: string; amount: string }[]>([]);
   const [stepsDraft, setStepsDraft] = useState<{ description: string; order: number }[]>([]);
   const [notesDraft, setNotesDraft] = useState<{ content: string }[]>([]);
 
@@ -44,8 +44,7 @@ export function useRecipeDrafts() {
     setIngDraft(
       recipe.ingredients?.map((i) => ({
         name: i.name,
-        quantity: i.quantity ?? '',
-        unit: i.unit ?? '',
+        amount: i.amount ?? '',
       })) ?? []
     );
     setStepsDraft(
