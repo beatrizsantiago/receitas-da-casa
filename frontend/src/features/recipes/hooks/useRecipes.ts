@@ -4,10 +4,12 @@ import type {
   CreateCookHistoryDto,
   CreateIngredientDto,
   CreateNoteDto,
+  CreatePreparationMethodDto,
   CreateStepDto,
   RecipeCategory,
   UpdateIngredientDto,
   UpdateNoteDto,
+  UpdatePreparationMethodDto,
   UpdateRecipeDto,
   UpdateStepDto,
 } from '../types';
@@ -73,10 +75,7 @@ export function useUpdateIngredientMutation() {
   return useMutation({
     mutationFn: ({ id, dto }: { id: number; dto: UpdateIngredientDto }) =>
       recipesService.updateIngredient(id, dto),
-    onSuccess: () => {
-      // We don't know the recipeId here, so invalidate all recipes broadly
-      qc.invalidateQueries({ queryKey: [RECIPE_KEY] });
-    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: [RECIPE_KEY] }),
   });
 }
 
@@ -88,13 +87,40 @@ export function useDeleteIngredientMutation() {
   });
 }
 
+// ─── Preparation Methods ───
+export function useAddPreparationMethodMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ recipeId, dto }: { recipeId: number; dto: CreatePreparationMethodDto }) =>
+      recipesService.addPreparationMethod(recipeId, dto),
+    onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: [RECIPE_KEY, vars.recipeId] }),
+  });
+}
+
+export function useUpdatePreparationMethodMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, dto }: { id: number; dto: UpdatePreparationMethodDto }) =>
+      recipesService.updatePreparationMethod(id, dto),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [RECIPE_KEY] }),
+  });
+}
+
+export function useDeletePreparationMethodMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: recipesService.removePreparationMethod,
+    onSuccess: () => qc.invalidateQueries({ queryKey: [RECIPE_KEY] }),
+  });
+}
+
 // ─── Steps ───
 export function useAddStepMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ recipeId, dto }: { recipeId: number; dto: CreateStepDto }) =>
-      recipesService.addStep(recipeId, dto),
-    onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: [RECIPE_KEY, vars.recipeId] }),
+    mutationFn: ({ preparationMethodId, dto }: { preparationMethodId: number; dto: CreateStepDto }) =>
+      recipesService.addStep(preparationMethodId, dto),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [RECIPE_KEY] }),
   });
 }
 

@@ -32,12 +32,19 @@ export interface PublicStep {
   order: number;
 }
 
+export interface PublicPreparationMethod {
+  id: number;
+  title?: string | null;
+  order: number;
+  steps: PublicStep[];
+}
+
 export interface PublicRecipeDetail {
   id: number;
   title: string;
   photos: PublicPhoto[];
   ingredients: PublicIngredient[];
-  steps: PublicStep[];
+  preparationMethods: PublicPreparationMethod[];
 }
 
 export interface PublicPaginatedResponse<T> {

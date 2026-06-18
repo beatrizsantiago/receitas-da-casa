@@ -11,6 +11,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { PublicRecipesModule } from './public-recipes/public-recipes.module';
 import { RecipeNotesModule } from './recipe-notes/recipe-notes.module';
 import { RecipesModule } from './recipes/recipes.module';
+import { PreparationMethodsModule } from './preparation-methods/preparation-methods.module';
 import { StepsModule } from './steps/steps.module';
 import { StorageModule } from './storage/storage.module';
 import { TagsModule } from './tags/tags.module';
@@ -26,6 +27,7 @@ import { UsersModule } from './users/users.module';
     PublicRecipesModule,
     RecipeNotesModule,
     IngredientsModule,
+    PreparationMethodsModule,
     StepsModule,
     TagsModule,
     PhotosModule,

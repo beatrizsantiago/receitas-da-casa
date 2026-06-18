@@ -4,16 +4,19 @@ import type {
   CreateCookHistoryDto,
   CreateIngredientDto,
   CreateNoteDto,
+  CreatePreparationMethodDto,
   CreateRecipeDto,
   CreateStepDto,
   Ingredient,
   Note,
   PaginatedResponse,
   Photo,
+  PreparationMethod,
   Recipe,
   Step,
   UpdateIngredientDto,
   UpdateNoteDto,
+  UpdatePreparationMethodDto,
   UpdateRecipeDto,
   UpdateStepDto,
 } from '../types';
@@ -43,6 +46,8 @@ export const recipesService = {
     await api.delete(`/recipes/${id}`);
   },
 
+  // ─── Ingredients ───
+
   async listIngredients(recipeId: number): Promise<Ingredient[]> {
     const { data } = await api.get<Ingredient[]>(`/recipes/${recipeId}/ingredients`);
     return data;
@@ -62,13 +67,26 @@ export const recipesService = {
     await api.delete(`/ingredients/${id}`);
   },
 
-  async listSteps(recipeId: number): Promise<Step[]> {
-    const { data } = await api.get<Step[]>(`/recipes/${recipeId}/steps`);
+  // ─── Preparation Methods ───
+
+  async addPreparationMethod(recipeId: number, dto: CreatePreparationMethodDto): Promise<PreparationMethod> {
+    const { data } = await api.post<PreparationMethod>(`/recipes/${recipeId}/preparation-methods`, dto);
     return data;
   },
 
-  async addStep(recipeId: number, dto: CreateStepDto): Promise<Step> {
-    const { data } = await api.post<Step>(`/recipes/${recipeId}/steps`, dto);
+  async updatePreparationMethod(id: number, dto: UpdatePreparationMethodDto): Promise<PreparationMethod> {
+    const { data } = await api.patch<PreparationMethod>(`/preparation-methods/${id}`, dto);
+    return data;
+  },
+
+  async removePreparationMethod(id: number): Promise<void> {
+    await api.delete(`/preparation-methods/${id}`);
+  },
+
+  // ─── Steps ───
+
+  async addStep(preparationMethodId: number, dto: CreateStepDto): Promise<Step> {
+    const { data } = await api.post<Step>(`/preparation-methods/${preparationMethodId}/steps`, dto);
     return data;
   },
 
@@ -80,6 +98,8 @@ export const recipesService = {
   async removeStep(id: number): Promise<void> {
     await api.delete(`/steps/${id}`);
   },
+
+  // ─── Notes ───
 
   async listNotes(recipeId: number): Promise<Note[]> {
     const { data } = await api.get<Note[]>(`/recipes/${recipeId}/notes`);

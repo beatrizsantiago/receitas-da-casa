@@ -14,10 +14,17 @@ export interface Ingredient {
 
 export interface Step {
   id: number;
-  recipeId: number;
+  preparationMethodId: number;
   description: string;
   order: number;
-  photoUrl?: string;
+}
+
+export interface PreparationMethod {
+  id: number;
+  recipeId: number;
+  title?: string | null;
+  order: number;
+  steps: Step[];
 }
 
 export interface Note {
@@ -51,7 +58,7 @@ export interface Recipe {
   createdAt: string;
   updatedAt: string;
   ingredients?: Ingredient[];
-  steps?: Step[];
+  preparationMethods?: PreparationMethod[];
   notes?: Note[];
   tags?: { tag: Tag }[];
   photos?: Photo[];
@@ -76,10 +83,16 @@ export interface CreateIngredientDto {
 
 export interface UpdateIngredientDto extends Partial<CreateIngredientDto> {}
 
+export interface CreatePreparationMethodDto {
+  title?: string;
+  order: number;
+}
+
+export interface UpdatePreparationMethodDto extends Partial<CreatePreparationMethodDto> {}
+
 export interface CreateStepDto {
   description: string;
   order: number;
-  photoUrl?: string;
 }
 
 export interface UpdateStepDto extends Partial<CreateStepDto> {}

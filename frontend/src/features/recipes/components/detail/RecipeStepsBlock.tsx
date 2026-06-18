@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { EditableBlock } from '@/shared/components/ui/EditableBlock';
-import { StepList, type StepListHandle } from '../StepList';
-import { StepsView } from './StepsView';
+import { PreparationMethodList, type PreparationMethodListHandle } from '../PreparationMethodList';
+import { PreparationMethodsView } from './PreparationMethodsView';
 import type { Recipe } from '../../types';
 
 interface RecipeStepsBlockProps {
@@ -15,7 +15,7 @@ export function RecipeStepsBlock({
   recipeId,
   onCancel,
 }: RecipeStepsBlockProps) {
-  const listRef = useRef<StepListHandle>(null);
+  const listRef = useRef<PreparationMethodListHandle>(null);
 
   return (
     <EditableBlock
@@ -26,14 +26,14 @@ export function RecipeStepsBlock({
       }}
       onCancel={onCancel}
       editor={
-        <StepList
+        <PreparationMethodList
           ref={listRef}
           recipeId={recipeId}
-          steps={recipe.steps ?? []}
+          preparationMethods={recipe.preparationMethods ?? []}
         />
       }
     >
-      <StepsView steps={recipe.steps} />
+      <PreparationMethodsView preparationMethods={recipe.preparationMethods} />
     </EditableBlock>
   );
 }

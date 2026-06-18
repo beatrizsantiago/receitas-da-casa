@@ -7,7 +7,7 @@ import { LoadingSpinner } from '@/shared/components/ui/LoadingSpinner';
 import { EmptyState } from '@/shared/components/ui/EmptyState';
 import { ViewBlock } from '@/shared/components/ui/ViewBlock';
 import { IngredientsView } from '@/features/recipes/components/detail/IngredientsView';
-import { StepsView } from '@/features/recipes/components/detail/StepsView';
+import { PreparationMethodsView } from '@/features/recipes/components/detail/PreparationMethodsView';
 import { COVER_GRADIENT } from '@/shared/utils/constants';
 
 export default function PublicRecipeDetail() {
@@ -112,7 +112,7 @@ export default function PublicRecipeDetail() {
         </ViewBlock>
 
         <ViewBlock eyebrow="modo de preparo" title="Passo a passo">
-          <StepsView steps={recipe.steps} />
+          <PreparationMethodsView preparationMethods={recipe.preparationMethods} />
         </ViewBlock>
       </Box>
     </Box>

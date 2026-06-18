@@ -21,23 +21,23 @@ import { StepsService } from './steps.service';
 export class StepsController {
   constructor(private steps: StepsService) {}
 
-  @Post('recipes/:recipeId/steps')
-  @ApiOperation({ summary: 'Adicionar passo a uma receita' })
+  @Post('preparation-methods/:preparationMethodId/steps')
+  @ApiOperation({ summary: 'Adicionar passo a um modo de preparo' })
   create(
     @CurrentUser() user: JwtPayload,
-    @Param('recipeId', ParseIntPipe) recipeId: number,
+    @Param('preparationMethodId', ParseIntPipe) preparationMethodId: number,
     @Body() dto: CreateStepDto,
   ) {
-    return this.steps.create(user.sub, recipeId, dto);
+    return this.steps.create(user.sub, preparationMethodId, dto);
   }
 
-  @Get('recipes/:recipeId/steps')
-  @ApiOperation({ summary: 'Listar passos de uma receita (ordenados)' })
+  @Get('preparation-methods/:preparationMethodId/steps')
+  @ApiOperation({ summary: 'Listar passos de um modo de preparo (ordenados)' })
   findAll(
     @CurrentUser() user: JwtPayload,
-    @Param('recipeId', ParseIntPipe) recipeId: number,
+    @Param('preparationMethodId', ParseIntPipe) preparationMethodId: number,
   ) {
-    return this.steps.findAll(user.sub, recipeId);
+    return this.steps.findAll(user.sub, preparationMethodId);
   }
 
   @Patch('steps/:id')

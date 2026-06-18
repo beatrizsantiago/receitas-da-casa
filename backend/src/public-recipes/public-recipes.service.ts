@@ -62,8 +62,16 @@ export class PublicRecipesService {
           select: { id: true, name: true, amount: true, order: true },
           orderBy: { order: 'asc' },
         },
-        steps: {
-          select: { id: true, description: true, order: true },
+        preparationMethods: {
+          select: {
+            id: true,
+            title: true,
+            order: true,
+            steps: {
+              select: { id: true, description: true, order: true },
+              orderBy: { order: 'asc' },
+            },
+          },
           orderBy: { order: 'asc' },
         },
       },

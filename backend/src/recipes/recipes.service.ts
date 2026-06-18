@@ -62,7 +62,10 @@ export class RecipesService {
       include: {
         tags: { include: { tag: true } },
         ingredients: true,
-        steps: { orderBy: { order: 'asc' } },
+        preparationMethods: {
+          orderBy: { order: 'asc' },
+          include: { steps: { orderBy: { order: 'asc' } } },
+        },
         notes: { orderBy: { createdAt: 'desc' } },
         photos: true,
         cookHistory: { orderBy: { date: 'desc' } },

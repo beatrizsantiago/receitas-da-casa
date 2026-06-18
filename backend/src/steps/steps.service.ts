@@ -11,28 +11,32 @@ export class StepsService {
     private recipes: RecipesService,
   ) {}
 
-  async create(userId: number, recipeId: number, dto: CreateStepDto) {
-    await this.recipes.findOne(userId, recipeId);
-    return this.prisma.step.create({ data: { ...dto, recipeId } });
+  async create(userId: number, preparationMethodId: number, dto: CreateStepDto) {
+    const method = await this.findMethod(preparationMethodId);
+    await this.recipes.findOne(userId, method.recipeId);
+    return this.prisma.step.create({ data: { ...dto, preparationMethodId } });
   }
 
-  async findAll(userId: number, recipeId: number) {
-    await this.recipes.findOne(userId, recipeId);
+  async findAll(userId: number, preparationMethodId: number) {
+    const method = await this.findMethod(preparationMethodId);
+    await this.recipes.findOne(userId, method.recipeId);
     return this.prisma.step.findMany({
-      where: { recipeId },
+      where: { preparationMethodId },
       orderBy: { order: 'asc' },
     });
   }
 
   async update(userId: number, id: number, dto: UpdateStepDto) {
     const step = await this.findStep(id);
-    await this.recipes.findOne(userId, step.recipeId);
+    const method = await this.findMethod(step.preparationMethodId);
+    await this.recipes.findOne(userId, method.recipeId);
     return this.prisma.step.update({ where: { id }, data: dto });
   }
 
   async remove(userId: number, id: number) {
     const step = await this.findStep(id);
-    await this.recipes.findOne(userId, step.recipeId);
+    const method = await this.findMethod(step.preparationMethodId);
+    await this.recipes.findOne(userId, method.recipeId);
     return this.prisma.step.delete({ where: { id } });
   }
 
@@ -40,5 +44,11 @@ export class StepsService {
     const step = await this.prisma.step.findUnique({ where: { id } });
     if (!step) throw new NotFoundException('Passo não encontrado');
     return step;
+  }
+
+  private async findMethod(id: number) {
+    const method = await this.prisma.preparationMethod.findUnique({ where: { id } });
+    if (!method) throw new NotFoundException('Modo de preparo não encontrado');
+    return method;
   }
 }
