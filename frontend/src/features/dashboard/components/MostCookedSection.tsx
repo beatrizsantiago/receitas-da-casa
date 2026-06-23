@@ -1,5 +1,5 @@
-import { Box, Flex, Heading, Image, Text } from '@chakra-ui/react';
-import { CATEGORY_META, COVER_GRADIENT } from '@/shared';
+import { Box, Flex, Heading, Text } from '@chakra-ui/react';
+import { CATEGORY_META } from '@/shared';
 import type { Recipe } from '@/features/recipes/types';
 
 interface Props {
@@ -36,11 +36,10 @@ export function MostCookedSection({ recipes, onRecipeClick }: Props) {
 
       <Flex direction="column" gap={2}>
         {recipes.map((r, i) => {
-          const cover = r.photos?.find((p) => p.type === 'COVER');
           return (
             <Flex
               key={r.id}
-              align={{ base: 'flex-start', sm: 'center' }}
+              align="center"
               gap={3}
               px={4}
               py={3}
@@ -62,50 +61,18 @@ export function MostCookedSection({ recipes, onRecipeClick }: Props) {
                 fontWeight="400"
                 color="neutral.300"
                 lineHeight={1}
-                mt={{ base: '2px', sm: 0 }}
+                mt={0}
               >
                 {String(i + 1).padStart(2, '0')}
               </Text>
 
-              <Box
-                w="44px"
-                h="44px"
-                flexShrink={0}
-                rounded="12px"
-                overflow="hidden"
-              >
-                {cover ? (
-                  <Image
-                    src={cover.url}
-                    alt={r.title}
-                    w="full"
-                    h="full"
-                    objectFit="cover"
-                  />
-                ) : (
-                  <Box
-                    w="full"
-                    h="full"
-                    style={{ background: COVER_GRADIENT }}
-                  />
-                )}
-              </Box>
-
-              <Flex
-                flex={1}
-                minW={0}
-                direction={{ base: 'column', sm: 'row' }}
-                align={{ base: 'flex-start', sm: 'center' }}
-                gap={{ base: 1, sm: 0 }}
-              >
-                <Box flex={1} minW={0}>
+<Box flex={1} minW={0}>
                   <Text
                     fontFamily="'Fraunces', Georgia, serif"
                     fontWeight="500"
                     fontSize="14px"
                     color="neutral.800"
                     letterSpacing="-0.01em"
-                    truncate
                   >
                     {r.title}
                   </Text>
@@ -114,7 +81,7 @@ export function MostCookedSection({ recipes, onRecipeClick }: Props) {
                   </Text>
                 </Box>
 
-                <Flex direction="column" align={{ base: 'flex-start', sm: 'flex-end' }} gap={0} flexShrink={0}>
+                <Flex direction="column" align="flex-end" gap={0} flexShrink={0}>
                   <Text
                     fontFamily="'Caveat', cursive"
                     fontSize="26px"
@@ -135,7 +102,6 @@ export function MostCookedSection({ recipes, onRecipeClick }: Props) {
                     vezes
                   </Text>
                 </Flex>
-              </Flex>
             </Flex>
           );
         })}
