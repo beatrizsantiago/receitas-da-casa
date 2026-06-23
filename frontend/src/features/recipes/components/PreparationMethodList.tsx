@@ -307,21 +307,22 @@ export const PreparationMethodList = forwardRef<PreparationMethodListHandle, Pro
                     </Flex>
                     <Box flex={1}>
                       <Flex justify="flex-end" mb={1}>
-                        <Box
-                          as="button"
+                        <Button
                           type="button"
+                          variant="plain"
                           fontSize="11px"
                           fontWeight="500"
                           color={previewSteps.has(step.tempId) ? 'primary.500' : 'neutral.400'}
                           cursor="pointer"
-                          border="none"
-                          bg="transparent"
                           p={0}
+                          minW="unset"
+                          h="auto"
+                          lineHeight="inherit"
                           _hover={{ color: 'primary.500' }}
                           onClick={() => togglePreview(step.tempId)}
                         >
                           {previewSteps.has(step.tempId) ? 'Editar' : 'Preview'}
-                        </Box>
+                        </Button>
                       </Flex>
                       {previewSteps.has(step.tempId) ? (
                         <Box
