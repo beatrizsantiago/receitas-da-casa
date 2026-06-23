@@ -14,7 +14,8 @@ export class StepsService {
   async create(userId: number, preparationMethodId: number, dto: CreateStepDto) {
     const method = await this.findMethod(preparationMethodId);
     await this.recipes.findOne(userId, method.recipeId);
-    return this.prisma.step.create({ data: { ...dto, preparationMethodId } });
+    const count = await this.prisma.step.count({ where: { preparationMethodId } });
+    return this.prisma.step.create({ data: { ...dto, preparationMethodId, order: count + 1 } });
   }
 
   async findAll(userId: number, preparationMethodId: number) {
