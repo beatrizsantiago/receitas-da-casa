@@ -42,8 +42,9 @@ export function CategorySummarySection({ categories, onSelectCategory }: Props) 
         {categories.map((c) => (
           <Flex
             key={c.cat}
-            align="center"
-            justify="space-between"
+            direction={{ base: 'column', sm: 'row' }}
+            align={{ base: 'flex-start', sm: 'center' }}
+            gap={{ base: 0.5, sm: 2 }}
             px={4}
             py={3.5}
             bg={c.meta?.bg ?? 'neutral.50'}
@@ -54,6 +55,7 @@ export function CategorySummarySection({ categories, onSelectCategory }: Props) 
             onClick={() => onSelectCategory(c.cat)}
           >
             <Text
+              flex={{ base: 'none', sm: 1 }}
               fontFamily="'Fraunces', Georgia, serif"
               fontWeight="500"
               fontSize="16px"
@@ -63,11 +65,13 @@ export function CategorySummarySection({ categories, onSelectCategory }: Props) 
               {c.meta?.label ?? c.cat}
             </Text>
             <Text
+              flexShrink={0}
               fontFamily="'Courier New', monospace"
               fontSize="12px"
               color={c.meta?.fg ?? 'neutral.800'}
               opacity={0.7}
               letterSpacing="0.03em"
+              whiteSpace="nowrap"
             >
               {String(c.count).padStart(2, '0')} receitas
             </Text>

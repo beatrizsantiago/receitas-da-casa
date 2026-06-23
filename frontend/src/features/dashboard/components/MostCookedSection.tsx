@@ -40,7 +40,7 @@ export function MostCookedSection({ recipes, onRecipeClick }: Props) {
           return (
             <Flex
               key={r.id}
-              align="center"
+              align={{ base: 'flex-start', sm: 'center' }}
               gap={3}
               px={4}
               py={3}
@@ -62,6 +62,7 @@ export function MostCookedSection({ recipes, onRecipeClick }: Props) {
                 fontWeight="400"
                 color="neutral.300"
                 lineHeight={1}
+                mt={{ base: '2px', sm: 0 }}
               >
                 {String(i + 1).padStart(2, '0')}
               </Text>
@@ -90,42 +91,50 @@ export function MostCookedSection({ recipes, onRecipeClick }: Props) {
                 )}
               </Box>
 
-              <Box flex={1} minW={0}>
-                <Text
-                  fontFamily="'Fraunces', Georgia, serif"
-                  fontWeight="500"
-                  fontSize="14px"
-                  color="neutral.800"
-                  letterSpacing="-0.01em"
-                  truncate
-                >
-                  {r.title}
-                </Text>
-                <Text fontSize="12px" color="neutral.400" mt={0.5}>
-                  {CATEGORY_META[r.category]?.label ?? r.category}
-                </Text>
-              </Box>
+              <Flex
+                flex={1}
+                minW={0}
+                direction={{ base: 'column', sm: 'row' }}
+                align={{ base: 'flex-start', sm: 'center' }}
+                gap={{ base: 1, sm: 0 }}
+              >
+                <Box flex={1} minW={0}>
+                  <Text
+                    fontFamily="'Fraunces', Georgia, serif"
+                    fontWeight="500"
+                    fontSize="14px"
+                    color="neutral.800"
+                    letterSpacing="-0.01em"
+                    truncate
+                  >
+                    {r.title}
+                  </Text>
+                  <Text fontSize="12px" color="neutral.400" mt={0.5} truncate>
+                    {CATEGORY_META[r.category]?.label ?? r.category}
+                  </Text>
+                </Box>
 
-              <Flex direction="column" align="flex-end" gap={0} flexShrink={0}>
-                <Text
-                  fontFamily="'Caveat', cursive"
-                  fontSize="26px"
-                  fontStyle="italic"
-                  fontWeight="500"
-                  color="primary.500"
-                  lineHeight={1}
-                >
-                  {r.cooks ?? 0}
-                </Text>
-                <Text
-                  fontSize="9px"
-                  color="neutral.400"
-                  fontWeight="600"
-                  letterSpacing="0.08em"
-                  textTransform="uppercase"
-                >
-                  vezes
-                </Text>
+                <Flex direction="column" align={{ base: 'flex-start', sm: 'flex-end' }} gap={0} flexShrink={0}>
+                  <Text
+                    fontFamily="'Caveat', cursive"
+                    fontSize="26px"
+                    fontStyle="italic"
+                    fontWeight="500"
+                    color="primary.500"
+                    lineHeight={1}
+                  >
+                    {r.cooks ?? 0}
+                  </Text>
+                  <Text
+                    fontSize="9px"
+                    color="neutral.400"
+                    fontWeight="600"
+                    letterSpacing="0.08em"
+                    textTransform="uppercase"
+                  >
+                    vezes
+                  </Text>
+                </Flex>
               </Flex>
             </Flex>
           );
