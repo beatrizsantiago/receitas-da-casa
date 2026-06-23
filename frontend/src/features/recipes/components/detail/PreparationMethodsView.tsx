@@ -1,4 +1,6 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
+import ReactMarkdown from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
 
 interface StepRow {
   id: number;
@@ -83,9 +85,21 @@ export function PreparationMethodsView({ preparationMethods }: Props) {
                   >
                     {stepIdx + 1}
                   </Flex>
-                  <Text flex={1} fontSize="14px" color="neutral.800" lineHeight={1.55} pt={1}>
-                    {step.description}
-                  </Text>
+                  <Box flex={1} fontSize="14px" color="neutral.800" lineHeight={1.55} pt={1}>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkBreaks]}
+                      components={{
+                        p: ({ children }) => <Text as="p" mb={1.5} _last={{ mb: 0 }}>{children}</Text>,
+                        strong: ({ children }) => <Text as="strong" fontWeight="600">{children}</Text>,
+                        em: ({ children }) => <Text as="em" fontStyle="italic">{children}</Text>,
+                        ul: ({ children }) => <Box as="ul" pl={4} mb={1.5}>{children}</Box>,
+                        ol: ({ children }) => <Box as="ol" pl={4} mb={1.5}>{children}</Box>,
+                        li: ({ children }) => <Box as="li" mb={0.5}>{children}</Box>,
+                      }}
+                    >
+                      {step.description}
+                    </ReactMarkdown>
+                  </Box>
                 </Box>
               ))}
             </Box>

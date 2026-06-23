@@ -1,5 +1,7 @@
 import { Box, Button, Flex, Input, Text, Textarea } from '@chakra-ui/react';
 import { useState, forwardRef, useImperativeHandle } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkBreaks from 'remark-breaks';
 import { LuX } from 'react-icons/lu';
 import { toast } from 'react-toastify';
 import {
@@ -64,6 +66,16 @@ export const PreparationMethodList = forwardRef<PreparationMethodListHandle, Pro
       )
     );
     const [deletedMethodIds] = useState(() => new Set<number>());
+    const [previewSteps, setPreviewSteps] = useState<Set<string>>(new Set());
+
+    function togglePreview(stepTempId: string) {
+      setPreviewSteps((prev) => {
+        const next = new Set(prev);
+        if (next.has(stepTempId)) next.delete(stepTempId);
+        else next.add(stepTempId);
+        return next;
+      });
+    }
 
     const addMethodMut = useAddPreparationMethodMutation();
     const updateMethodMut = useUpdatePreparationMethodMutation();
@@ -293,19 +305,70 @@ export const PreparationMethodList = forwardRef<PreparationMethodListHandle, Pro
                     >
                       {stepIdx + 1}
                     </Flex>
-                    <Textarea
-                      flex={1}
-                      value={step.description}
-                      onChange={(e) => updateStep(method.tempId, step.tempId, e.target.value)}
-                      rows={2}
-                      bg="white"
-                      fontSize="14px"
-                      px={3}
-                      py={2.5}
-                      resize="vertical"
-                      lineHeight={1.5}
-                      placeholder="Descreva o passo..."
-                    />
+                    <Box flex={1}>
+                      <Flex justify="flex-end" mb={1}>
+                        <Box
+                          as="button"
+                          type="button"
+                          fontSize="11px"
+                          fontWeight="500"
+                          color={previewSteps.has(step.tempId) ? 'primary.500' : 'neutral.400'}
+                          cursor="pointer"
+                          border="none"
+                          bg="transparent"
+                          p={0}
+                          _hover={{ color: 'primary.500' }}
+                          onClick={() => togglePreview(step.tempId)}
+                        >
+                          {previewSteps.has(step.tempId) ? 'Editar' : 'Preview'}
+                        </Box>
+                      </Flex>
+                      {previewSteps.has(step.tempId) ? (
+                        <Box
+                          minH="60px"
+                          bg="beige.50"
+                          border="1px solid"
+                          borderColor="beige.200"
+                          rounded="8px"
+                          px={3}
+                          py={2.5}
+                          fontSize="14px"
+                          color={step.description.trim() ? 'neutral.800' : 'neutral.400'}
+                          lineHeight={1.5}
+                        >
+                          {step.description.trim() ? (
+                            <ReactMarkdown
+                              remarkPlugins={[remarkBreaks]}
+                              components={{
+                                p: ({ children }) => <Text as="p" mb={1.5} _last={{ mb: 0 }}>{children}</Text>,
+                                strong: ({ children }) => <Text as="strong" fontWeight="600">{children}</Text>,
+                                em: ({ children }) => <Text as="em" fontStyle="italic">{children}</Text>,
+                                ul: ({ children }) => <Box as="ul" pl={4} mb={1.5}>{children}</Box>,
+                                ol: ({ children }) => <Box as="ol" pl={4} mb={1.5}>{children}</Box>,
+                                li: ({ children }) => <Box as="li" mb={0.5}>{children}</Box>,
+                              }}
+                            >
+                              {step.description}
+                            </ReactMarkdown>
+                          ) : (
+                            'Descreva o passo...'
+                          )}
+                        </Box>
+                      ) : (
+                        <Textarea
+                          value={step.description}
+                          onChange={(e) => updateStep(method.tempId, step.tempId, e.target.value)}
+                          rows={2}
+                          bg="white"
+                          fontSize="14px"
+                          px={3}
+                          py={2.5}
+                          resize="vertical"
+                          lineHeight={1.5}
+                          placeholder="Descreva o passo..."
+                        />
+                      )}
+                    </Box>
                     <Box
                       as="button"
                       display="flex"
