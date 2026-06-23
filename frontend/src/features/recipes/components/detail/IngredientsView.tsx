@@ -47,7 +47,8 @@ export function IngredientsView({ ingredients }: Props) {
             fontWeight="600"
             px={3.5}
             py={2.5}
-            minW="90px"
+            minW="100px"
+            maxWidth="100px"
             flexShrink={0}
           >
             {ing.amount}
