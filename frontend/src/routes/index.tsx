@@ -1,8 +1,9 @@
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import { PublicRoute } from './PublicRoute';
 import PrivateLayout from './PrivateLayout';
+import { ScrollToTop } from './ScrollToTop';
 import Login from '@/features/auth/pages/Login';
-import Register from '@/features/auth/pages/Register';
+// import Register from '@/features/auth/pages/Register';
 import Dashboard from '@/features/dashboard/pages/Dashboard';
 import RecipeList from '@/features/recipes/pages/List';
 import RecipeDetail from '@/features/recipes/pages/Detail';
@@ -13,6 +14,7 @@ import PublicRecipeDetail from '@/features/public/pages/PublicRecipeDetail';
 
 const PublicLayout = () => (
   <PublicRoute>
+    <ScrollToTop />
     <Outlet />
   </PublicRoute>
 );
@@ -22,7 +24,7 @@ export const router = createBrowserRouter([
     element: <PublicLayout />,
     children: [
       { path: '/', element: <Login /> },
-      { path: '/cadastro', element: <Register /> },
+      // { path: '/cadastro', element: <Register /> },
     ],
   },
   {
