@@ -92,7 +92,6 @@ export interface UpdatePreparationMethodDto extends Partial<CreatePreparationMet
 
 export interface CreateStepDto {
   description: string;
-  order: number;
 }
 
 export interface UpdateStepDto extends Partial<CreateStepDto> {}

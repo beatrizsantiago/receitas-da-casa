@@ -135,12 +135,12 @@ export const PreparationMethodList = forwardRef<PreparationMethodListHandle, Pro
             }
 
             // Create new steps
-            for (const [stepIdx, step] of method.steps.entries()) {
+            for (const step of method.steps) {
               if (step.serverId || !step.description.trim()) continue;
               try {
                 await addStepMut.mutateAsync({
                   preparationMethodId: method.serverId,
-                  dto: { description: step.description.trim(), order: stepIdx + 1 },
+                  dto: { description: step.description.trim() },
                 });
               } catch {
                 toast.error('Erro ao adicionar passo');
@@ -158,12 +158,12 @@ export const PreparationMethodList = forwardRef<PreparationMethodListHandle, Pro
                 dto: { title: method.title || undefined, order: methodIdx + 1 },
               });
 
-              for (const [stepIdx, step] of method.steps.entries()) {
+              for (const step of method.steps) {
                 if (!step.description.trim()) continue;
                 try {
                   await addStepMut.mutateAsync({
                     preparationMethodId: created.id,
-                    dto: { description: step.description.trim(), order: stepIdx + 1 },
+                    dto: { description: step.description.trim() },
                   });
                 } catch {
                   toast.error('Erro ao adicionar passo');
