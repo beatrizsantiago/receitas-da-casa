@@ -20,8 +20,9 @@ export class RecipesService {
     return this.prisma.recipe.create({ data: { ...dto, userId } });
   }
 
-  async findAll(filter: FilterRecipesDto) {
+  async findAll(userId: number, filter: FilterRecipesDto) {
     const where = {
+      userId,
       deletedAt: null,
       ...(filter.category && { category: filter.category }),
       ...(filter.tags?.length && {
@@ -58,7 +59,7 @@ export class RecipesService {
 
   async findOne(userId: number, id: number) {
     const recipe = await this.prisma.recipe.findFirst({
-      where: { id, deletedAt: null },
+      where: { id, userId, deletedAt: null },
       include: {
         tags: { include: { tag: true } },
         ingredients: true,

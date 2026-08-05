@@ -57,6 +57,8 @@ export class PhotosService {
       throw new NotFoundException('Foto não encontrada');
     }
 
+    await this.recipes.findOne(userId, photo.recipeId);
+
     return this.prisma.recipePhoto.update({
       where: { id: photoId },
       data: { positionY },
