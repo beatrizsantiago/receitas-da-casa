@@ -97,13 +97,16 @@ export const PreparationMethodList = forwardRef<PreparationMethodListHandle, Pro
 
         for (const [methodIdx, method] of methods.entries()) {
           if (method.serverId) {
-            // Update title if changed
+            // Update title and/or order if changed — order must stay compacted
+            // (no gaps) since it's unique per recipe, and deleting a method
+            // earlier in the list leaves a gap that later methods must fill.
             const original = preparationMethods.find((m) => m.id === method.serverId);
-            if (original && method.title !== (original.title ?? '')) {
+            const newOrder = methodIdx + 1;
+            if (original && (method.title !== (original.title ?? '') || newOrder !== original.order)) {
               try {
                 await updateMethodMut.mutateAsync({
                   id: method.serverId,
-                  dto: { title: method.title || undefined },
+                  dto: { title: method.title || undefined, order: newOrder },
                 });
               } catch {
                 toast.error('Erro ao atualizar modo de preparo');
