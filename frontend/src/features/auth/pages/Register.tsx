@@ -12,7 +12,7 @@ import {
   chakra,
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import { LuUser, LuMail, LuLock } from 'react-icons/lu';
+import { LuUser, LuMail, LuLock, LuEye, LuEyeOff } from 'react-icons/lu';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';
@@ -22,6 +22,8 @@ const Register = () => {
   const navigate = useNavigate();
   const { register, isLoading } = useAuth();
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -155,14 +157,34 @@ const Register = () => {
                 </Box>
                 <Input
                   name="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   pl="38px"
+                  pr="38px"
                   required
                   minLength={8}
                   onInvalid={(e) => handleInvalid(e, 'password')}
                   onInput={() => clearError('password')}
                 />
+                <chakra.button
+                  type="button"
+                  position="absolute"
+                  right="12px"
+                  top="50%"
+                  transform="translateY(-50%)"
+                  color="neutral.400"
+                  display="flex"
+                  alignItems="center"
+                  bg="transparent"
+                  border="none"
+                  cursor="pointer"
+                  p={0}
+                  _hover={{ color: 'neutral.600' }}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                >
+                  {showPassword ? <LuEyeOff size={16} /> : <LuEye size={16} />}
+                </chakra.button>
               </Box>
               <Field.ErrorText>{errors.password}</Field.ErrorText>
             </Field.Root>
@@ -175,13 +197,33 @@ const Register = () => {
                 </Box>
                 <Input
                   name="confirmPassword"
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   pl="38px"
+                  pr="38px"
                   required
                   onInvalid={(e) => handleInvalid(e, 'confirmPassword')}
                   onInput={() => clearError('confirmPassword')}
                 />
+                <chakra.button
+                  type="button"
+                  position="absolute"
+                  right="12px"
+                  top="50%"
+                  transform="translateY(-50%)"
+                  color="neutral.400"
+                  display="flex"
+                  alignItems="center"
+                  bg="transparent"
+                  border="none"
+                  cursor="pointer"
+                  p={0}
+                  _hover={{ color: 'neutral.600' }}
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  aria-label={showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                >
+                  {showConfirmPassword ? <LuEyeOff size={16} /> : <LuEye size={16} />}
+                </chakra.button>
               </Box>
               <Field.ErrorText>{errors.confirmPassword}</Field.ErrorText>
             </Field.Root>

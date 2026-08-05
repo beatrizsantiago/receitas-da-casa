@@ -10,7 +10,7 @@ import {
   chakra,
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import { LuMail, LuLock } from 'react-icons/lu';
+import { LuMail, LuLock, LuEye, LuEyeOff } from 'react-icons/lu';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';
@@ -20,6 +20,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { login, isLoading } = useAuth();
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -44,7 +45,6 @@ const Login = () => {
     e.preventDefault();
     const input = e.currentTarget;
     let msg = input.validationMessage;
-    // Traduz mensagens padrão do HTML5
     if (input.validity.valueMissing) {
       if (field === 'email') msg = 'E-mail é obrigatório';
       if (field === 'password') msg = 'Senha é obrigatória';
@@ -128,13 +128,33 @@ const Login = () => {
               </Box>
               <Input
                 name="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
                 pl="38px"
+                pr="38px"
                 required
                 onInvalid={(e) => handleInvalid(e, 'password')}
                 onInput={() => clearError('password')}
               />
+              <chakra.button
+                type="button"
+                position="absolute"
+                right="12px"
+                top="50%"
+                transform="translateY(-50%)"
+                color="neutral.400"
+                display="flex"
+                alignItems="center"
+                bg="transparent"
+                border="none"
+                cursor="pointer"
+                p={0}
+                _hover={{ color: 'neutral.600' }}
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+              >
+                {showPassword ? <LuEyeOff size={16} /> : <LuEye size={16} />}
+              </chakra.button>
             </Box>
             <Field.ErrorText>{errors.password}</Field.ErrorText>
           </Field.Root>
