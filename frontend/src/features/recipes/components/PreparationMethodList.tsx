@@ -2,8 +2,9 @@ import { Box, Button, Flex, Input, Text, Textarea } from '@chakra-ui/react';
 import { useState, forwardRef, useImperativeHandle } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
-import { LuX } from 'react-icons/lu';
 import { toast } from 'react-toastify';
+import { AddRowButton } from '@/shared/components/ui/AddRowButton';
+import { RemoveRowButton } from '@/shared/components/ui/RemoveRowButton';
 import {
   useAddPreparationMethodMutation,
   useUpdatePreparationMethodMutation,
@@ -267,24 +268,7 @@ export const PreparationMethodList = forwardRef<PreparationMethodListHandle, Pro
                   _placeholder={{ color: 'neutral.400', fontWeight: '400' }}
                   _focus={{ borderColor: 'primary.300', boxShadow: 'none' }}
                 />
-                <Box
-                  as="button"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  w="28px"
-                  h="28px"
-                  flexShrink={0}
-                  rounded="6px"
-                  color="neutral.300"
-                  cursor="pointer"
-                  border="none"
-                  bg="transparent"
-                  _hover={{ color: 'red.400', bg: 'red.50' }}
-                  onClick={() => removeMethod(method)}
-                >
-                  <LuX size={14} />
-                </Box>
+                <RemoveRowButton onClick={() => removeMethod(method)} />
               </Flex>
 
               {/* Steps */}
@@ -373,47 +357,19 @@ export const PreparationMethodList = forwardRef<PreparationMethodListHandle, Pro
                         />
                       )}
                     </Box>
-                    <Box
-                      as="button"
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                      w="28px"
-                      h="28px"
-                      mt="6px"
-                      rounded="6px"
-                      color="neutral.300"
-                      cursor="pointer"
-                      border="none"
-                      bg="transparent"
-                      flexShrink={0}
-                      _hover={{ color: 'red.400', bg: 'red.50' }}
-                      onClick={() => removeStep(method.tempId, step)}
-                    >
-                      <LuX size={14} />
-                    </Box>
+                    <RemoveRowButton mt="6px" onClick={() => removeStep(method.tempId, step)} />
                   </Flex>
                 ))}
               </Flex>
 
-              <Button
-                w="full"
-                variant="outline"
-                borderStyle="dashed"
-                borderColor="beige.200"
+              <AddRowButton
                 color="neutral.400"
                 fontSize="12px"
-                fontWeight="500"
                 mt={method.steps.length > 0 ? 3 : 0}
-                display="inline-flex"
-                alignItems="center"
-                gap={1.5}
-                bg="transparent"
-                _hover={{ bg: 'beige.50' }}
                 onClick={() => addStep(method.tempId)}
               >
                 + Adicionar passo
-              </Button>
+              </AddRowButton>
             </Box>
           ))}
         </Flex>
@@ -424,24 +380,15 @@ export const PreparationMethodList = forwardRef<PreparationMethodListHandle, Pro
           </Text>
         )}
 
-        <Button
-          w="full"
-          variant="outline"
-          borderStyle="dashed"
-          borderColor="primary.200"
+        <AddRowButton
           color="primary.500"
-          fontSize="13px"
-          fontWeight="500"
+          borderColor="primary.200"
+          hoverBg="primary.50"
           mt={methods.length > 0 ? 5 : 0}
-          display="inline-flex"
-          alignItems="center"
-          gap={1.5}
-          bg="transparent"
-          _hover={{ bg: 'primary.50' }}
           onClick={addMethod}
         >
           + Adicionar modo de preparo
-        </Button>
+        </AddRowButton>
       </Box>
     );
   }
