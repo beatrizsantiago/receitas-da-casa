@@ -24,7 +24,10 @@ export class AuthService {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userWithoutPassword } = user;
-    return { ...this.issueTokens({ sub: user.id, email: user.email }), user: userWithoutPassword };
+    return {
+      ...this.issueTokens({ sub: user.id, email: user.email, tokenVersion: user.tokenVersion }),
+      user: userWithoutPassword,
+    };
   }
 
   async login(dto: LoginDto) {
@@ -36,11 +39,18 @@ export class AuthService {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userWithoutPassword } = user;
-    return { ...this.issueTokens({ sub: user.id, email: user.email }), user: userWithoutPassword };
+    return {
+      ...this.issueTokens({ sub: user.id, email: user.email, tokenVersion: user.tokenVersion }),
+      user: userWithoutPassword,
+    };
   }
 
   refresh(payload: JwtPayload) {
-    return this.issueTokens({ sub: payload.sub, email: payload.email });
+    return this.issueTokens(payload);
+  }
+
+  async logout(userId: number) {
+    await this.users.incrementTokenVersion(userId);
   }
 
   private issueTokens(payload: JwtPayload) {
