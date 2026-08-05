@@ -1,4 +1,5 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
+import { EmptyHint } from '@/shared/components/ui/EmptyHint';
 
 interface IngredientRow {
   id: number;
@@ -12,20 +13,7 @@ interface Props {
 
 export function IngredientsView({ ingredients }: Props) {
   if (!ingredients || ingredients.length === 0) {
-    return (
-      <Box
-        textAlign="center"
-        p={6}
-        bg="beige.50"
-        border="1.5px dashed"
-        borderColor="beige.200"
-        rounded="16px"
-      >
-        <Text fontSize="13px" color="neutral.500">
-          Nenhum ingrediente ainda.
-        </Text>
-      </Box>
-    );
+    return <EmptyHint>Nenhum ingrediente ainda.</EmptyHint>;
   }
 
   return (

@@ -1,6 +1,7 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import ReactMarkdown from 'react-markdown';
 import remarkBreaks from 'remark-breaks';
+import { EmptyHint } from '@/shared/components/ui/EmptyHint';
 
 interface StepRow {
   id: number;
@@ -21,20 +22,7 @@ interface Props {
 
 export function PreparationMethodsView({ preparationMethods }: Props) {
   if (!preparationMethods || preparationMethods.length === 0) {
-    return (
-      <Box
-        textAlign="center"
-        p={6}
-        bg="beige.50"
-        border="1.5px dashed"
-        borderColor="beige.200"
-        rounded="16px"
-      >
-        <Text fontSize="13px" color="neutral.500">
-          Nenhum modo de preparo adicionado.
-        </Text>
-      </Box>
-    );
+    return <EmptyHint>Nenhum modo de preparo adicionado.</EmptyHint>;
   }
 
   return (

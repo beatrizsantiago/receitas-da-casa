@@ -5,6 +5,7 @@ import { LuImages } from 'react-icons/lu';
 import Lightbox from 'yet-another-react-lightbox';
 import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import 'yet-another-react-lightbox/styles.css';
+import { EmptyHint } from '@/shared/components/ui/EmptyHint';
 import type { Photo } from '../../types';
 
 interface RecipeGallerySectionProps {
@@ -136,18 +137,7 @@ export function RecipeGallerySection({
           />
         </>
       ) : (
-        <Box
-          textAlign="center"
-          p={6}
-          bg="beige.50"
-          border="1.5px dashed"
-          borderColor="beige.200"
-          rounded="16px"
-        >
-          <Text fontSize="13px" color="neutral.500">
-            Nenhuma foto na galeria ainda.
-          </Text>
-        </Box>
+        <EmptyHint>Nenhuma foto na galeria ainda.</EmptyHint>
       )}
     </Box>
   );

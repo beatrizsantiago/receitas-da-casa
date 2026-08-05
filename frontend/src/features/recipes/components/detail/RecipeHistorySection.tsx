@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Box, Button, Flex, Heading, Text, Textarea } from '@chakra-ui/react';
 import { LuCheck, LuFlame, LuPlus } from 'react-icons/lu';
+import { EmptyHint } from '@/shared/components/ui/EmptyHint';
 import type { CookHistory } from '../../types';
 
 interface RecipeHistorySectionProps {
@@ -180,18 +181,7 @@ export function RecipeHistorySection({
             ))}
           </Flex>
         ) : (
-          <Box
-            textAlign="center"
-            p={6}
-            bg="beige.50"
-            border="1.5px dashed"
-            borderColor="beige.200"
-            rounded="16px"
-          >
-            <Text fontSize="13px" color="neutral.500">
-              Ainda não registrou nenhum preparo.
-            </Text>
-          </Box>
+          <EmptyHint>Ainda não registrou nenhum preparo.</EmptyHint>
         )}
       </Box>
     </Box>

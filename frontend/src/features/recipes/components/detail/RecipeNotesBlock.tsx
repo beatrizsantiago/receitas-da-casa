@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { EditableBlock } from '@/shared/components/ui/EditableBlock';
+import { EmptyHint } from '@/shared/components/ui/EmptyHint';
 import { NotesList, type NotesListHandle } from '../NotesList';
 import type { Recipe } from '../../types';
 
@@ -66,18 +67,7 @@ export function RecipeNotesBlock({
           ))}
         </Flex>
       ) : (
-        <Box
-          textAlign="center"
-          p={6}
-          bg="beige.50"
-          border="1.5px dashed"
-          borderColor="beige.200"
-          rounded="16px"
-        >
-          <Text fontSize="13px" color="neutral.500">
-            Nenhuma anotação ainda.
-          </Text>
-        </Box>
+        <EmptyHint>Nenhuma anotação ainda.</EmptyHint>
       )}
     </EditableBlock>
   );
