@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { toast } from 'react-toastify';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box,
@@ -84,11 +85,15 @@ export default function RecipeList() {
     );
   }
 
-  const { data, isLoading } = useRecipesQuery({
+  const { data, isLoading, error } = useRecipesQuery({
     limit: 200,
     category: category === 'all' ? undefined : category,
   });
   const recipes = data?.data ?? [];
+
+  useEffect(() => {
+    if (error) toast.error('Erro ao carregar receitas');
+  }, [error]);
 
   const { data: tagsData } = useTagsQuery();
   const allTags = tagsData ?? [];

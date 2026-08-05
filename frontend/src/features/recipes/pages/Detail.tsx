@@ -7,6 +7,7 @@ import { LoadingSpinner } from '@/shared/components/ui/LoadingSpinner';
 import { EmptyState } from '@/shared/components/ui/EmptyState';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { toast } from 'react-toastify';
+import { getApiErrorMessage } from '@/shared/utils/parseError';
 import {
   useRecipeQuery,
   useUpdateRecipeMutation,
@@ -56,7 +57,12 @@ export default function RecipeDetail() {
   const createTagMut = useCreateTagMutation();
 
   async function handleSavePosition(photoId: number, positionY: number) {
-    await updatePositionMut.mutateAsync({ photoId, positionY, recipeId });
+    try {
+      await updatePositionMut.mutateAsync({ photoId, positionY, recipeId });
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, 'Erro ao salvar posição da foto'));
+      throw err;
+    }
   }
 
   useEffect(() => {
@@ -107,12 +113,13 @@ export default function RecipeDetail() {
         name: t.tag.name.toLowerCase(),
       })) ?? [];
     const newNames = drafts.tags.map((t) => t.name);
+    let tagFailures = 0;
     for (const ct of currentTags) {
       if (!newNames.includes(ct.name)) {
         try {
           await removeTagMut.mutateAsync({ recipeId, tagId: ct.id });
         } catch {
-          /* ignore */
+          tagFailures++;
         }
       }
     }
@@ -129,9 +136,12 @@ export default function RecipeDetail() {
             await addTagMut.mutateAsync({ recipeId, tagId: newTag.id });
           }
         } catch {
-          /* ignore */
+          tagFailures++;
         }
       }
+    }
+    if (tagFailures > 0) {
+      toast.error('Algumas tags não puderam ser salvas');
     }
   }
 

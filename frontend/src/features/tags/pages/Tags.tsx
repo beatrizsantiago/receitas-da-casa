@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Button, Flex, Heading, Text } from '@chakra-ui/react';
 import { LuPlus } from 'react-icons/lu';
 import { useBreakpointValue } from '@chakra-ui/react';
@@ -26,10 +26,14 @@ const randomColor = () => {
 
 export default function TagsPage() {
   const mobile = useBreakpointValue({ base: true, md: false });
-  const { data: tagsData } = useTagsQuery();
-  const { data: recipesData } = useRecipesQuery({ limit: 1000 });
+  const { data: tagsData, error: tagsError } = useTagsQuery();
+  const { data: recipesData, error: recipesError } = useRecipesQuery({ limit: 1000 });
   const tags = tagsData ?? [];
   const recipes = recipesData?.data ?? [];
+
+  useEffect(() => {
+    if (tagsError || recipesError) toast.error('Erro ao carregar tags');
+  }, [tagsError, recipesError]);
 
   const [showForm, setShowForm] = useState(false);
   const [draft, setDraft] = useState({ name: '', color: randomColor() });

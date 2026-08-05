@@ -20,12 +20,18 @@ function processQueue(error: unknown, token: string | null) {
   failedQueue = [];
 }
 
+const AUTH_ENDPOINTS = ['/auth/login', '/auth/register', '/auth/refresh'];
+
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config;
+    const isAuthEndpoint = AUTH_ENDPOINTS.some((path) => original?.url?.includes(path));
 
-    if (error.response?.status !== 401 || original._retry) {
+    // 401 on login/register/refresh means bad credentials or an expired
+    // refresh token, not a stale session — let the caller's own error
+    // handling show it instead of wiping localStorage and reloading.
+    if (error.response?.status !== 401 || original._retry || isAuthEndpoint) {
       return Promise.reject(error);
     }
 

@@ -1,4 +1,6 @@
 import { Box } from '@chakra-ui/react';
+import { useEffect } from 'react';
+import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { useBreakpointValue } from '@chakra-ui/react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -14,9 +16,13 @@ import { useRecipeStats } from '../hooks/useRecipeStats';
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data, isLoading } = useRecipesQuery({ limit: 50 });
+  const { data, isLoading, error } = useRecipesQuery({ limit: 50 });
   const recipes = data?.data ?? [];
   const mobile = useBreakpointValue({ base: true, md: false });
+
+  useEffect(() => {
+    if (error) toast.error('Erro ao carregar suas receitas');
+  }, [error]);
 
   const { recent, mostCooked, categoryCounts } = useRecipeStats(recipes, !!mobile);
   const showEmpty = !isLoading && recipes.length === 0;
