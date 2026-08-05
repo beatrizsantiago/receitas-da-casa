@@ -1,7 +1,9 @@
-import { Box, Button, Flex, Input } from '@chakra-ui/react';
+import { Box, Flex, Input } from '@chakra-ui/react';
 import { useState, forwardRef, useImperativeHandle } from 'react';
-import { LuX } from 'react-icons/lu';
 import { toast } from 'react-toastify';
+import { AddRowButton } from '@/shared/components/ui/AddRowButton';
+import { RemoveRowButton } from '@/shared/components/ui/RemoveRowButton';
+import { useDraftRows, type DraftRow } from '@/shared/hooks/useDraftRows';
 import {
   useAddIngredientMutation,
   useUpdateIngredientMutation,
@@ -19,28 +21,21 @@ interface Props {
   ingredients: Ingredient[];
 }
 
-interface LocalRow {
-  tempId: string;
-  serverId?: number;
+interface IngredientFields {
   amount: string;
   name: string;
   order: number;
 }
 
-let tempCounter = 0;
-
 export const IngredientList = forwardRef<IngredientListHandle, Props>(
   function IngredientList({ recipeId, ingredients }, ref) {
-    const [rows, setRows] = useState<LocalRow[]>(() =>
-      ingredients.map((i) => ({
-        tempId: `existing-${i.id}`,
-        serverId: i.id,
-        amount: i.amount,
-        name: i.name,
-        order: i.order,
-      }))
-    );
-    const [deletedIds] = useState(() => new Set<number>());
+    const { rows, setRows, deletedIds, addRow, updateRow } = useDraftRows<
+      Ingredient,
+      IngredientFields
+    >(ingredients, (i) => ({
+      serverId: i.id,
+      fields: { amount: i.amount, name: i.name, order: i.order },
+    }));
     const [rowErrors, setRowErrors] = useState<Set<string>>(new Set());
 
     const addMut = useAddIngredientMutation();
@@ -61,8 +56,8 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
         // name and amount filled in — the backend rejects blank values.
         const invalid = new Set<string>();
         for (const row of rows) {
-          const hasContent = row.serverId || row.name.trim() || row.amount.trim();
-          if (hasContent && (!row.name.trim() || !row.amount.trim())) {
+          const hasContent = row.serverId || row.fields.name.trim() || row.fields.amount.trim();
+          if (hasContent && (!row.fields.name.trim() || !row.fields.amount.trim())) {
             invalid.add(row.tempId);
           }
         }
@@ -76,16 +71,16 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
           const original = ingredients.find((i) => i.id === row.serverId);
           if (!original) continue;
           const unchanged =
-            row.amount === original.amount &&
-            row.name === original.name &&
-            row.order === original.order;
+            row.fields.amount === original.amount &&
+            row.fields.name === original.name &&
+            row.fields.order === original.order;
           if (unchanged) continue;
           try {
             await updateMut.mutateAsync({
               id: row.serverId,
               dto: {
-                name: row.name.trim(),
-                amount: row.amount.trim(),
+                name: row.fields.name.trim(),
+                amount: row.fields.amount.trim(),
                 order: idx + 1,
               },
             });
@@ -96,13 +91,13 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
 
         for (const [idx, row] of rows.entries()) {
           if (row.serverId || invalid.has(row.tempId)) continue;
-          if (!row.name.trim() && !row.amount.trim()) continue;
+          if (!row.fields.name.trim() && !row.fields.amount.trim()) continue;
           try {
             await addMut.mutateAsync({
               recipeId,
               dto: {
-                name: row.name.trim(),
-                amount: row.amount.trim(),
+                name: row.fields.name.trim(),
+                amount: row.fields.amount.trim(),
                 order: idx + 1,
               },
             });
@@ -113,26 +108,8 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
       },
     }));
 
-    function addRow() {
-      setRows((prev) => [
-        ...prev,
-        {
-          tempId: `new-${++tempCounter}`,
-          amount: '',
-          name: '',
-          order: prev.length + 1,
-        },
-      ]);
-    }
-
-    function updateRow(
-      tempId: string,
-      field: 'amount' | 'name',
-      value: string
-    ) {
-      setRows((prev) =>
-        prev.map((r) => (r.tempId === tempId ? { ...r, [field]: value } : r))
-      );
+    function handleUpdateRow(tempId: string, field: 'amount' | 'name', value: string) {
+      updateRow(tempId, { [field]: value });
       setRowErrors((prev) => {
         if (!prev.has(tempId)) return prev;
         const next = new Set(prev);
@@ -141,11 +118,11 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
       });
     }
 
-    function removeRow(row: LocalRow) {
+    function handleRemoveRow(row: DraftRow<IngredientFields>) {
       setRows((prev) =>
         prev
           .filter((r) => r.tempId !== row.tempId)
-          .map((r, idx) => ({ ...r, order: idx + 1 }))
+          .map((r, idx) => ({ ...r, fields: { ...r.fields, order: idx + 1 } }))
       );
       if (row.serverId !== undefined) {
         deletedIds.add(row.serverId);
@@ -160,15 +137,15 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
             return (
               <Flex key={row.tempId} align="center" gap={2}>
                 <Input
-                  value={row.amount}
-                  onChange={(e) => updateRow(row.tempId, 'amount', e.target.value)}
+                  value={row.fields.amount}
+                  onChange={(e) => handleUpdateRow(row.tempId, 'amount', e.target.value)}
                   fontFamily="'JetBrains Mono', monospace"
                   fontSize="12px"
                   fontWeight="600"
                   color="primary.600"
                   bg="primary.50"
                   border="1.5px solid"
-                  borderColor={invalid && !row.amount.trim() ? 'red.400' : 'transparent'}
+                  borderColor={invalid && !row.fields.amount.trim() ? 'red.400' : 'transparent'}
                   rounded="8px"
                   px={2.5}
                   py={2}
@@ -180,61 +157,32 @@ export const IngredientList = forwardRef<IngredientListHandle, Props>(
                 />
 
                 <Input
-                  value={row.name}
-                  onChange={(e) => updateRow(row.tempId, 'name', e.target.value)}
+                  value={row.fields.name}
+                  onChange={(e) => handleUpdateRow(row.tempId, 'name', e.target.value)}
                   flex={1}
                   bg="white"
                   fontSize="14px"
                   color="neutral.800"
                   border="1.5px solid"
-                  borderColor={invalid && !row.name.trim() ? 'red.400' : 'transparent'}
+                  borderColor={invalid && !row.fields.name.trim() ? 'red.400' : 'transparent'}
                   px={3}
                   py={2}
                   h="auto"
                   placeholder="Nome do ingrediente"
                 />
 
-                <Box
-                  as="button"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  w="28px"
-                  h="28px"
-                  flexShrink={0}
-                  rounded="6px"
-                  color="neutral.300"
-                  cursor="pointer"
-                  border="none"
-                  bg="transparent"
-                  _hover={{ color: 'red.400', bg: 'red.50' }}
-                  onClick={() => removeRow(row)}
-                >
-                  <LuX size={14} />
-                </Box>
+                <RemoveRowButton onClick={() => handleRemoveRow(row)} />
               </Flex>
             );
           })}
         </Flex>
 
-        <Button
-          w="full"
-          variant="outline"
-          borderStyle="dashed"
-          borderColor="beige.200"
-          color="neutral.500"
-          fontSize="13px"
-          fontWeight="500"
+        <AddRowButton
           mt={2.5}
-          display="inline-flex"
-          alignItems="center"
-          gap={1.5}
-          bg="transparent"
-          _hover={{ bg: 'beige.50' }}
-          onClick={addRow}
+          onClick={() => addRow({ amount: '', name: '', order: rows.length + 1 })}
         >
           + Adicionar ingrediente
-        </Button>
+        </AddRowButton>
       </Box>
     );
   }

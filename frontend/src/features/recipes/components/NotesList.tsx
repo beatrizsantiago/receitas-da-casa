@@ -1,7 +1,9 @@
-import { Box, Button, Flex, Textarea } from '@chakra-ui/react';
-import { useState, forwardRef, useImperativeHandle } from 'react';
-import { LuX } from 'react-icons/lu';
+import { Box, Flex, Textarea } from '@chakra-ui/react';
+import { forwardRef, useImperativeHandle } from 'react';
 import { toast } from 'react-toastify';
+import { AddRowButton } from '@/shared/components/ui/AddRowButton';
+import { RemoveRowButton } from '@/shared/components/ui/RemoveRowButton';
+import { useDraftRows } from '@/shared/hooks/useDraftRows';
 import {
   useAddNoteMutation,
   useUpdateNoteMutation,
@@ -18,24 +20,16 @@ interface Props {
   notes: Note[];
 }
 
-interface LocalNote {
-  tempId: string;
-  serverId?: number;
+interface NoteFields {
   content: string;
 }
 
-let tempCounter = 0;
-
 export const NotesList = forwardRef<NotesListHandle, Props>(
   function NotesList({ recipeId, notes }, ref) {
-    const [rows, setRows] = useState<LocalNote[]>(() =>
-      notes.map((n) => ({
-        tempId: `existing-${n.id}`,
-        serverId: n.id,
-        content: n.content,
-      }))
+    const { rows, deletedIds, addRow, updateRow, removeRow } = useDraftRows<Note, NoteFields>(
+      notes,
+      (n) => ({ serverId: n.id, fields: { content: n.content } })
     );
-    const [deletedIds] = useState(() => new Set<number>());
 
     const addMut = useAddNoteMutation();
     const updateMut = useUpdateNoteMutation();
@@ -55,11 +49,11 @@ export const NotesList = forwardRef<NotesListHandle, Props>(
           if (!row.serverId) continue;
           const original = notes.find((n) => n.id === row.serverId);
           if (!original) continue;
-          if (row.content === original.content) continue;
+          if (row.fields.content === original.content) continue;
           try {
             await updateMut.mutateAsync({
               id: row.serverId,
-              dto: { content: row.content },
+              dto: { content: row.fields.content },
             });
           } catch {
             toast.error('Erro ao atualizar anotação');
@@ -68,11 +62,11 @@ export const NotesList = forwardRef<NotesListHandle, Props>(
 
         for (const row of rows) {
           if (row.serverId) continue;
-          if (!row.content.trim()) continue;
+          if (!row.fields.content.trim()) continue;
           try {
             await addMut.mutateAsync({
               recipeId,
-              dto: { content: row.content.trim() },
+              dto: { content: row.fields.content.trim() },
             });
           } catch {
             toast.error('Erro ao adicionar anotação');
@@ -81,26 +75,6 @@ export const NotesList = forwardRef<NotesListHandle, Props>(
       },
     }));
 
-    function addRow() {
-      setRows((prev) => [
-        ...prev,
-        { tempId: `new-${++tempCounter}`, content: '' },
-      ]);
-    }
-
-    function updateContent(tempId: string, value: string) {
-      setRows((prev) =>
-        prev.map((r) => (r.tempId === tempId ? { ...r, content: value } : r))
-      );
-    }
-
-    function removeRow(row: LocalNote) {
-      setRows((prev) => prev.filter((r) => r.tempId !== row.tempId));
-      if (row.serverId !== undefined) {
-        deletedIds.add(row.serverId);
-      }
-    }
-
     return (
       <Box>
         <Flex direction="column" gap={2.5}>
@@ -108,8 +82,8 @@ export const NotesList = forwardRef<NotesListHandle, Props>(
             <Flex key={row.tempId} gap={2} align="flex-start">
               <Textarea
                 flex={1}
-                value={row.content}
-                onChange={(e) => updateContent(row.tempId, e.target.value)}
+                value={row.fields.content}
+                onChange={(e) => updateRow(row.tempId, { content: e.target.value })}
                 rows={2}
                 borderColor="yellow.200"
                 bg="yellow.50"
@@ -123,47 +97,14 @@ export const NotesList = forwardRef<NotesListHandle, Props>(
                 _focus={{ borderColor: 'yellow.300', boxShadow: 'none' }}
                 placeholder="Escreva sua anotação..."
               />
-              <Box
-                as="button"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                w="28px"
-                h="28px"
-                mt="6px"
-                rounded="6px"
-                color="neutral.300"
-                cursor="pointer"
-                border="none"
-                bg="transparent"
-                flexShrink={0}
-                _hover={{ color: 'red.400', bg: 'red.50' }}
-                onClick={() => removeRow(row)}
-              >
-                <LuX size={14} />
-              </Box>
+              <RemoveRowButton mt="6px" onClick={() => removeRow(row)} />
             </Flex>
           ))}
         </Flex>
 
-        <Button
-          w="full"
-          variant="outline"
-          borderStyle="dashed"
-          borderColor="beige.200"
-          color="neutral.500"
-          fontSize="13px"
-          fontWeight="500"
-          mt={2.5}
-          display="inline-flex"
-          alignItems="center"
-          gap={1.5}
-          bg="transparent"
-          _hover={{ bg: 'beige.50' }}
-          onClick={addRow}
-        >
+        <AddRowButton mt={2.5} onClick={() => addRow({ content: '' })}>
           + Adicionar anotação
-        </Button>
+        </AddRowButton>
       </Box>
     );
   }
