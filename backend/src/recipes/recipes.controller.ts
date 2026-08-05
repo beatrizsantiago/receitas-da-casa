@@ -31,35 +31,25 @@ export class RecipesController {
 
   @Get()
   @ApiOperation({ summary: 'Listar receitas com filtros e paginação' })
-  findAll(@CurrentUser() user: JwtPayload, @Query() filter: FilterRecipesDto) {
-    return this.recipes.findAll(user.sub, filter);
+  findAll(@Query() filter: FilterRecipesDto) {
+    return this.recipes.findAll(filter);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Buscar receita por ID (com todos os detalhes)' })
-  findOne(
-    @CurrentUser() user: JwtPayload,
-    @Param('id', ParseIntPipe) id: number,
-  ) {
-    return this.recipes.findOne(user.sub, id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.recipes.findOne(id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar receita' })
-  update(
-    @CurrentUser() user: JwtPayload,
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateRecipeDto,
-  ) {
-    return this.recipes.update(user.sub, id, dto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateRecipeDto) {
+    return this.recipes.update(id, dto);
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Deletar receita (soft delete)' })
-  remove(
-    @CurrentUser() user: JwtPayload,
-    @Param('id', ParseIntPipe) id: number,
-  ) {
-    return this.recipes.remove(user.sub, id);
+  @ApiOperation({ summary: 'Deletar receita definitivamente (com fotos)' })
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.recipes.remove(id);
   }
 }

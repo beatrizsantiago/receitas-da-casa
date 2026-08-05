@@ -10,15 +10,15 @@ export class HistoryService {
     private recipes: RecipesService,
   ) {}
 
-  async create(userId: number, recipeId: number, dto: CreateCookHistoryDto) {
-    await this.recipes.findOne(userId, recipeId);
+  async create(recipeId: number, dto: CreateCookHistoryDto) {
+    await this.recipes.findOne(recipeId);
     return this.prisma.cookHistory.create({
       data: { ...dto, recipeId, date: dto.date ?? new Date() },
     });
   }
 
-  async findAll(userId: number, recipeId: number) {
-    await this.recipes.findOne(userId, recipeId);
+  async findAll(recipeId: number) {
+    await this.recipes.findOne(recipeId);
     return this.prisma.cookHistory.findMany({
       where: { recipeId },
       orderBy: { date: 'desc' },

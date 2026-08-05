@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { FilterRecipesDto } from './dto/filter-recipes.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
@@ -14,15 +15,17 @@ function mapRecipe<T extends { id: number; _count: { cookHistory: number }; cook
 
 @Injectable()
 export class RecipesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private storage: StorageService,
+  ) {}
 
   create(userId: number, dto: CreateRecipeDto) {
     return this.prisma.recipe.create({ data: { ...dto, userId } });
   }
 
-  async findAll(userId: number, filter: FilterRecipesDto) {
+  async findAll(filter: FilterRecipesDto) {
     const where = {
-      userId,
       deletedAt: null,
       ...(filter.category && { category: filter.category }),
       ...(filter.tags?.length && {
@@ -57,9 +60,9 @@ export class RecipesService {
     };
   }
 
-  async findOne(userId: number, id: number) {
+  async findOne(id: number) {
     const recipe = await this.prisma.recipe.findFirst({
-      where: { id, userId, deletedAt: null },
+      where: { id, deletedAt: null },
       include: {
         tags: { include: { tag: true } },
         ingredients: true,
@@ -77,16 +80,16 @@ export class RecipesService {
     return mapRecipe(recipe);
   }
 
-  async update(userId: number, id: number, dto: UpdateRecipeDto) {
-    await this.findOne(userId, id);
+  async update(id: number, dto: UpdateRecipeDto) {
+    await this.findOne(id);
     return this.prisma.recipe.update({ where: { id }, data: dto });
   }
 
-  async remove(userId: number, id: number) {
-    await this.findOne(userId, id);
-    return this.prisma.recipe.update({
-      where: { id },
-      data: { deletedAt: new Date() },
-    });
+  async remove(id: number) {
+    const recipe = await this.findOne(id);
+    for (const photo of recipe.photos) {
+      await this.storage.deleteFile(photo.url);
+    }
+    return this.prisma.recipe.delete({ where: { id } });
   }
 }

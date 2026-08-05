@@ -11,13 +11,13 @@ export class PreparationMethodsService {
     private recipes: RecipesService,
   ) {}
 
-  async create(userId: number, recipeId: number, dto: CreatePreparationMethodDto) {
-    await this.recipes.findOne(userId, recipeId);
+  async create(recipeId: number, dto: CreatePreparationMethodDto) {
+    await this.recipes.findOne(recipeId);
     return this.prisma.preparationMethod.create({ data: { ...dto, recipeId } });
   }
 
-  async findAll(userId: number, recipeId: number) {
-    await this.recipes.findOne(userId, recipeId);
+  async findAll(recipeId: number) {
+    await this.recipes.findOne(recipeId);
     return this.prisma.preparationMethod.findMany({
       where: { recipeId },
       orderBy: { order: 'asc' },
@@ -25,15 +25,15 @@ export class PreparationMethodsService {
     });
   }
 
-  async update(userId: number, id: number, dto: UpdatePreparationMethodDto) {
+  async update(id: number, dto: UpdatePreparationMethodDto) {
     const method = await this.findMethod(id);
-    await this.recipes.findOne(userId, method.recipeId);
+    await this.recipes.findOne(method.recipeId);
     return this.prisma.preparationMethod.update({ where: { id }, data: dto });
   }
 
-  async remove(userId: number, id: number) {
+  async remove(id: number) {
     const method = await this.findMethod(id);
-    await this.recipes.findOne(userId, method.recipeId);
+    await this.recipes.findOne(method.recipeId);
     return this.prisma.preparationMethod.delete({ where: { id } });
   }
 

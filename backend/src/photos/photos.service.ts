@@ -15,8 +15,8 @@ export class PhotosService {
     private storage: StorageService,
   ) {}
 
-  async create(userId: number, file: Express.Multer.File, dto: CreatePhotoDto) {
-    await this.recipes.findOne(userId, dto.recipeId);
+  async create(file: Express.Multer.File, dto: CreatePhotoDto) {
+    await this.recipes.findOne(dto.recipeId);
 
     if (dto.type === PhotoType.COVER) {
       const existing = await this.prisma.recipePhoto.findFirst({
@@ -48,7 +48,7 @@ export class PhotosService {
     return pipeline.webp({ quality: 85 }).toBuffer();
   }
 
-  async updatePosition(userId: number, photoId: number, positionY: number) {
+  async updatePosition(photoId: number, positionY: number) {
     const photo = await this.prisma.recipePhoto.findUnique({
       where: { id: photoId },
     });
@@ -56,8 +56,6 @@ export class PhotosService {
     if (!photo) {
       throw new NotFoundException('Foto não encontrada');
     }
-
-    await this.recipes.findOne(userId, photo.recipeId);
 
     return this.prisma.recipePhoto.update({
       where: { id: photoId },

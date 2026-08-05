@@ -11,28 +11,28 @@ export class RecipeNotesService {
     private recipes: RecipesService,
   ) {}
 
-  async create(userId: number, recipeId: number, dto: CreateRecipeNoteDto) {
-    await this.recipes.findOne(userId, recipeId);
+  async create(recipeId: number, dto: CreateRecipeNoteDto) {
+    await this.recipes.findOne(recipeId);
     return this.prisma.recipeNote.create({ data: { ...dto, recipeId } });
   }
 
-  async findAll(userId: number, recipeId: number) {
-    await this.recipes.findOne(userId, recipeId);
+  async findAll(recipeId: number) {
+    await this.recipes.findOne(recipeId);
     return this.prisma.recipeNote.findMany({
       where: { recipeId },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async update(userId: number, id: number, dto: UpdateRecipeNoteDto) {
+  async update(id: number, dto: UpdateRecipeNoteDto) {
     const note = await this.findNote(id);
-    await this.recipes.findOne(userId, note.recipeId);
+    await this.recipes.findOne(note.recipeId);
     return this.prisma.recipeNote.update({ where: { id }, data: dto });
   }
 
-  async remove(userId: number, id: number) {
+  async remove(id: number) {
     const note = await this.findNote(id);
-    await this.recipes.findOne(userId, note.recipeId);
+    await this.recipes.findOne(note.recipeId);
     return this.prisma.recipeNote.delete({ where: { id } });
   }
 

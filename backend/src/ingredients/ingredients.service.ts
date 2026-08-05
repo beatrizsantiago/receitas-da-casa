@@ -11,25 +11,25 @@ export class IngredientsService {
     private recipes: RecipesService,
   ) {}
 
-  async create(userId: number, recipeId: number, dto: CreateIngredientDto) {
-    await this.recipes.findOne(userId, recipeId);
+  async create(recipeId: number, dto: CreateIngredientDto) {
+    await this.recipes.findOne(recipeId);
     return this.prisma.ingredient.create({ data: { ...dto, recipeId } });
   }
 
-  async findAll(userId: number, recipeId: number) {
-    await this.recipes.findOne(userId, recipeId);
+  async findAll(recipeId: number) {
+    await this.recipes.findOne(recipeId);
     return this.prisma.ingredient.findMany({ where: { recipeId }, orderBy: { order: 'asc' } });
   }
 
-  async update(userId: number, id: number, dto: UpdateIngredientDto) {
+  async update(id: number, dto: UpdateIngredientDto) {
     const ingredient = await this.findIngredient(id);
-    await this.recipes.findOne(userId, ingredient.recipeId);
+    await this.recipes.findOne(ingredient.recipeId);
     return this.prisma.ingredient.update({ where: { id }, data: dto });
   }
 
-  async remove(userId: number, id: number) {
+  async remove(id: number) {
     const ingredient = await this.findIngredient(id);
-    await this.recipes.findOne(userId, ingredient.recipeId);
+    await this.recipes.findOne(ingredient.recipeId);
     return this.prisma.ingredient.delete({ where: { id } });
   }
 

@@ -14,8 +14,8 @@ export class TagsService {
     return this.prisma.tag.findMany({ orderBy: { name: 'asc' } });
   }
 
-  async addToRecipe(userId: number, recipeId: number, tagId: number) {
-    await this.recipes.findOne(userId, recipeId);
+  async addToRecipe(recipeId: number, tagId: number) {
+    await this.recipes.findOne(recipeId);
 
     const tag = await this.prisma.tag.findUnique({ where: { id: tagId } });
     if (!tag) throw new NotFoundException('Tag não encontrada');
@@ -27,8 +27,8 @@ export class TagsService {
     });
   }
 
-  async removeFromRecipe(userId: number, recipeId: number, tagId: number) {
-    await this.recipes.findOne(userId, recipeId);
+  async removeFromRecipe(recipeId: number, tagId: number) {
+    await this.recipes.findOne(recipeId);
     return this.prisma.recipeTag.delete({
       where: { recipeId_tagId: { recipeId, tagId } },
     });
