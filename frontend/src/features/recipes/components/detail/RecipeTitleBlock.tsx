@@ -1,5 +1,6 @@
 import { Badge, Box, Button, Flex, Input, Text, Textarea } from '@chakra-ui/react';
 import { EditableBlock } from '@/shared/components/ui/EditableBlock';
+import { FieldLabel } from '@/shared/components/ui/FieldLabel';
 import { CATEGORY_META } from '@/shared';
 import type { Recipe } from '../../types';
 import type { RecipeDrafts, RecipeDraftSetters } from '../../hooks/useRecipeDrafts';
@@ -31,15 +32,7 @@ export function RecipeTitleBlock({
       editor={
         <Flex direction="column" gap={3.5}>
           <Box>
-            <Text
-              fontSize="13px"
-              fontWeight="550"
-              color="neutral.600"
-              mb={1.5}
-              letterSpacing="-0.005em"
-            >
-              Título
-            </Text>
+            <FieldLabel>Título</FieldLabel>
             <Input
               value={drafts.title}
               onChange={(e) => setters.setTitle(e.target.value)}
@@ -50,15 +43,7 @@ export function RecipeTitleBlock({
             />
           </Box>
           <Box>
-            <Text
-              fontSize="13px"
-              fontWeight="550"
-              color="neutral.600"
-              mb={1.5}
-              letterSpacing="-0.005em"
-            >
-              Descrição
-            </Text>
+            <FieldLabel>Descrição</FieldLabel>
             <Textarea
               value={drafts.description}
               onChange={(e) => setters.setDescription(e.target.value)}
@@ -73,15 +58,7 @@ export function RecipeTitleBlock({
             />
           </Box>
           <Box>
-            <Text
-              fontSize="13px"
-              fontWeight="550"
-              color="neutral.600"
-              mb={2}
-              letterSpacing="-0.005em"
-            >
-              Categoria
-            </Text>
+            <FieldLabel mb={2}>Categoria</FieldLabel>
             <Flex gap={2} flexWrap="wrap">
               {[
                 { id: 'SAVORY' as RecipeCategory, label: 'Salgada' },
