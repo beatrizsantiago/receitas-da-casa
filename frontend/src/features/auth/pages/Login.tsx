@@ -1,18 +1,18 @@
 import {
-  Box,
   Button,
   Field,
   Flex,
   Heading,
   Image,
-  Input,
   Text,
   chakra,
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import { LuMail, LuLock, LuEye, LuEyeOff } from 'react-icons/lu';
+import { LuMail } from 'react-icons/lu';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { IconInput } from '@/shared/components/ui/IconInput';
+import { PasswordInput } from '@/shared/components/ui/PasswordInput';
 import { useAuth } from '../hooks/useAuth';
 import smallLogo from '@/assets/logo.png';
 
@@ -20,7 +20,6 @@ const Login = () => {
   const navigate = useNavigate();
   const { login, isLoading } = useAuth();
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -101,20 +100,15 @@ const Login = () => {
             <Field.Label fontSize="sm" fontWeight="500" color="neutral.700">
               E-mail
             </Field.Label>
-            <Box position="relative" w="full">
-              <Box position="absolute" left="12px" top="50%" transform="translateY(-50%)" color="neutral.400" pointerEvents="none" display="flex" alignItems="center">
-                <LuMail size={16} />
-              </Box>
-              <Input
-                name="email"
-                type="email"
-                placeholder="seu@email.com"
-                pl="38px"
-                required
-                onInvalid={(e) => handleInvalid(e, 'email')}
-                onInput={() => clearError('email')}
-              />
-            </Box>
+            <IconInput
+              icon={<LuMail size={16} />}
+              name="email"
+              type="email"
+              placeholder="seu@email.com"
+              required
+              onInvalid={(e) => handleInvalid(e, 'email')}
+              onInput={() => clearError('email')}
+            />
             <Field.ErrorText>{errors.email}</Field.ErrorText>
           </Field.Root>
 
@@ -122,40 +116,13 @@ const Login = () => {
             <Field.Label fontSize="sm" fontWeight="500" color="neutral.700">
               Senha
             </Field.Label>
-            <Box position="relative" w="full">
-              <Box position="absolute" left="12px" top="50%" transform="translateY(-50%)" color="neutral.400" pointerEvents="none" display="flex" alignItems="center">
-                <LuLock size={16} />
-              </Box>
-              <Input
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder="••••••••"
-                pl="38px"
-                pr="38px"
-                required
-                onInvalid={(e) => handleInvalid(e, 'password')}
-                onInput={() => clearError('password')}
-              />
-              <chakra.button
-                type="button"
-                position="absolute"
-                right="12px"
-                top="50%"
-                transform="translateY(-50%)"
-                color="neutral.400"
-                display="flex"
-                alignItems="center"
-                bg="transparent"
-                border="none"
-                cursor="pointer"
-                p={0}
-                _hover={{ color: 'neutral.600' }}
-                onClick={() => setShowPassword((prev) => !prev)}
-                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-              >
-                {showPassword ? <LuEyeOff size={16} /> : <LuEye size={16} />}
-              </chakra.button>
-            </Box>
+            <PasswordInput
+              name="password"
+              placeholder="••••••••"
+              required
+              onInvalid={(e) => handleInvalid(e, 'password')}
+              onInput={() => clearError('password')}
+            />
             <Field.ErrorText>{errors.password}</Field.ErrorText>
           </Field.Root>
 

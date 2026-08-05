@@ -1,20 +1,21 @@
 import {
-  Box,
   Button,
   Field,
   Flex,
   Grid,
   Heading,
   Image,
-  Input,
   Link,
   Text,
   chakra,
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import { LuUser, LuMail, LuLock, LuEye, LuEyeOff } from 'react-icons/lu';
+import { LuUser, LuMail } from 'react-icons/lu';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { IconInput } from '@/shared/components/ui/IconInput';
+import { PasswordInput } from '@/shared/components/ui/PasswordInput';
+import { getApiErrorMessage } from '@/shared/utils/parseError';
 import { useAuth } from '../hooks/useAuth';
 import smallLogo from '@/assets/logo.png';
 
@@ -22,8 +23,6 @@ const Register = () => {
   const navigate = useNavigate();
   const { register, isLoading } = useAuth();
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -46,9 +45,7 @@ const Register = () => {
     register({ name, email, password })
       .then(() => navigate('/dashboard'))
       .catch((err: unknown) => {
-        const msg = (err as { response?: { data?: { message?: string } } })
-          ?.response?.data?.message ?? 'Erro ao criar conta';
-        toast.error(Array.isArray(msg) ? msg[0] : msg);
+        toast.error(getApiErrorMessage(err, 'Erro ao criar conta'));
       });
   };
 
@@ -113,118 +110,54 @@ const Register = () => {
         <Flex direction="column" gap={4}>
           <Field.Root invalid={!!errors.name}>
             <Field.Label fontSize="sm" fontWeight="500" color="neutral.700">Nome</Field.Label>
-            <Box position="relative" w="full">
-              <Box position="absolute" left="12px" top="50%" transform="translateY(-50%)" color="neutral.400" pointerEvents="none" display="flex" alignItems="center">
-                <LuUser size={16} />
-              </Box>
-              <Input
-                name="name"
-                placeholder="Seu nome"
-                pl="38px"
-                required
-                onInvalid={(e) => handleInvalid(e, 'name')}
-                onInput={() => clearError('name')}
-              />
-            </Box>
+            <IconInput
+              icon={<LuUser size={16} />}
+              name="name"
+              placeholder="Seu nome"
+              required
+              onInvalid={(e) => handleInvalid(e, 'name')}
+              onInput={() => clearError('name')}
+            />
             <Field.ErrorText>{errors.name}</Field.ErrorText>
           </Field.Root>
 
           <Field.Root invalid={!!errors.email}>
             <Field.Label fontSize="sm" fontWeight="500" color="neutral.700">E-mail</Field.Label>
-            <Box position="relative" w="full">
-              <Box position="absolute" left="12px" top="50%" transform="translateY(-50%)" color="neutral.400" pointerEvents="none" display="flex" alignItems="center">
-                <LuMail size={16} />
-              </Box>
-              <Input
-                name="email"
-                type="email"
-                placeholder="seu@email.com"
-                pl="38px"
-                required
-                onInvalid={(e) => handleInvalid(e, 'email')}
-                onInput={() => clearError('email')}
-              />
-            </Box>
+            <IconInput
+              icon={<LuMail size={16} />}
+              name="email"
+              type="email"
+              placeholder="seu@email.com"
+              required
+              onInvalid={(e) => handleInvalid(e, 'email')}
+              onInput={() => clearError('email')}
+            />
             <Field.ErrorText>{errors.email}</Field.ErrorText>
           </Field.Root>
 
           <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4}>
             <Field.Root invalid={!!errors.password}>
               <Field.Label fontSize="sm" fontWeight="500" color="neutral.700">Senha</Field.Label>
-              <Box position="relative" w="full">
-                <Box position="absolute" left="12px" top="50%" transform="translateY(-50%)" color="neutral.400" pointerEvents="none" display="flex" alignItems="center">
-                  <LuLock size={16} />
-                </Box>
-                <Input
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  pl="38px"
-                  pr="38px"
-                  required
-                  minLength={8}
-                  onInvalid={(e) => handleInvalid(e, 'password')}
-                  onInput={() => clearError('password')}
-                />
-                <chakra.button
-                  type="button"
-                  position="absolute"
-                  right="12px"
-                  top="50%"
-                  transform="translateY(-50%)"
-                  color="neutral.400"
-                  display="flex"
-                  alignItems="center"
-                  bg="transparent"
-                  border="none"
-                  cursor="pointer"
-                  p={0}
-                  _hover={{ color: 'neutral.600' }}
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                >
-                  {showPassword ? <LuEyeOff size={16} /> : <LuEye size={16} />}
-                </chakra.button>
-              </Box>
+              <PasswordInput
+                name="password"
+                placeholder="••••••••"
+                required
+                minLength={8}
+                onInvalid={(e) => handleInvalid(e, 'password')}
+                onInput={() => clearError('password')}
+              />
               <Field.ErrorText>{errors.password}</Field.ErrorText>
             </Field.Root>
 
             <Field.Root invalid={!!errors.confirmPassword}>
               <Field.Label fontSize="sm" fontWeight="500" color="neutral.700">Confirmar senha</Field.Label>
-              <Box position="relative" w="full">
-                <Box position="absolute" left="12px" top="50%" transform="translateY(-50%)" color="neutral.400" pointerEvents="none" display="flex" alignItems="center">
-                  <LuLock size={16} />
-                </Box>
-                <Input
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  pl="38px"
-                  pr="38px"
-                  required
-                  onInvalid={(e) => handleInvalid(e, 'confirmPassword')}
-                  onInput={() => clearError('confirmPassword')}
-                />
-                <chakra.button
-                  type="button"
-                  position="absolute"
-                  right="12px"
-                  top="50%"
-                  transform="translateY(-50%)"
-                  color="neutral.400"
-                  display="flex"
-                  alignItems="center"
-                  bg="transparent"
-                  border="none"
-                  cursor="pointer"
-                  p={0}
-                  _hover={{ color: 'neutral.600' }}
-                  onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  aria-label={showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                >
-                  {showConfirmPassword ? <LuEyeOff size={16} /> : <LuEye size={16} />}
-                </chakra.button>
-              </Box>
+              <PasswordInput
+                name="confirmPassword"
+                placeholder="••••••••"
+                required
+                onInvalid={(e) => handleInvalid(e, 'confirmPassword')}
+                onInput={() => clearError('confirmPassword')}
+              />
               <Field.ErrorText>{errors.confirmPassword}</Field.ErrorText>
             </Field.Root>
           </Grid>
