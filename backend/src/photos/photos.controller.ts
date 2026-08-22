@@ -1,8 +1,10 @@
 import {
-  BadRequestException,
   Body,
   Controller,
+  FileTypeValidator,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -21,6 +23,7 @@ import { UpdatePhotoDto } from './dto/update-photo.dto';
 import { PhotosService } from './photos.service';
 
 const MAX_PHOTO_SIZE = 8 * 1024 * 1024; // 8MB
+const ALLOWED_IMAGE_TYPES = /^image\/(jpeg|png|webp|gif)$/;
 
 @ApiTags('photos')
 @ApiBearerAuth('access-token')
@@ -35,12 +38,20 @@ export class PhotosController {
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Fazer upload de foto para uma receita' })
   create(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: MAX_PHOTO_SIZE,
+            message: 'Arquivo muito grande (máx. 8MB)',
+          }),
+          new FileTypeValidator({ fileType: ALLOWED_IMAGE_TYPES }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
     @Body() dto: CreatePhotoDto,
   ) {
-    if (!file) {
-      throw new BadRequestException('Nenhum arquivo enviado');
-    }
     return this.photos.create(file, dto);
   }
 
