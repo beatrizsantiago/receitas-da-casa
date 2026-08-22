@@ -1,6 +1,6 @@
-import { Box, Flex, Text } from '@chakra-ui/react';
+import { Box, Flex, Text, chakra } from '@chakra-ui/react';
 import { FaInstagram, FaYoutube } from 'react-icons/fa6';
-import { LuLink, LuSquareArrowOutUpRight } from 'react-icons/lu';
+import { LuLink, LuSquareArrowOutUpRight, LuX } from 'react-icons/lu';
 import { EditableBlock } from '@/shared/components/ui/EditableBlock';
 import { EmptyHint } from '@/shared/components/ui/EmptyHint';
 import { FieldLabel } from '@/shared/components/ui/FieldLabel';
@@ -68,6 +68,30 @@ export function RecipeReferenceBlock({
             type="url"
             bg="white"
             fontSize="15px"
+            rightElement={
+              drafts.reference ? (
+                <chakra.button
+                  type="button"
+                  position="absolute"
+                  right="12px"
+                  top="50%"
+                  transform="translateY(-50%)"
+                  zIndex={1}
+                  color="neutral.400"
+                  display="flex"
+                  alignItems="center"
+                  bg="transparent"
+                  border="none"
+                  cursor="pointer"
+                  p={0}
+                  _hover={{ color: 'neutral.600' }}
+                  onClick={() => setters.setReference('')}
+                  aria-label="Limpar referência"
+                >
+                  <LuX size={16} />
+                </chakra.button>
+              ) : undefined
+            }
           />
           <Text fontSize="12px" color="neutral.400" mt={1.5}>
             Apenas um link. Deixe em branco para remover a referência.
