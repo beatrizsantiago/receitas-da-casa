@@ -6,6 +6,7 @@ import { Public } from '../common/decorators/public.decorator';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { AllowNewUsersGuard } from './guards/allow-new-users.guard';
 import { RefreshJwtGuard } from './guards/refresh-jwt.guard';
 import type { JwtPayload } from './interfaces/jwt-payload.interface';
 
@@ -15,9 +16,10 @@ export class AuthController {
   constructor(private auth: AuthService) {}
 
   @Public()
+  @UseGuards(AllowNewUsersGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('register')
-  @ApiOperation({ summary: 'Criar conta' })
+  @ApiOperation({ summary: 'Criar conta (somente quando ALLOW_NEW_USERS=true)' })
   register(@Body() dto: RegisterDto) {
     return this.auth.register(dto);
   }
