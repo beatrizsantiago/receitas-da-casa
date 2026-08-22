@@ -14,6 +14,7 @@ export function IconInput({ icon, rightElement, ...inputProps }: IconInputProps)
         left="12px"
         top="50%"
         transform="translateY(-50%)"
+        zIndex={1}
         color="neutral.400"
         pointerEvents="none"
         display="flex"
