@@ -31,8 +31,6 @@ model User {
   password     String
   tokenVersion Int      @default(0)
   createdAt    DateTime @default(now())
-
-  recipes Recipe[]
 }
 
 model Recipe {
@@ -44,9 +42,6 @@ model Recipe {
   updatedAt   DateTime       @updatedAt
   deletedAt   DateTime?
 
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
-
   notes               RecipeNote[]
   ingredients         Ingredient[]
   preparationMethods  PreparationMethod[]
@@ -54,7 +49,6 @@ model Recipe {
   cookHistory CookHistory[]
   tags        RecipeTag[]
 
-  @@index([userId])
   @@index([deletedAt])
 }
 

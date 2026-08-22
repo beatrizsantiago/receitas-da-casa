@@ -20,8 +20,8 @@ export class RecipesService {
     private storage: StorageService,
   ) {}
 
-  create(userId: number, dto: CreateRecipeDto) {
-    return this.prisma.recipe.create({ data: { ...dto, userId } });
+  create(dto: CreateRecipeDto) {
+    return this.prisma.recipe.create({ data: dto });
   }
 
   async findAll(filter: FilterRecipesDto) {

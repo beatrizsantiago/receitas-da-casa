@@ -10,8 +10,6 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { FilterRecipesDto } from './dto/filter-recipes.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
@@ -25,8 +23,8 @@ export class RecipesController {
 
   @Post()
   @ApiOperation({ summary: 'Criar receita' })
-  create(@CurrentUser() user: JwtPayload, @Body() dto: CreateRecipeDto) {
-    return this.recipes.create(user.sub, dto);
+  create(@Body() dto: CreateRecipeDto) {
+    return this.recipes.create(dto);
   }
 
   @Get()
