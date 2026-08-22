@@ -6,7 +6,7 @@ import { usePublicRecipeQuery } from '../hooks/usePublicRecipes';
 import { LoadingSpinner } from '@/shared/components/ui/LoadingSpinner';
 import { EmptyState } from '@/shared/components/ui/EmptyState';
 import { ViewBlock } from '@/shared/components/ui/ViewBlock';
-import { IngredientsView } from '@/features/recipes/components/detail/IngredientsView';
+import { IngredientGroupsView } from '@/features/recipes/components/detail/IngredientGroupsView';
 import { PreparationMethodsView } from '@/features/recipes/components/detail/PreparationMethodsView';
 import { COVER_GRADIENT } from '@/shared/utils/constants';
 
@@ -108,7 +108,7 @@ export default function PublicRecipeDetail() {
         gap={4}
       >
         <ViewBlock eyebrow="você vai precisar de" title="Ingredientes">
-          <IngredientsView ingredients={recipe.ingredients} />
+          <IngredientGroupsView ingredientGroups={recipe.ingredientGroups} />
         </ViewBlock>
 
         <ViewBlock eyebrow="modo de preparo" title="Passo a passo">

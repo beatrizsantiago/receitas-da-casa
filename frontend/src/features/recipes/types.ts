@@ -6,10 +6,18 @@ export type PhotoType = 'COVER' | 'USER';
 
 export interface Ingredient {
   id: number;
-  recipeId: number;
+  ingredientGroupId: number;
   name: string;
   amount: string;
   order: number;
+}
+
+export interface IngredientGroup {
+  id: number;
+  recipeId: number;
+  title?: string | null;
+  order: number;
+  ingredients: Ingredient[];
 }
 
 export interface Step {
@@ -58,7 +66,7 @@ export interface Recipe {
   category: RecipeCategory;
   createdAt: string;
   updatedAt: string;
-  ingredients?: Ingredient[];
+  ingredientGroups?: IngredientGroup[];
   preparationMethods?: PreparationMethod[];
   notes?: Note[];
   tags?: { tag: Tag }[];
@@ -84,6 +92,13 @@ export interface CreateIngredientDto {
 }
 
 export interface UpdateIngredientDto extends Partial<CreateIngredientDto> {}
+
+export interface CreateIngredientGroupDto {
+  title?: string;
+  order: number;
+}
+
+export interface UpdateIngredientGroupDto extends Partial<CreateIngredientGroupDto> {}
 
 export interface CreatePreparationMethodDto {
   title?: string;

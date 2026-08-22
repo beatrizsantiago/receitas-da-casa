@@ -3,11 +3,13 @@ import type {
   CookHistory,
   CreateCookHistoryDto,
   CreateIngredientDto,
+  CreateIngredientGroupDto,
   CreateNoteDto,
   CreatePreparationMethodDto,
   CreateRecipeDto,
   CreateStepDto,
   Ingredient,
+  IngredientGroup,
   Note,
   PaginatedResponse,
   Photo,
@@ -15,6 +17,7 @@ import type {
   Recipe,
   Step,
   UpdateIngredientDto,
+  UpdateIngredientGroupDto,
   UpdateNoteDto,
   UpdatePreparationMethodDto,
   UpdateRecipeDto,
@@ -46,15 +49,31 @@ export const recipesService = {
     await api.delete(`/recipes/${id}`);
   },
 
-  // ─── Ingredients ───
+  // ─── Ingredient Groups ───
 
-  async listIngredients(recipeId: number): Promise<Ingredient[]> {
-    const { data } = await api.get<Ingredient[]>(`/recipes/${recipeId}/ingredients`);
+  async addIngredientGroup(recipeId: number, dto: CreateIngredientGroupDto): Promise<IngredientGroup> {
+    const { data } = await api.post<IngredientGroup>(`/recipes/${recipeId}/ingredient-groups`, dto);
     return data;
   },
 
-  async addIngredient(recipeId: number, dto: CreateIngredientDto): Promise<Ingredient> {
-    const { data } = await api.post<Ingredient>(`/recipes/${recipeId}/ingredients`, dto);
+  async updateIngredientGroup(id: number, dto: UpdateIngredientGroupDto): Promise<IngredientGroup> {
+    const { data } = await api.patch<IngredientGroup>(`/ingredient-groups/${id}`, dto);
+    return data;
+  },
+
+  async removeIngredientGroup(id: number): Promise<void> {
+    await api.delete(`/ingredient-groups/${id}`);
+  },
+
+  // ─── Ingredients ───
+
+  async listIngredients(ingredientGroupId: number): Promise<Ingredient[]> {
+    const { data } = await api.get<Ingredient[]>(`/ingredient-groups/${ingredientGroupId}/ingredients`);
+    return data;
+  },
+
+  async addIngredient(ingredientGroupId: number, dto: CreateIngredientDto): Promise<Ingredient> {
+    const { data } = await api.post<Ingredient>(`/ingredient-groups/${ingredientGroupId}/ingredients`, dto);
     return data;
   },
 

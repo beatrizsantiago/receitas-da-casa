@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { HistoryModule } from './history/history.module';
+import { IngredientGroupsModule } from './ingredient-groups/ingredient-groups.module';
 import { IngredientsModule } from './ingredients/ingredients.module';
 import { PhotosModule } from './photos/photos.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -29,6 +30,7 @@ import { UsersModule } from './users/users.module';
     PublicRecipesModule,
     RecipeNotesModule,
     IngredientsModule,
+    IngredientGroupsModule,
     PreparationMethodsModule,
     StepsModule,
     TagsModule,

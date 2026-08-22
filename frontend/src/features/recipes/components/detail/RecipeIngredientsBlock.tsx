@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { EditableBlock } from '@/shared/components/ui/EditableBlock';
-import { IngredientList, type IngredientListHandle } from '../IngredientList';
-import { IngredientsView } from './IngredientsView';
+import { IngredientGroupList, type IngredientGroupListHandle } from '../IngredientGroupList';
+import { IngredientGroupsView } from './IngredientGroupsView';
 import type { Recipe } from '../../types';
 
 interface RecipeIngredientsBlockProps {
@@ -15,7 +15,7 @@ export function RecipeIngredientsBlock({
   recipeId,
   onCancel,
 }: RecipeIngredientsBlockProps) {
-  const listRef = useRef<IngredientListHandle>(null);
+  const listRef = useRef<IngredientGroupListHandle>(null);
 
   return (
     <EditableBlock
@@ -26,14 +26,14 @@ export function RecipeIngredientsBlock({
       }}
       onCancel={onCancel}
       editor={
-        <IngredientList
+        <IngredientGroupList
           ref={listRef}
           recipeId={recipeId}
-          ingredients={recipe.ingredients ?? []}
+          ingredientGroups={recipe.ingredientGroups ?? []}
         />
       }
     >
-      <IngredientsView ingredients={recipe.ingredients} />
+      <IngredientGroupsView ingredientGroups={recipe.ingredientGroups} />
     </EditableBlock>
   );
 }

@@ -44,7 +44,7 @@ model Recipe {
   deletedAt   DateTime?
 
   notes               RecipeNote[]
-  ingredients         Ingredient[]
+  ingredientGroups    IngredientGroup[]
   preparationMethods  PreparationMethod[]
   photos              RecipePhoto[]
   cookHistory CookHistory[]
@@ -64,16 +64,30 @@ model RecipeNote {
   @@index([recipeId])
 }
 
+model IngredientGroup {
+  id    Int     @id @default(autoincrement())
+  title String?
+  order Int
+
+  recipeId Int
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  ingredients Ingredient[]
+
+  @@index([recipeId])
+  @@unique([recipeId, order])
+}
+
 model Ingredient {
   id       Int    @id @default(autoincrement())
   name   String
   amount String
   order  Int
 
-  recipeId Int
-  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredientGroupId Int
+  ingredientGroup   IngredientGroup @relation(fields: [ingredientGroupId], references: [id], onDelete: Cascade)
 
-  @@index([recipeId])
+  @@index([ingredientGroupId])
 }
 
 model PreparationMethod {

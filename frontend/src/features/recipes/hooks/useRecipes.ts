@@ -3,11 +3,13 @@ import { recipesService } from '../services/recipes.service';
 import type {
   CreateCookHistoryDto,
   CreateIngredientDto,
+  CreateIngredientGroupDto,
   CreateNoteDto,
   CreatePreparationMethodDto,
   CreateStepDto,
   RecipeCategory,
   UpdateIngredientDto,
+  UpdateIngredientGroupDto,
   UpdateNoteDto,
   UpdatePreparationMethodDto,
   UpdateRecipeDto,
@@ -60,13 +62,40 @@ export function useDeleteRecipeMutation() {
   });
 }
 
+// ─── Ingredient Groups ───
+export function useAddIngredientGroupMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ recipeId, dto }: { recipeId: number; dto: CreateIngredientGroupDto }) =>
+      recipesService.addIngredientGroup(recipeId, dto),
+    onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: [RECIPE_KEY, vars.recipeId] }),
+  });
+}
+
+export function useUpdateIngredientGroupMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, dto }: { id: number; dto: UpdateIngredientGroupDto }) =>
+      recipesService.updateIngredientGroup(id, dto),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [RECIPE_KEY] }),
+  });
+}
+
+export function useDeleteIngredientGroupMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: recipesService.removeIngredientGroup,
+    onSuccess: () => qc.invalidateQueries({ queryKey: [RECIPE_KEY] }),
+  });
+}
+
 // ─── Ingredients ───
 export function useAddIngredientMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ recipeId, dto }: { recipeId: number; dto: CreateIngredientDto }) =>
-      recipesService.addIngredient(recipeId, dto),
-    onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: [RECIPE_KEY, vars.recipeId] }),
+    mutationFn: ({ ingredientGroupId, dto }: { ingredientGroupId: number; dto: CreateIngredientDto }) =>
+      recipesService.addIngredient(ingredientGroupId, dto),
+    onSuccess: () => qc.invalidateQueries({ queryKey: [RECIPE_KEY] }),
   });
 }
 

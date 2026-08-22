@@ -19,19 +19,19 @@ import { IngredientsService } from './ingredients.service';
 export class IngredientsController {
   constructor(private ingredients: IngredientsService) {}
 
-  @Post('recipes/:recipeId/ingredients')
-  @ApiOperation({ summary: 'Adicionar ingrediente a uma receita' })
+  @Post('ingredient-groups/:ingredientGroupId/ingredients')
+  @ApiOperation({ summary: 'Adicionar ingrediente a um grupo de ingredientes' })
   create(
-    @Param('recipeId', ParseIntPipe) recipeId: number,
+    @Param('ingredientGroupId', ParseIntPipe) ingredientGroupId: number,
     @Body() dto: CreateIngredientDto,
   ) {
-    return this.ingredients.create(recipeId, dto);
+    return this.ingredients.create(ingredientGroupId, dto);
   }
 
-  @Get('recipes/:recipeId/ingredients')
-  @ApiOperation({ summary: 'Listar ingredientes de uma receita' })
-  findAll(@Param('recipeId', ParseIntPipe) recipeId: number) {
-    return this.ingredients.findAll(recipeId);
+  @Get('ingredient-groups/:ingredientGroupId/ingredients')
+  @ApiOperation({ summary: 'Listar ingredientes de um grupo' })
+  findAll(@Param('ingredientGroupId', ParseIntPipe) ingredientGroupId: number) {
+    return this.ingredients.findAll(ingredientGroupId);
   }
 
   @Patch('ingredients/:id')

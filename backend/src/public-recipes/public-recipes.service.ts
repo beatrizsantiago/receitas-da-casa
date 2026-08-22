@@ -58,8 +58,16 @@ export class PublicRecipesService {
           where: { type: 'COVER' },
           select: { url: true, positionY: true },
         },
-        ingredients: {
-          select: { id: true, name: true, amount: true, order: true },
+        ingredientGroups: {
+          select: {
+            id: true,
+            title: true,
+            order: true,
+            ingredients: {
+              select: { id: true, name: true, amount: true, order: true },
+              orderBy: { order: 'asc' },
+            },
+          },
           orderBy: { order: 'asc' },
         },
         preparationMethods: {

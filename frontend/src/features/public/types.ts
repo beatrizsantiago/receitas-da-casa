@@ -26,6 +26,13 @@ export interface PublicIngredient {
   order: number;
 }
 
+export interface PublicIngredientGroup {
+  id: number;
+  title?: string | null;
+  order: number;
+  ingredients: PublicIngredient[];
+}
+
 export interface PublicStep {
   id: number;
   description: string;
@@ -43,7 +50,7 @@ export interface PublicRecipeDetail {
   id: number;
   title: string;
   photos: PublicPhoto[];
-  ingredients: PublicIngredient[];
+  ingredientGroups: PublicIngredientGroup[];
   preparationMethods: PublicPreparationMethod[];
 }
 

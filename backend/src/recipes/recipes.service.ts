@@ -5,7 +5,13 @@ import { CreateRecipeDto } from './dto/create-recipe.dto';
 import { FilterRecipesDto } from './dto/filter-recipes.dto';
 import { UpdateRecipeDto } from './dto/update-recipe.dto';
 
-function mapRecipe<T extends { id: number; _count: { cookHistory: number }; cookHistory: { date: Date }[] }>(recipe: T) {
+function mapRecipe<
+  T extends {
+    id: number;
+    _count: { cookHistory: number };
+    cookHistory: { date: Date }[];
+  },
+>(recipe: T) {
   return {
     ...recipe,
     cooks: recipe._count.cookHistory,
@@ -65,7 +71,10 @@ export class RecipesService {
       where: { id, deletedAt: null },
       include: {
         tags: { include: { tag: true } },
-        ingredients: true,
+        ingredientGroups: {
+          orderBy: { order: 'asc' },
+          include: { ingredients: { orderBy: { order: 'asc' } } },
+        },
         preparationMethods: {
           orderBy: { order: 'asc' },
           include: { steps: { orderBy: { order: 'asc' } } },
