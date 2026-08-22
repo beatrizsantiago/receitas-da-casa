@@ -4,6 +4,7 @@ import type { Recipe, RecipeCategory } from '../types';
 export interface RecipeDrafts {
   title: string;
   description: string;
+  reference: string;
   category: RecipeCategory;
   tags: { name: string; color: string }[];
   ingredients: { name: string; amount: string }[];
@@ -13,6 +14,7 @@ export interface RecipeDrafts {
 export interface RecipeDraftSetters {
   setTitle: React.Dispatch<React.SetStateAction<string>>;
   setDescription: React.Dispatch<React.SetStateAction<string>>;
+  setReference: React.Dispatch<React.SetStateAction<string>>;
   setCategory: React.Dispatch<React.SetStateAction<RecipeCategory>>;
   setTags: React.Dispatch<React.SetStateAction<{ name: string; color: string }[]>>;
   setIngredients: React.Dispatch<React.SetStateAction<{ name: string; amount: string }[]>>;
@@ -22,6 +24,7 @@ export interface RecipeDraftSetters {
 export function useRecipeDrafts() {
   const [titleDraft, setTitleDraft] = useState('');
   const [descDraft, setDescDraft] = useState('');
+  const [referenceDraft, setReferenceDraft] = useState('');
   const [catDraft, setCatDraft] = useState<RecipeCategory>('SAVORY');
   const [tagsDraft, setTagsDraft] = useState<{ name: string; color: string }[]>([]);
   const [ingDraft, setIngDraft] = useState<{ name: string; amount: string }[]>([]);
@@ -31,6 +34,7 @@ export function useRecipeDrafts() {
     if (!recipe) return;
     setTitleDraft(recipe.title);
     setDescDraft(recipe.description ?? '');
+    setReferenceDraft(recipe.reference ?? '');
     setCatDraft(recipe.category);
     setTagsDraft(
       recipe.tags?.map((t) => ({
@@ -54,6 +58,7 @@ export function useRecipeDrafts() {
   const drafts: RecipeDrafts = {
     title: titleDraft,
     description: descDraft,
+    reference: referenceDraft,
     category: catDraft,
     tags: tagsDraft,
     ingredients: ingDraft,
@@ -63,6 +68,7 @@ export function useRecipeDrafts() {
   const setters: RecipeDraftSetters = {
     setTitle: setTitleDraft,
     setDescription: setDescDraft,
+    setReference: setReferenceDraft,
     setCategory: setCatDraft,
     setTags: setTagsDraft,
     setIngredients: setIngDraft,

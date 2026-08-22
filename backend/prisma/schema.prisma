@@ -37,6 +37,7 @@ model Recipe {
   id          Int            @id @default(autoincrement())
   title       String
   description String?
+  reference   String?
   category    RecipeCategory
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt

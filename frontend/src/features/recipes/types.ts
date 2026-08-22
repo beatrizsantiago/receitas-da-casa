@@ -54,6 +54,7 @@ export interface Recipe {
   id: number;
   title: string;
   description?: string;
+  reference?: string | null;
   category: RecipeCategory;
   createdAt: string;
   updatedAt: string;
@@ -70,6 +71,7 @@ export interface Recipe {
 export interface CreateRecipeDto {
   title: string;
   description?: string;
+  reference?: string | null;
   category: RecipeCategory;
 }
 

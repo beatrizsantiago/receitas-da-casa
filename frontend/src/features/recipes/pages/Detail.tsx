@@ -24,6 +24,7 @@ import { RecipeTitleBlock } from '../components/detail/RecipeTitleBlock';
 import { RecipeTagsBlock } from '../components/detail/RecipeTagsBlock';
 import { RecipeIngredientsBlock } from '../components/detail/RecipeIngredientsBlock';
 import { RecipeStepsBlock } from '../components/detail/RecipeStepsBlock';
+import { RecipeReferenceBlock } from '../components/detail/RecipeReferenceBlock';
 import { RecipeNotesBlock } from '../components/detail/RecipeNotesBlock';
 import { RecipeHistorySection } from '../components/detail/RecipeHistorySection';
 import { RecipeGallerySection } from '../components/detail/RecipeGallerySection';
@@ -145,6 +146,15 @@ export default function RecipeDetail() {
     }
   }
 
+  async function saveReferenceBlock() {
+    await updateRecipe.mutateAsync({
+      id: recipeId,
+      dto: {
+        reference: drafts.reference.trim() || null,
+      },
+    });
+  }
+
   if (isLoading) {
     return (
       <Box minH="100vh" bg="beige.100">
@@ -224,6 +234,13 @@ export default function RecipeDetail() {
         <RecipeStepsBlock
           recipe={recipe}
           recipeId={recipeId}
+          onCancel={initDrafts}
+        />
+        <RecipeReferenceBlock
+          recipe={recipe}
+          drafts={drafts}
+          setters={setters}
+          onSave={saveReferenceBlock}
           onCancel={initDrafts}
         />
         <RecipeNotesBlock

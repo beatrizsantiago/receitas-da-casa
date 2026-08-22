@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { RecipeCategory } from '@prisma/client';
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
 
 export class CreateRecipeDto {
   @ApiProperty({ example: 'Bolo de chocolate' })
@@ -12,6 +12,15 @@ export class CreateRecipeDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({ example: 'https://www.youtube.com/watch?v=xxxxx' })
+  @IsOptional()
+  @IsUrl(
+    { protocols: ['http', 'https'], require_protocol: true },
+    { message: 'A referência deve ser um link válido (http ou https)' },
+  )
+  @MaxLength(2048, { message: 'O link é muito longo' })
+  reference?: string | null;
 
   @ApiProperty({ enum: RecipeCategory, example: RecipeCategory.SWEET })
   @IsEnum(RecipeCategory, { message: 'A categoria deve ser Doce ou Salgada' })
