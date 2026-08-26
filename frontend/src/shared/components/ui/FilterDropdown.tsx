@@ -47,112 +47,116 @@ export function FilterDropdown({
       p={4}
       minW="260px"
       maxW="320px"
+      display="flex"
+      flexDirection="column"
     >
-      <Text
-        fontSize="11px"
-        fontWeight="700"
-        color="neutral.500"
-        letterSpacing="0.07em"
-        textTransform="uppercase"
-        mb={2}
-      >
-        Categoria
-      </Text>
+      <Box maxH="300px" overflowY="auto" pr={1}>
+        <Text
+          fontSize="11px"
+          fontWeight="700"
+          color="neutral.500"
+          letterSpacing="0.07em"
+          textTransform="uppercase"
+          mb={2}
+        >
+          Categoria
+        </Text>
 
-      <Flex direction="column" gap={1} mb={4}>
-        {categoryOptions.map(({ key, label }) => (
-          <Box
-            as="button"
-            key={key}
-            display="flex"
-            alignItems="center"
-            gap={2.5}
-            px={2.5}
-            py={1.5}
-            rounded="10px"
-            fontSize="13px"
-            fontWeight="500"
-            color={draftCategory === key ? 'primary.700' : 'neutral.700'}
-            bg={draftCategory === key ? 'primary.50' : 'transparent'}
-            transition="all 0.12s"
-            onClick={() => onCategoryChange(key)}
-          >
+        <Flex direction="column" gap={1} mb={4}>
+          {categoryOptions.map(({ key, label }) => (
             <Box
-              w="16px"
-              h="16px"
-              rounded="full"
-              borderWidth="1.5px"
-              borderColor={draftCategory === key ? 'primary.500' : 'neutral.300'}
-              bg={draftCategory === key ? 'primary.500' : 'transparent'}
+              as="button"
+              key={key}
               display="flex"
               alignItems="center"
-              justifyContent="center"
-              flexShrink={0}
+              gap={2.5}
+              px={2.5}
+              py={1.5}
+              rounded="10px"
+              fontSize="13px"
+              fontWeight="500"
+              color={draftCategory === key ? 'primary.700' : 'neutral.700'}
+              bg={draftCategory === key ? 'primary.50' : 'transparent'}
+              transition="all 0.12s"
+              onClick={() => onCategoryChange(key)}
             >
-              {draftCategory === key && <Box w="6px" h="6px" rounded="full" bg="white" />}
+              <Box
+                w="16px"
+                h="16px"
+                rounded="full"
+                borderWidth="1.5px"
+                borderColor={draftCategory === key ? 'primary.500' : 'neutral.300'}
+                bg={draftCategory === key ? 'primary.500' : 'transparent'}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                flexShrink={0}
+              >
+                {draftCategory === key && <Box w="6px" h="6px" rounded="full" bg="white" />}
+              </Box>
+              {label}
             </Box>
-            {label}
-          </Box>
-        ))}
-      </Flex>
+          ))}
+        </Flex>
 
-      {tags.length > 0 && (
-        <>
-          <Text
-            fontSize="11px"
-            fontWeight="700"
-            color="neutral.500"
-            letterSpacing="0.07em"
-            textTransform="uppercase"
-            mb={2}
-          >
-            Tags
-          </Text>
-          <Flex direction="column" gap={1} mb={4}>
-            {tags.map((t) => {
-              const checked = draftTags.includes(t.name);
-              return (
-                <Box
-                  as="button"
-                  key={t.id}
-                  display="flex"
-                  alignItems="center"
-                  gap={2.5}
-                  px={2.5}
-                  py={1.5}
-                  rounded="10px"
-                  fontSize="13px"
-                  fontWeight="500"
-                  color="neutral.700"
-                  bg={checked ? t.color + '12' : 'transparent'}
-                  transition="all 0.12s"
-                  onClick={() => onTagToggle(t.name)}
-                >
+        {tags.length > 0 && (
+          <>
+            <Text
+              fontSize="11px"
+              fontWeight="700"
+              color="neutral.500"
+              letterSpacing="0.07em"
+              textTransform="uppercase"
+              mb={2}
+            >
+              Tags
+            </Text>
+            <Flex direction="column" gap={1} mb={4}>
+              {tags.map((t) => {
+                const checked = draftTags.includes(t.name);
+                return (
                   <Box
-                    w="16px"
-                    h="16px"
-                    rounded="4px"
-                    borderWidth="1.5px"
-                    borderColor={checked ? t.color : 'neutral.300'}
-                    bg={checked ? t.color : 'transparent'}
+                    as="button"
+                    key={t.id}
                     display="flex"
                     alignItems="center"
-                    justifyContent="center"
-                    flexShrink={0}
+                    gap={2.5}
+                    px={2.5}
+                    py={1.5}
+                    rounded="10px"
+                    fontSize="13px"
+                    fontWeight="500"
+                    color="neutral.700"
+                    bg={checked ? t.color + '12' : 'transparent'}
+                    transition="all 0.12s"
+                    onClick={() => onTagToggle(t.name)}
                   >
-                    {checked && <LuCheck size={10} color="white" />}
+                    <Box
+                      w="16px"
+                      h="16px"
+                      rounded="4px"
+                      borderWidth="1.5px"
+                      borderColor={checked ? t.color : 'neutral.300'}
+                      bg={checked ? t.color : 'transparent'}
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      flexShrink={0}
+                    >
+                      {checked && <LuCheck size={10} color="white" />}
+                    </Box>
+                    <Box as="span" style={{ color: t.color }} fontWeight="600">
+                      #{t.name}
+                    </Box>
                   </Box>
-                  <Box as="span" style={{ color: t.color }} fontWeight="600">
-                    #{t.name}
-                  </Box>
-                </Box>
-              );
-            })}
-          </Flex>
-        </>
-      )}
+                );
+              })}
+            </Flex>
+          </>
+        )}
+      </Box>
 
-      <Flex gap={2} borderTopWidth="1px" borderColor="beige.100" pt={3}>
+      <Flex gap={2} borderTopWidth="1px" borderColor="beige.100" pt={3} flexShrink={0}>
         <Button
           variant="ghost"
           size="sm"
