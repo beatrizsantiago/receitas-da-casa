@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Flex, Input, Text, Textarea } from '@chakra-ui/react';
+import { Badge, Box, Button, Flex, Input, Switch, Text, Textarea } from '@chakra-ui/react';
 import { EditableBlock } from '@/shared/components/ui/EditableBlock';
 import { FieldLabel } from '@/shared/components/ui/FieldLabel';
 import { CATEGORY_META } from '@/shared';
@@ -87,6 +87,24 @@ export function RecipeTitleBlock({
               ))}
             </Flex>
           </Box>
+          <Box>
+            <FieldLabel mb={2}>Visibilidade</FieldLabel>
+            <Switch.Root
+              checked={drafts.isPublic}
+              onCheckedChange={(e) => setters.setIsPublic(e.checked)}
+            >
+              <Switch.HiddenInput />
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+              <Switch.Label fontSize="14px" color="neutral.600">
+                {drafts.isPublic ? 'Pública' : 'Privada'}
+              </Switch.Label>
+            </Switch.Root>
+            <Text fontSize="12px" color="neutral.400" mt={1}>
+              Receitas públicas aparecem no link compartilhável.
+            </Text>
+          </Box>
         </Flex>
       }
     >
@@ -102,6 +120,17 @@ export function RecipeTitleBlock({
             fontWeight="500"
           >
             {cat.label}
+          </Badge>
+          <Badge
+            bg={recipe.isPublic ? 'red.100' : 'neutral.100'}
+            color={recipe.isPublic ? 'red.700' : 'neutral.500'}
+            px={2}
+            py={0.5}
+            rounded="md"
+            fontSize="xs"
+            fontWeight="500"
+          >
+            {recipe.isPublic ? 'Pública' : 'Privada'}
           </Badge>
         </Flex>
         <Text fontSize="14px" color="neutral.600" lineHeight={1.65}>

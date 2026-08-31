@@ -65,6 +65,21 @@ export function RecipeCard({ recipe }: Props) {
         >
           {cat?.label ?? recipe.category}
         </Box>
+
+        <Box
+          position="absolute"
+          top={2.5}
+          right={2.5}
+          px={2}
+          py={0.5}
+          rounded="md"
+          fontSize="11px"
+          fontWeight="500"
+          bg={recipe.isPublic ? 'red.100' : 'neutral.100'}
+          color={recipe.isPublic ? 'red.700' : 'neutral.500'}
+        >
+          {recipe.isPublic ? 'Pública' : 'Privada'}
+        </Box>
       </Box>
 
       <Box p={3.5} display="flex" flexDirection="column" flex={1} gap={0} justifyContent="space-between">

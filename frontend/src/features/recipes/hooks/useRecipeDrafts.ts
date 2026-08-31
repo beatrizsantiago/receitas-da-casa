@@ -6,6 +6,7 @@ export interface RecipeDrafts {
   description: string;
   reference: string;
   category: RecipeCategory;
+  isPublic: boolean;
   tags: { name: string; color: string }[];
   notes: { content: string }[];
 }
@@ -15,6 +16,7 @@ export interface RecipeDraftSetters {
   setDescription: React.Dispatch<React.SetStateAction<string>>;
   setReference: React.Dispatch<React.SetStateAction<string>>;
   setCategory: React.Dispatch<React.SetStateAction<RecipeCategory>>;
+  setIsPublic: React.Dispatch<React.SetStateAction<boolean>>;
   setTags: React.Dispatch<React.SetStateAction<{ name: string; color: string }[]>>;
   setNotes: React.Dispatch<React.SetStateAction<{ content: string }[]>>;
 }
@@ -24,6 +26,7 @@ export function useRecipeDrafts() {
   const [descDraft, setDescDraft] = useState('');
   const [referenceDraft, setReferenceDraft] = useState('');
   const [catDraft, setCatDraft] = useState<RecipeCategory>('SAVORY');
+  const [isPublicDraft, setIsPublicDraft] = useState(false);
   const [tagsDraft, setTagsDraft] = useState<{ name: string; color: string }[]>([]);
   const [notesDraft, setNotesDraft] = useState<{ content: string }[]>([]);
 
@@ -33,6 +36,7 @@ export function useRecipeDrafts() {
     setDescDraft(recipe.description ?? '');
     setReferenceDraft(recipe.reference ?? '');
     setCatDraft(recipe.category);
+    setIsPublicDraft(recipe.isPublic);
     setTagsDraft(
       recipe.tags?.map((t) => ({
         name: t.tag.name.toLowerCase(),
@@ -51,6 +55,7 @@ export function useRecipeDrafts() {
     description: descDraft,
     reference: referenceDraft,
     category: catDraft,
+    isPublic: isPublicDraft,
     tags: tagsDraft,
     notes: notesDraft,
   };
@@ -60,6 +65,7 @@ export function useRecipeDrafts() {
     setDescription: setDescDraft,
     setReference: setReferenceDraft,
     setCategory: setCatDraft,
+    setIsPublic: setIsPublicDraft,
     setTags: setTagsDraft,
     setNotes: setNotesDraft,
   };

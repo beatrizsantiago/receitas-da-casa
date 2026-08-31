@@ -7,6 +7,7 @@ import {
   Flex,
   Heading,
   Input,
+  Switch,
   Text,
   Textarea,
 } from '@chakra-ui/react';
@@ -22,6 +23,7 @@ export default function RecipeCreate() {
   const navigate = useNavigate();
   const mobile = useBreakpointValue({ base: true, md: false });
   const [category, setCategory] = useState<RecipeCategory>('SAVORY');
+  const [isPublic, setIsPublic] = useState(false);
   const createRecipe = useCreateRecipeMutation();
 
   const validationErrors = (createRecipe.error as AxiosError<ApiErrorResponse> | null)?.response?.data?.validation_errors;
@@ -35,7 +37,7 @@ export default function RecipeCreate() {
     const description = (data.get('description') as string).trim() || undefined;
 
     createRecipe.mutate(
-      { title, description, category },
+      { title, description, category, isPublic },
       {
         onSuccess: (created) => {
           toast.success('Receita criada!');
@@ -219,6 +221,28 @@ export default function RecipeCreate() {
             {validationErrors?.category?.map((error, index) => (
               <Field.ErrorText key={index}>{error}</Field.ErrorText>
             ))}
+          </Field.Root>
+
+          {/* Visibilidade */}
+          <Field.Root>
+            <Field.Label fontSize="13px" fontWeight="550" color="neutral.600" letterSpacing="-0.005em">
+              Visibilidade
+            </Field.Label>
+            <Switch.Root
+              checked={isPublic}
+              onCheckedChange={(e) => setIsPublic(e.checked)}
+            >
+              <Switch.HiddenInput />
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+              <Switch.Label fontSize="14px" color="neutral.600">
+                {isPublic ? 'Pública' : 'Privada'}
+              </Switch.Label>
+            </Switch.Root>
+            <Text fontSize="12px" color="neutral.400" mt={1}>
+              Receitas públicas aparecem no link compartilhável. Você pode mudar isso depois.
+            </Text>
           </Field.Root>
 
           {/* Footer actions */}

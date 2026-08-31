@@ -106,6 +106,7 @@ export default function RecipeDetail() {
         title: drafts.title.trim(),
         description: drafts.description.trim() || undefined,
         category: drafts.category,
+        isPublic: drafts.isPublic,
       },
     });
     const currentTags =

@@ -64,6 +64,7 @@ export interface Recipe {
   description?: string;
   reference?: string | null;
   category: RecipeCategory;
+  isPublic: boolean;
   createdAt: string;
   updatedAt: string;
   ingredientGroups?: IngredientGroup[];
@@ -81,6 +82,7 @@ export interface CreateRecipeDto {
   description?: string;
   reference?: string | null;
   category: RecipeCategory;
+  isPublic?: boolean;
 }
 
 export interface UpdateRecipeDto extends Partial<CreateRecipeDto> {}
