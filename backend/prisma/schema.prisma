@@ -39,6 +39,7 @@ model Recipe {
   description String?
   reference   String?
   category    RecipeCategory
+  isPublic    Boolean        @default(false)
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   deletedAt   DateTime?

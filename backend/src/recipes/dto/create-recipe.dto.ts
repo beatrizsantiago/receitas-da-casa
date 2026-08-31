@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { RecipeCategory } from '@prisma/client';
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
+import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
 
 export class CreateRecipeDto {
   @ApiProperty({ example: 'Bolo de chocolate' })
@@ -26,4 +26,9 @@ export class CreateRecipeDto {
   @IsEnum(RecipeCategory, { message: 'A categoria deve ser Doce ou Salgada' })
   @IsNotEmpty({ message: 'A categoria é obrigatória' })
   category: RecipeCategory;
+
+  @ApiPropertyOptional({ example: false, default: false })
+  @IsOptional()
+  @IsBoolean({ message: 'A visibilidade deve ser verdadeira ou falsa' })
+  isPublic?: boolean;
 }

@@ -9,6 +9,7 @@ export class PublicRecipesService {
   async findAll(filter: FilterRecipesDto) {
     const where = {
       deletedAt: null,
+      isPublic: true,
       ...(filter.category && { category: filter.category }),
       ...(filter.tags?.length && {
         tags: { some: { tag: { name: { in: filter.tags } } } },
@@ -50,7 +51,7 @@ export class PublicRecipesService {
 
   async findOne(id: number) {
     const recipe = await this.prisma.recipe.findFirst({
-      where: { id, deletedAt: null },
+      where: { id, deletedAt: null, isPublic: true },
       select: {
         id: true,
         title: true,
