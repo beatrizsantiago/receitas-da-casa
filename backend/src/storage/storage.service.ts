@@ -10,19 +10,26 @@ import { ConfigService } from '@nestjs/config';
 export class StorageService {
   private s3: S3Client;
   private bucket: string;
-  private region: string;
+  private publicBaseUrl: string;
 
   constructor(private config: ConfigService) {
-    this.region = config.getOrThrow<string>('AWS_REGION');
+    const region = config.getOrThrow<string>('AWS_REGION');
     this.bucket = config.getOrThrow<string>('AWS_S3_BUCKET');
+    // Host customizado (MinIO, R2, Spaces...). Vazio = AWS padrão.
+    const endpoint = config.get<string>('AWS_S3_ENDPOINT')?.replace(/\/+$/, '');
 
     this.s3 = new S3Client({
-      region: this.region,
+      region,
+      ...(endpoint && { endpoint, forcePathStyle: true }),
       credentials: {
         accessKeyId: config.getOrThrow('AWS_ACCESS_KEY_ID'),
         secretAccessKey: config.getOrThrow('AWS_SECRET_ACCESS_KEY'),
       },
     });
+
+    this.publicBaseUrl = endpoint
+      ? `${endpoint}/${this.bucket}`
+      : `https://${this.bucket}.s3.${region}.amazonaws.com`;
   }
 
   async uploadFile(
@@ -38,11 +45,15 @@ export class StorageService {
         ContentType: contentType,
       }),
     );
-    return `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`;
+    return `${this.publicBaseUrl}/${key}`;
   }
 
   async deleteFile(url: string): Promise<void> {
-    const key = new URL(url).pathname.slice(1);
+    const prefix = `${this.publicBaseUrl}/`;
+    // URLs antigas (de outro host) caem no fallback: key = path sem a barra inicial
+    const key = url.startsWith(prefix)
+      ? url.slice(prefix.length)
+      : new URL(url).pathname.slice(1);
     await this.s3.send(
       new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
     );
