@@ -5,6 +5,7 @@ import { LuCamera, LuChevronLeft, LuMove, LuTrash2 } from 'react-icons/lu';
 import type { Recipe } from '../../types';
 
 import { CATEGORY_META, COVER_GRADIENT } from '@/shared';
+import { IMAGE_ACCEPT } from '@/shared/utils/prepareImage';
 
 interface RecipeCoverSectionProps {
   recipe: Recipe;
@@ -115,7 +116,7 @@ export function RecipeCoverSection({
         type="file"
         ref={coverInputRef}
         style={{ display: 'none' }}
-        accept="image/*"
+        accept={IMAGE_ACCEPT}
         onChange={onCoverFileChange}
       />
 

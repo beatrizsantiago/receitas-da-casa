@@ -7,6 +7,7 @@ import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import 'yet-another-react-lightbox/styles.css';
 import { EmptyHint } from '@/shared/components/ui/EmptyHint';
 import type { Photo } from '../../types';
+import { IMAGE_ACCEPT } from '@/shared/utils/prepareImage';
 
 interface RecipeGallerySectionProps {
   photos: Photo[] | undefined;
@@ -87,7 +88,7 @@ export function RecipeGallerySection({
         type="file"
         ref={galleryInputRef}
         style={{ display: 'none' }}
-        accept="image/*"
+        accept={IMAGE_ACCEPT}
         onChange={onGalleryFileChange}
       />
 

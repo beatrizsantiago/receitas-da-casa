@@ -15,7 +15,7 @@ export function useRecipePhotoUpload(recipeId: number) {
 
   async function handlePhotoUpload(original: File, type: 'COVER' | 'USER') {
     if (!isImageFile(original)) {
-      toast.error('Selecione um arquivo de imagem');
+      toast.error('Selecione uma foto em JPG, PNG, WebP ou HEIC');
       return;
     }
 

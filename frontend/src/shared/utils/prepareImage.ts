@@ -1,10 +1,18 @@
 const MAX_DIMENSION = 1920; // o backend já limita a 1920px, então não há por que enviar mais
-const JPEG_QUALITY = 0.85;
+// Alta de propósito: a compressão final (WebP) é feita no backend, e comprimir
+// forte aqui somaria duas perdas de qualidade
+const JPEG_QUALITY = 0.92;
 
 // Alguns navegadores (ex.: fotos HEIC vindas do app Arquivos no iOS) entregam file.type vazio
 const HEIC_EXTENSION = /\.(heic|heif)$/i;
 
+const GIF = /(^image\/gif$)|(\.gif$)/i;
+
+// Formatos oferecidos no seletor de arquivos (GIF não é aceito)
+export const IMAGE_ACCEPT = 'image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif';
+
 export function isImageFile(file: File): boolean {
+  if (GIF.test(file.type) || GIF.test(file.name)) return false;
   return file.type.startsWith('image/') || HEIC_EXTENSION.test(file.name);
 }
 
@@ -27,12 +35,10 @@ function loadImage(file: File): Promise<HTMLImageElement> {
 /**
  * Redimensiona e converte a imagem para JPEG no navegador antes do upload.
  * Resolve fotos HEIC do iPhone (que a API não aceita) e fotos grandes demais
- * para o limite de 8MB. GIFs são enviados como estão para não perder a animação.
+ * para o limite de 8MB. A otimização final fica com o backend.
  * Se o navegador não conseguir decodificar a imagem, devolve o arquivo original.
  */
 export async function prepareImageForUpload(file: File): Promise<File> {
-  if (file.type === 'image/gif') return file;
-
   let img: HTMLImageElement;
   try {
     img = await loadImage(file);
