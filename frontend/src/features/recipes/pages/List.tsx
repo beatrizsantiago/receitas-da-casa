@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -11,7 +11,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { useBreakpointValue } from '@chakra-ui/react';
-import { LuPlus, LuSearch, LuSlidersHorizontal } from 'react-icons/lu';
+import { LuPlus, LuSearch, LuSlidersHorizontal, LuX } from 'react-icons/lu';
 import { useRecipesQuery } from '../hooks/useRecipes';
 import { useTagsQuery } from '@/features/tags/hooks/useTags';
 import { RecipeCard } from '../components/RecipeCard';
@@ -20,6 +20,7 @@ import { ActiveFilters } from '@/shared/components/ui/ActiveFilters';
 import { LoadingSpinner } from '@/shared/components/ui/LoadingSpinner';
 import { EmptyState } from '@/shared/components/ui/EmptyState';
 import { CATEGORY_META } from '@/shared';
+import { searchScore, tokenize } from '@/shared/utils/search';
 import type { RecipeCategory } from '../types';
 
 const CATEGORY_OPTIONS = [
@@ -29,32 +30,45 @@ const CATEGORY_OPTIONS = [
 
 export default function RecipeList() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const mobile = useBreakpointValue({ base: true, md: false });
 
-  const [inputValue, setInputValue] = useState('');
-  const [search, setSearch] = useState('');
+  const [inputValue, setInputValue] = useState(() => searchParams.get('busca') ?? '');
+  const [search, setSearch] = useState(inputValue);
 
   useEffect(() => {
-    const timer = setTimeout(() => setSearch(inputValue), 600);
+    const timer = setTimeout(() => setSearch(inputValue), 250);
     return () => clearTimeout(timer);
   }, [inputValue]);
 
-  const [category, setCategory] = useState<RecipeCategory | 'all'>('all');
+  // Mantém o termo na URL para sobreviver ao "voltar" da página de detalhe
+  useEffect(() => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (search.trim()) next.set('busca', search.trim());
+        else next.delete('busca');
+        return next;
+      },
+      { replace: true },
+    );
+  }, [search, setSearchParams]);
+
+  function clearSearch() {
+    setInputValue('');
+    setSearch('');
+  }
+
+  const [category, setCategory] = useState<RecipeCategory | 'all'>(() => {
+    const catParam = searchParams.get('categoria');
+    return catParam === 'SWEET' || catParam === 'SAVORY' ? catParam : 'all';
+  });
   const [tagFilter, setTagFilter] = useState<string[]>([]);
 
   const [filterOpen, setFilterOpen] = useState(false);
-  const [draftCategory, setDraftCategory] = useState<RecipeCategory | 'all'>('all');
+  const [draftCategory, setDraftCategory] = useState<RecipeCategory | 'all'>(category);
   const [draftTags, setDraftTags] = useState<string[]>([]);
   const filterRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const catParam = searchParams.get('categoria');
-    if (catParam === 'SWEET' || catParam === 'SAVORY') {
-      setCategory(catParam);
-      setDraftCategory(catParam);
-    }
-  }, []);
 
   useEffect(() => {
     if (!filterOpen) return;
@@ -89,7 +103,7 @@ export default function RecipeList() {
     limit: 200,
     category: category === 'all' ? undefined : category,
   });
-  const recipes = data?.data ?? [];
+  const recipes = useMemo(() => data?.data ?? [], [data]);
 
   useEffect(() => {
     if (error) toast.error('Erro ao carregar receitas');
@@ -98,22 +112,30 @@ export default function RecipeList() {
   const { data: tagsData } = useTagsQuery();
   const allTags = tagsData ?? [];
 
-  const filtered = recipes.filter((r) => {
-    if (
-      tagFilter.length > 0 &&
-      !tagFilter.every((t) => r.tags?.some((rt) => rt.tag.name === t))
-    )
-      return false;
-    if (search) {
-      const s = search.toLowerCase();
-      if (
-        !r.title.toLowerCase().includes(s) &&
-        !r.description?.toLowerCase().includes(s)
-      )
-        return false;
-    }
-    return true;
-  });
+  const filtered = useMemo(() => {
+    const byTags = recipes.filter(
+      (r) =>
+        tagFilter.length === 0 ||
+        tagFilter.every((t) => r.tags?.some((rt) => rt.tag.name === t)),
+    );
+
+    const terms = tokenize(search);
+    if (terms.length === 0) return byTags;
+
+    return byTags
+      .map((r) => ({
+        recipe: r,
+        score: searchScore(terms, [
+          { values: [r.title], weight: 10 },
+          { values: r.tags?.map((rt) => rt.tag.name) ?? [], weight: 5 },
+          { values: r.ingredientNames ?? [], weight: 3 },
+          { values: [r.description], weight: 2 },
+        ]),
+      }))
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map((x) => x.recipe);
+  }, [recipes, tagFilter, search]);
 
   const activeFilterCount = (category !== 'all' ? 1 : 0) + tagFilter.length;
 
@@ -191,14 +213,40 @@ export default function RecipeList() {
               <LuSearch size={15} />
             </Box>
             <Input
-              placeholder="Buscar receitas..."
+              type="search"
+              placeholder={mobile ? 'Nome, ingrediente ou tag...' : 'Buscar por nome, ingrediente ou tag...'}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => e.key === 'Escape' && clearSearch()}
               pl="38px"
+              pr={inputValue ? '38px' : undefined}
               bg="white"
               fontSize="14px"
               _placeholder={{ color: 'neutral.400' }}
+              css={{ '&::-webkit-search-cancel-button': { display: 'none' } }}
             />
+            {inputValue && (
+              <Box
+                as="button"
+                aria-label="Limpar busca"
+                position="absolute"
+                right="10px"
+                top="50%"
+                transform="translateY(-50%)"
+                zIndex={1}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                w="22px"
+                h="22px"
+                rounded="full"
+                color="neutral.400"
+                _hover={{ bg: 'beige.100', color: 'neutral.600' }}
+                onClick={clearSearch}
+              >
+                <LuX size={14} />
+              </Box>
+            )}
           </Box>
 
           <Box ref={filterRef} position="relative" flexShrink={0}>
@@ -267,12 +315,15 @@ export default function RecipeList() {
       ) : filtered.length === 0 ? (
         <EmptyState
           title="Nenhuma receita encontrada"
-          description="Tente ajustar os filtros ou busque por outra palavra."
+          description={
+            search.trim()
+              ? `Nada encontrado para “${search.trim()}”. Tente outra palavra ou ajuste os filtros.`
+              : 'Tente ajustar os filtros ou busque por outra palavra.'
+          }
           action={{
             label: 'Limpar filtros',
             onClick: () => {
-              setInputValue('');
-              setSearch('');
+              clearSearch();
               setCategory('all');
               setTagFilter([]);
             },
