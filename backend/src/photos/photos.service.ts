@@ -69,16 +69,18 @@ export class PhotosService {
   }
 
   private async processImage(buffer: Buffer, type: PhotoType): Promise<Buffer> {
-    const pipeline = sharp(buffer);
+    // rotate(): aplica a orientação do EXIF antes de descartar os metadados,
+    // senão fotos de celular tiradas em pé podem ficar deitadas
+    const pipeline = sharp(buffer).rotate();
     if (type === PhotoType.COVER) {
       pipeline.resize(1280, 720, { fit: 'inside', withoutEnlargement: true });
     } else {
-      pipeline.resize(1920, undefined, {
-        fit: 'inside',
-        withoutEnlargement: true,
-      });
+      pipeline.resize(1920, 1920, { fit: 'inside', withoutEnlargement: true });
     }
-    return pipeline.webp({ quality: 85 }).toBuffer();
+    // effort 6 (máximo) + smartSubsample: arquivo menor com a mesma qualidade
+    return pipeline
+      .webp({ quality: 85, effort: 6, smartSubsample: true })
+      .toBuffer();
   }
 
   async updatePosition(photoId: number, positionY: number) {

@@ -23,7 +23,7 @@ import { UpdatePhotoDto } from './dto/update-photo.dto';
 import { PhotosService } from './photos.service';
 
 const MAX_PHOTO_SIZE = 8 * 1024 * 1024; // 8MB
-const ALLOWED_IMAGE_TYPES = /^image\/(jpeg|png|webp|gif)$/;
+const ALLOWED_IMAGE_TYPES = /^image\/(jpeg|png|webp)$/;
 
 @ApiTags('photos')
 @ApiBearerAuth('access-token')
@@ -45,7 +45,11 @@ export class PhotosController {
             maxSize: MAX_PHOTO_SIZE,
             message: 'Arquivo muito grande (máx. 8MB)',
           }),
-          new FileTypeValidator({ fileType: ALLOWED_IMAGE_TYPES }),
+          new FileTypeValidator({
+            fileType: ALLOWED_IMAGE_TYPES,
+            errorMessage:
+              'Formato não suportado. Envie uma foto em JPG, PNG ou WebP.',
+          }),
         ],
       }),
     )
@@ -57,7 +61,10 @@ export class PhotosController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar posição vertical da foto de capa' })
-  updatePosition(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdatePhotoDto) {
+  updatePosition(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdatePhotoDto,
+  ) {
     return this.photos.updatePosition(id, dto.positionY);
   }
 }
