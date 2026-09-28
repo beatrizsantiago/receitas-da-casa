@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { refreshSession, setAccessToken, setSessionExpiredHandler } from '@/shared/services/api';
 import { authService } from '../services/auth.service';
-import type { LoginDto, RegisterDto, User } from '../types';
+import type { AuthResponse, LoginDto, RegisterDto, User } from '../types';
 
 interface AuthContextValue {
   user: User | null;
@@ -19,67 +20,83 @@ export function useAuth(): AuthContextValue {
   return ctx;
 }
 
-function safeParseUser(raw: string | null): User | null {
-  if (!raw || raw === 'undefined' || raw === 'null') return null;
-  try {
-    return JSON.parse(raw) as User;
-  } catch {
-    return null;
-  }
-}
+type AuthMessage = 'login' | 'logout';
+
+// Sincroniza login/logout entre abas abertas
+const authChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('auth') : null;
 
 export function useAuthState() {
-  const [user, setUser] = useState<User | null>(() => {
-    const raw = localStorage.getItem('user');
-    return safeParseUser(raw);
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  // Começa carregando: a sessão é restaurada pelo cookie de refresh ao abrir o app
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = useCallback(async (dto: LoginDto) => {
-    setIsLoading(true);
-    try {
-      const res = await authService.login(dto);
-      localStorage.setItem('accessToken', res.accessToken);
-      localStorage.setItem('refreshToken', res.refreshToken);
-      localStorage.setItem('user', JSON.stringify(res.user));
-      setUser(res.user);
-    } finally {
-      setIsLoading(false);
-    }
+  const applySession = useCallback((res: AuthResponse) => {
+    setAccessToken(res.accessToken);
+    setUser(res.user);
   }, []);
 
-  const register = useCallback(async (dto: RegisterDto) => {
-    setIsLoading(true);
-    try {
-      const res = await authService.register(dto);
-      localStorage.setItem('accessToken', res.accessToken);
-      localStorage.setItem('refreshToken', res.refreshToken);
-      localStorage.setItem('user', JSON.stringify(res.user));
-      setUser(res.user);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const logout = useCallback(async () => {
-    const refreshToken = localStorage.getItem('refreshToken');
-    try {
-      if (refreshToken) await authService.logout(refreshToken);
-    } catch {
-      // ignore
-    }
-    localStorage.clear();
+  const clearSession = useCallback(() => {
+    setAccessToken(null);
     setUser(null);
   }, []);
 
   useEffect(() => {
-    const handleStorage = () => {
-      const raw = localStorage.getItem('user');
-      setUser(safeParseUser(raw));
+    // Tokens da versão anterior ficavam no localStorage
+    ['accessToken', 'refreshToken', 'user'].forEach((key) => localStorage.removeItem(key));
+
+    let cancelled = false;
+    refreshSession()
+      .then((res) => {
+        if (!cancelled) applySession(res);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    setSessionExpiredHandler(clearSession);
+
+    const handleMessage = (event: MessageEvent<AuthMessage>) => {
+      if (event.data === 'logout') clearSession();
+      if (event.data === 'login') refreshSession().then(applySession).catch(() => {});
     };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  }, []);
+    authChannel?.addEventListener('message', handleMessage);
+
+    return () => {
+      cancelled = true;
+      authChannel?.removeEventListener('message', handleMessage);
+    };
+  }, [applySession, clearSession]);
+
+  const login = useCallback(async (dto: LoginDto) => {
+    setIsLoading(true);
+    try {
+      applySession(await authService.login(dto));
+      authChannel?.postMessage('login' satisfies AuthMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [applySession]);
+
+  const register = useCallback(async (dto: RegisterDto) => {
+    setIsLoading(true);
+    try {
+      applySession(await authService.register(dto));
+      authChannel?.postMessage('login' satisfies AuthMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [applySession]);
+
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // ignore
+    }
+    clearSession();
+    authChannel?.postMessage('logout' satisfies AuthMessage);
+  }, [clearSession]);
 
   return { user, isLoading, login, register, logout, isAuthenticated: !!user };
 }
