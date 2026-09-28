@@ -1,4 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { recipesService } from '../services/recipes.service';
 import type {
   CreateCookHistoryDto,
@@ -24,6 +30,25 @@ export function useRecipesQuery(options?: { page?: number; limit?: number; categ
   return useQuery({
     queryKey: [RECIPES_KEY, { page, limit, category }],
     queryFn: () => recipesService.list({ page, limit, category }),
+  });
+}
+
+export function useInfiniteRecipesQuery(filters: {
+  q?: string;
+  category?: RecipeCategory;
+  tags?: string[];
+  limit?: number;
+}) {
+  const { limit = 24, ...rest } = filters;
+  return useInfiniteQuery({
+    queryKey: [RECIPES_KEY, 'infinite', { limit, ...rest }],
+    // signal: cancela a requisição quando a busca muda antes da resposta chegar
+    queryFn: ({ pageParam, signal }) =>
+      recipesService.list({ page: pageParam, limit, ...rest }, signal),
+    initialPageParam: 1,
+    getNextPageParam: (last) => (last.meta.page < last.meta.lastPage ? last.meta.page + 1 : undefined),
+    // Mantém os resultados anteriores na tela enquanto a nova busca carrega
+    placeholderData: keepPreviousData,
   });
 }
 

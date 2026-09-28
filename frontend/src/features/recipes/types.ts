@@ -75,7 +75,6 @@ export interface Recipe {
   cookHistory?: CookHistory[];
   cooks?: number;
   lastCooked?: string | null;
-  ingredientNames?: string[];
 }
 
 export interface CreateRecipeDto {

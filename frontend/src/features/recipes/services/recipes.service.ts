@@ -25,8 +25,22 @@ import type {
 } from '../types';
 
 export const recipesService = {
-  async list(params?: { page?: number; limit?: number; category?: string }): Promise<PaginatedResponse<Recipe>> {
-    const { data } = await api.get<PaginatedResponse<Recipe>>('/recipes', { params });
+  async list(
+    params?: {
+      page?: number;
+      limit?: number;
+      category?: string;
+      q?: string;
+      tags?: string[];
+    },
+    signal?: AbortSignal,
+  ): Promise<PaginatedResponse<Recipe>> {
+    const { data } = await api.get<PaginatedResponse<Recipe>>('/recipes', {
+      params,
+      signal,
+      // tags=a&tags=b (sem colchetes), como o backend espera
+      paramsSerializer: { indexes: null },
+    });
     return data;
   },
 

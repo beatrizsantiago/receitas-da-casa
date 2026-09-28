@@ -12,7 +12,7 @@ import {
 } from '@chakra-ui/react';
 import { useBreakpointValue } from '@chakra-ui/react';
 import { LuPlus, LuSearch, LuSlidersHorizontal, LuX } from 'react-icons/lu';
-import { useRecipesQuery } from '../hooks/useRecipes';
+import { useInfiniteRecipesQuery } from '../hooks/useRecipes';
 import { useTagsQuery } from '@/features/tags/hooks/useTags';
 import { RecipeCard } from '../components/RecipeCard';
 import { FilterDropdown } from '@/shared/components/ui/FilterDropdown';
@@ -20,8 +20,9 @@ import { ActiveFilters } from '@/shared/components/ui/ActiveFilters';
 import { LoadingSpinner } from '@/shared/components/ui/LoadingSpinner';
 import { EmptyState } from '@/shared/components/ui/EmptyState';
 import { CATEGORY_META } from '@/shared';
-import { searchScore, tokenize } from '@/shared/utils/search';
 import type { RecipeCategory } from '../types';
+
+const SEARCH_DEBOUNCE_MS = 500;
 
 const CATEGORY_OPTIONS = [
   { key: 'all', label: 'Todas' },
@@ -37,7 +38,7 @@ export default function RecipeList() {
   const [search, setSearch] = useState(inputValue);
 
   useEffect(() => {
-    const timer = setTimeout(() => setSearch(inputValue), 250);
+    const timer = setTimeout(() => setSearch(inputValue), SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [inputValue]);
 
@@ -99,11 +100,36 @@ export default function RecipeList() {
     );
   }
 
-  const { data, isLoading, error } = useRecipesQuery({
-    limit: 200,
+  const {
+    data,
+    isLoading,
+    isPlaceholderData,
+    error,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteRecipesQuery({
+    q: search.trim() || undefined,
     category: category === 'all' ? undefined : category,
+    tags: tagFilter.length > 0 ? tagFilter : undefined,
   });
-  const recipes = useMemo(() => data?.data ?? [], [data]);
+  const recipes = useMemo(() => data?.pages.flatMap((p) => p.data) ?? [], [data]);
+  const total = data?.pages[0]?.meta.total ?? 0;
+
+  // Carrega a próxima página quando o fim da lista aparece na tela
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasNextPage) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !isFetchingNextPage) fetchNextPage();
+      },
+      { rootMargin: '400px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   useEffect(() => {
     if (error) toast.error('Erro ao carregar receitas');
@@ -111,31 +137,6 @@ export default function RecipeList() {
 
   const { data: tagsData } = useTagsQuery();
   const allTags = tagsData ?? [];
-
-  const filtered = useMemo(() => {
-    const byTags = recipes.filter(
-      (r) =>
-        tagFilter.length === 0 ||
-        tagFilter.every((t) => r.tags?.some((rt) => rt.tag.name === t)),
-    );
-
-    const terms = tokenize(search);
-    if (terms.length === 0) return byTags;
-
-    return byTags
-      .map((r) => ({
-        recipe: r,
-        score: searchScore(terms, [
-          { values: [r.title], weight: 10 },
-          { values: r.tags?.map((rt) => rt.tag.name) ?? [], weight: 5 },
-          { values: r.ingredientNames ?? [], weight: 3 },
-          { values: [r.description], weight: 2 },
-        ]),
-      }))
-      .filter((x) => x.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .map((x) => x.recipe);
-  }, [recipes, tagFilter, search]);
 
   const activeFilterCount = (category !== 'all' ? 1 : 0) + tagFilter.length;
 
@@ -171,7 +172,7 @@ export default function RecipeList() {
             Todas as receitas
           </Heading>
           <Text fontSize="13px" color="neutral.400" mt={1}>
-            {filtered.length} {filtered.length === 1 ? 'receita' : 'receitas'}
+            {total} {total === 1 ? 'receita' : 'receitas'}
             {search || category !== 'all' || tagFilter.length > 0
               ? ' encontradas'
               : ''}
@@ -214,6 +215,7 @@ export default function RecipeList() {
             </Box>
             <Input
               type="search"
+              aria-label="Buscar receitas"
               placeholder={mobile ? 'Nome, ingrediente ou tag...' : 'Buscar por nome, ingrediente ou tag...'}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
@@ -312,7 +314,7 @@ export default function RecipeList() {
 
       {isLoading ? (
         <LoadingSpinner />
-      ) : filtered.length === 0 ? (
+      ) : recipes.length === 0 ? (
         <EmptyState
           title="Nenhuma receita encontrada"
           description={
@@ -333,12 +335,19 @@ export default function RecipeList() {
         <Grid
           templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }}
           gap={4}
+          // Resultados da busca anterior ficam esmaecidos enquanto a nova carrega
+          opacity={isPlaceholderData ? 0.5 : 1}
+          transition="opacity 0.15s"
+          aria-busy={isPlaceholderData}
         >
-          {filtered.map((r) => (
+          {recipes.map((r) => (
             <RecipeCard key={r.id} recipe={r} />
           ))}
         </Grid>
       )}
+
+      <Box ref={sentinelRef} h="1px" />
+      {isFetchingNextPage && <LoadingSpinner />}
     </Box>
   );
 }
