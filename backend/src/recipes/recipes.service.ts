@@ -50,13 +50,22 @@ export class RecipesService {
           photos: { where: { type: 'COVER' } },
           _count: { select: { cookHistory: true } },
           cookHistory: { orderBy: { date: 'desc' }, take: 1 },
+          ingredientGroups: {
+            select: { ingredients: { select: { name: true } } },
+          },
         },
       }),
       this.prisma.recipe.count({ where }),
     ]);
 
     return {
-      data: data.map(mapRecipe),
+      // Só os nomes dos ingredientes, achatados, para a busca da listagem
+      data: data.map(({ ingredientGroups, ...recipe }) => ({
+        ...mapRecipe(recipe),
+        ingredientNames: ingredientGroups.flatMap((g) =>
+          g.ingredients.map((i) => i.name),
+        ),
+      })),
       meta: {
         total,
         page: filter.page,
