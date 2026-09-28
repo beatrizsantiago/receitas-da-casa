@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PhotoType } from '@prisma/client';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { PhotoType, RecipePhoto } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import sharp from 'sharp';
 import { PrismaService } from '../prisma/prisma.service';
@@ -9,6 +9,8 @@ import { CreatePhotoDto } from './dto/create-photo.dto';
 
 @Injectable()
 export class PhotosService {
+  private readonly logger = new Logger(PhotosService.name);
+
   constructor(
     private prisma: PrismaService,
     private recipes: RecipesService,
@@ -18,24 +20,52 @@ export class PhotosService {
   async create(file: Express.Multer.File, dto: CreatePhotoDto) {
     await this.recipes.findOne(dto.recipeId);
 
-    if (dto.type === PhotoType.COVER) {
-      const existing = await this.prisma.recipePhoto.findFirst({
-        where: { recipeId: dto.recipeId, type: PhotoType.COVER },
-      });
-      if (existing) {
-        await this.storage.deleteFile(existing.url);
-        await this.prisma.recipePhoto.delete({ where: { id: existing.id } });
-      }
-    }
-
+    // Primeiro garante a foto nova no storage; a antiga só sai depois
     const processed = await this.processImage(file.buffer, dto.type);
     const folder = dto.type === PhotoType.COVER ? 'cover' : 'user';
     const key = `recipes/${dto.recipeId}/${folder}/${randomUUID()}.webp`;
     const url = await this.storage.uploadFile(processed, key, 'image/webp');
 
-    return this.prisma.recipePhoto.create({
-      data: { url, type: dto.type, recipeId: dto.recipeId },
-    });
+    let photo: RecipePhoto;
+    let replaced: RecipePhoto[];
+    try {
+      [photo, replaced] = await this.prisma.$transaction(async (tx) => {
+        let old: RecipePhoto[] = [];
+        if (dto.type === PhotoType.COVER) {
+          // Trava a receita: uploads de capa simultâneos são serializados e
+          // não terminam com duas capas
+          await tx.$queryRaw`SELECT id FROM "Recipe" WHERE id = ${dto.recipeId} FOR UPDATE`;
+          old = await tx.recipePhoto.findMany({
+            where: { recipeId: dto.recipeId, type: PhotoType.COVER },
+          });
+          await tx.recipePhoto.deleteMany({
+            where: { id: { in: old.map((p) => p.id) } },
+          });
+        }
+        const created = await tx.recipePhoto.create({
+          data: { url, type: dto.type, recipeId: dto.recipeId },
+        });
+        return [created, old] as const;
+      });
+    } catch (err) {
+      await this.deleteFileSafely(url);
+      throw err;
+    }
+
+    // A troca já foi gravada: falhar aqui deixaria só um arquivo órfão
+    for (const old of replaced) await this.deleteFileSafely(old.url);
+
+    return photo;
+  }
+
+  private async deleteFileSafely(url: string) {
+    try {
+      await this.storage.deleteFile(url);
+    } catch (err) {
+      this.logger.warn(
+        `Não foi possível apagar ${url} do storage: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
   }
 
   private async processImage(buffer: Buffer, type: PhotoType): Promise<Buffer> {
@@ -43,7 +73,10 @@ export class PhotosService {
     if (type === PhotoType.COVER) {
       pipeline.resize(1280, 720, { fit: 'inside', withoutEnlargement: true });
     } else {
-      pipeline.resize(1920, undefined, { fit: 'inside', withoutEnlargement: true });
+      pipeline.resize(1920, undefined, {
+        fit: 'inside',
+        withoutEnlargement: true,
+      });
     }
     return pipeline.webp({ quality: 85 }).toBuffer();
   }
