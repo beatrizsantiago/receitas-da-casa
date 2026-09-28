@@ -51,13 +51,19 @@ FRONTEND_URL=https://receitas.seudominio.com
 PORT=3000
 JWT_SECRET=...
 JWT_EXPIRES_IN=15m
-JWT_REFRESH_SECRET=...
-JWT_REFRESH_EXPIRES_IN=7d
+REFRESH_TOKEN_TTL_DAYS=30
+SESSION_MAX_AGE_DAYS=90
+REFRESH_COOKIE_SAMESITE=strict
 AWS_REGION=...
 AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...
 AWS_S3_BUCKET=...
 ```
+
+> O refresh token trafega em cookie `HttpOnly` restrito a `/api/auth`. Com
+> `REFRESH_COOKIE_SAMESITE=strict`, frontend e API precisam estar no mesmo site
+> (ex.: `receitas.seudominio.com` + `api.seudominio.com`). Em domínios
+> diferentes, use `none` (exige HTTPS).
 
 > O frontend **não** recebe env em runtime: o `VITE_API_URL` é embutido no
 > bundle durante o build (veja a variável `VITE_API_URL` na seção 3).

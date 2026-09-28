@@ -25,12 +25,44 @@ enum PhotoType {
 // ─────────────────────────────────────────
 
 model User {
-  id           Int      @id @default(autoincrement())
-  name         String
-  email        String   @unique
-  password     String
-  tokenVersion Int      @default(0)
-  createdAt    DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+
+  sessions Session[]
+}
+
+// Uma sessão = um login em um dispositivo. Os refresh tokens dela formam uma
+// "família": a cada renovação o token usado é marcado (usedAt) e um novo é
+// emitido. Reapresentar um token já usado indica roubo e revoga a sessão.
+model Session {
+  id         String    @id @default(uuid())
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime  @default(now())
+  expiresAt  DateTime  // tempo de vida absoluto; nenhuma renovação passa disso
+  revokedAt  DateTime?
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  refreshTokens RefreshToken[]
+
+  @@index([userId])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  tokenHash String    @unique // SHA-256 do token; o valor bruto nunca é persistido
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  sessionId String
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
 }
 
 model Recipe {

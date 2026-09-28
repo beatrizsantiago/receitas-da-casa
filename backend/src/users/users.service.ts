@@ -16,14 +16,7 @@ export class UsersService {
   findById(id: number) {
     return this.prisma.user.findUnique({
       where: { id },
-      select: { id: true, name: true, email: true, createdAt: true, tokenVersion: true },
-    });
-  }
-
-  incrementTokenVersion(id: number) {
-    return this.prisma.user.update({
-      where: { id },
-      data: { tokenVersion: { increment: 1 } },
+      select: { id: true, name: true, email: true, createdAt: true },
     });
   }
 }

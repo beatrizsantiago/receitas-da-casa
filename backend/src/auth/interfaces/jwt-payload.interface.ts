@@ -1,5 +1,5 @@
 export interface JwtPayload {
   sub: number;
   email: string;
-  tokenVersion: number;
+  sid: string; // id da sessão (Session) que emitiu o token
 }

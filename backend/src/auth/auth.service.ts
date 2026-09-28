@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -6,11 +10,13 @@ import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import type { JwtPayload } from './interfaces/jwt-payload.interface';
+import { IssuedRefreshToken, SessionsService } from './sessions.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private users: UsersService,
+    private sessions: SessionsService,
     private jwt: JwtService,
     private config: ConfigService,
   ) {}
@@ -24,10 +30,8 @@ export class AuthService {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userWithoutPassword } = user;
-    return {
-      ...this.issueTokens({ sub: user.id, email: user.email, tokenVersion: user.tokenVersion }),
-      user: userWithoutPassword,
-    };
+    const refresh = await this.sessions.create(user.id);
+    return this.buildAuthResult(userWithoutPassword, refresh);
   }
 
   async login(dto: LoginDto) {
@@ -39,31 +43,50 @@ export class AuthService {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userWithoutPassword } = user;
-    return {
-      ...this.issueTokens({ sub: user.id, email: user.email, tokenVersion: user.tokenVersion }),
-      user: userWithoutPassword,
+    const refresh = await this.sessions.create(user.id);
+    return this.buildAuthResult(userWithoutPassword, refresh);
+  }
+
+  async refresh(rawRefreshToken: string | undefined) {
+    if (!rawRefreshToken) throw new UnauthorizedException();
+
+    const refresh = await this.sessions.rotate(rawRefreshToken);
+    if (!refresh) throw new UnauthorizedException();
+
+    const user = await this.users.findById(refresh.userId);
+    if (!user) throw new UnauthorizedException();
+
+    return this.buildAuthResult(user, refresh);
+  }
+
+  async logout(rawRefreshToken: string | undefined) {
+    if (rawRefreshToken) await this.sessions.revokeByToken(rawRefreshToken);
+  }
+
+  async logoutAll(userId: number) {
+    await this.sessions.revokeAllForUser(userId);
+  }
+
+  private buildAuthResult<U extends { id: number; email: string }>(
+    user: U,
+    refresh: IssuedRefreshToken,
+  ) {
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      sid: refresh.sessionId,
     };
-  }
-
-  refresh(payload: JwtPayload) {
-    return this.issueTokens(payload);
-  }
-
-  async logout(userId: number) {
-    await this.users.incrementTokenVersion(userId);
-  }
-
-  private issueTokens(payload: JwtPayload) {
     const accessToken = this.jwt.sign(payload, {
       secret: this.config.getOrThrow('JWT_SECRET'),
       expiresIn: this.config.get('JWT_EXPIRES_IN', '15m'),
+      algorithm: 'HS256',
     });
 
-    const refreshToken = this.jwt.sign(payload, {
-      secret: this.config.getOrThrow('JWT_REFRESH_SECRET'),
-      expiresIn: this.config.get('JWT_REFRESH_EXPIRES_IN', '7d'),
-    });
-
-    return { accessToken, refreshToken };
+    return {
+      accessToken,
+      refreshToken: refresh.refreshToken,
+      refreshTokenExpiresAt: refresh.expiresAt,
+      user,
+    };
   }
 }
