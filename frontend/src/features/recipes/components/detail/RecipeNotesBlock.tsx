@@ -53,7 +53,20 @@ export function RecipeNotesBlock({
                 letterSpacing="0.04em"
                 mb={1}
               >
-                {note.createdAt?.substring(0, 10) ?? ''}
+                {note.createdAt && (
+                  <>
+                    {new Date(note.createdAt).toLocaleDateString('pt-BR', {
+                      day: '2-digit',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                    {' · '}
+                    {new Date(note.createdAt).toLocaleTimeString('pt-BR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </>
+                )}
               </Text>
               <Text
                 fontFamily="'Caveat', cursive"
