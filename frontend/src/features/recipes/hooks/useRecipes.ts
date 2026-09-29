@@ -93,7 +93,10 @@ export function useAddIngredientGroupMutation() {
   return useMutation({
     mutationFn: ({ recipeId, dto }: { recipeId: number; dto: CreateIngredientGroupDto }) =>
       recipesService.addIngredientGroup(recipeId, dto),
-    onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: [RECIPE_KEY, vars.recipeId] }),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: [RECIPE_KEY, vars.recipeId] });
+      qc.invalidateQueries({ queryKey: [RECIPES_KEY] });
+    },
   });
 }
 
@@ -102,7 +105,10 @@ export function useUpdateIngredientGroupMutation() {
   return useMutation({
     mutationFn: ({ id, dto }: { id: number; dto: UpdateIngredientGroupDto }) =>
       recipesService.updateIngredientGroup(id, dto),
-    onSuccess: () => qc.invalidateQueries({ queryKey: [RECIPE_KEY] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [RECIPE_KEY] });
+      qc.invalidateQueries({ queryKey: [RECIPES_KEY] });
+    },
   });
 }
 
@@ -110,7 +116,10 @@ export function useDeleteIngredientGroupMutation() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: recipesService.removeIngredientGroup,
-    onSuccess: () => qc.invalidateQueries({ queryKey: [RECIPE_KEY] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [RECIPE_KEY] });
+      qc.invalidateQueries({ queryKey: [RECIPES_KEY] });
+    },
   });
 }
 
@@ -120,7 +129,10 @@ export function useAddIngredientMutation() {
   return useMutation({
     mutationFn: ({ ingredientGroupId, dto }: { ingredientGroupId: number; dto: CreateIngredientDto }) =>
       recipesService.addIngredient(ingredientGroupId, dto),
-    onSuccess: () => qc.invalidateQueries({ queryKey: [RECIPE_KEY] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [RECIPE_KEY] });
+      qc.invalidateQueries({ queryKey: [RECIPES_KEY] });
+    },
   });
 }
 
@@ -129,7 +141,10 @@ export function useUpdateIngredientMutation() {
   return useMutation({
     mutationFn: ({ id, dto }: { id: number; dto: UpdateIngredientDto }) =>
       recipesService.updateIngredient(id, dto),
-    onSuccess: () => qc.invalidateQueries({ queryKey: [RECIPE_KEY] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [RECIPE_KEY] });
+      qc.invalidateQueries({ queryKey: [RECIPES_KEY] });
+    },
   });
 }
 
@@ -137,7 +152,10 @@ export function useDeleteIngredientMutation() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: recipesService.removeIngredient,
-    onSuccess: () => qc.invalidateQueries({ queryKey: [RECIPE_KEY] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [RECIPE_KEY] });
+      qc.invalidateQueries({ queryKey: [RECIPES_KEY] });
+    },
   });
 }
 
@@ -226,7 +244,10 @@ export function useAddHistoryMutation() {
   return useMutation({
     mutationFn: ({ recipeId, dto }: { recipeId: number; dto: CreateCookHistoryDto }) =>
       recipesService.addHistory(recipeId, dto),
-    onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: [RECIPE_KEY, vars.recipeId] }),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: [RECIPE_KEY, vars.recipeId] });
+      qc.invalidateQueries({ queryKey: [RECIPES_KEY] });
+    },
   });
 }
 
@@ -236,7 +257,10 @@ export function useAddTagToRecipeMutation() {
   return useMutation({
     mutationFn: ({ recipeId, tagId }: { recipeId: number; tagId: number }) =>
       recipesService.addTag(recipeId, tagId),
-    onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: [RECIPE_KEY, vars.recipeId] }),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: [RECIPE_KEY, vars.recipeId] });
+      qc.invalidateQueries({ queryKey: [RECIPES_KEY] });
+    },
   });
 }
 
@@ -245,6 +269,9 @@ export function useRemoveTagFromRecipeMutation() {
   return useMutation({
     mutationFn: ({ recipeId, tagId }: { recipeId: number; tagId: number }) =>
       recipesService.removeTag(recipeId, tagId),
-    onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: [RECIPE_KEY, vars.recipeId] }),
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: [RECIPE_KEY, vars.recipeId] });
+      qc.invalidateQueries({ queryKey: [RECIPES_KEY] });
+    },
   });
 }
