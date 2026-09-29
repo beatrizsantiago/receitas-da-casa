@@ -21,7 +21,7 @@ export class PhotosService {
     await this.recipes.findOne(dto.recipeId);
 
     // Primeiro garante a foto nova no storage; a antiga só sai depois
-    const processed = await this.processImage(file.buffer, dto.type);
+    const processed = await this.processImage(file.buffer);
     const folder = dto.type === PhotoType.COVER ? 'cover' : 'user';
     const key = `recipes/${dto.recipeId}/${folder}/${randomUUID()}.webp`;
     const url = await this.storage.uploadFile(processed, key, 'image/webp');
@@ -68,15 +68,15 @@ export class PhotosService {
     }
   }
 
-  private async processImage(buffer: Buffer, type: PhotoType): Promise<Buffer> {
+  private async processImage(buffer: Buffer): Promise<Buffer> {
     // rotate(): aplica a orientação do EXIF antes de descartar os metadados,
     // senão fotos de celular tiradas em pé podem ficar deitadas
-    const pipeline = sharp(buffer).rotate();
-    if (type === PhotoType.COVER) {
-      pipeline.resize(1280, 720, { fit: 'inside', withoutEnlargement: true });
-    } else {
-      pipeline.resize(1920, 1920, { fit: 'inside', withoutEnlargement: true });
-    }
+    // Capa usa o mesmo limite da galeria: ela é exibida na largura toda e
+    // recortada/reposicionada, então uma foto vertical encaixada em 1280x720
+    // ficava com ~400px de largura e borrava ao ser esticada
+    const pipeline = sharp(buffer)
+      .rotate()
+      .resize(1920, 1920, { fit: 'inside', withoutEnlargement: true });
     // effort 6 (máximo) + smartSubsample: arquivo menor com a mesma qualidade
     return pipeline
       .webp({ quality: 85, effort: 6, smartSubsample: true })
