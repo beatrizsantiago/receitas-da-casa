@@ -108,7 +108,7 @@ export function RecipeCoverSection({
       <Box
         position="absolute"
         inset={0}
-        bg="linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.5) 100%)"
+        bg="linear-gradient(to bottom, rgba(0,0,0,0) 45%, rgba(0,0,0,0.5) 100%)"
         pointerEvents="none"
       />
 
@@ -266,6 +266,7 @@ export function RecipeCoverSection({
               px={2}
               py={0.5}
               rounded="md"
+              boxShadow="0 1px 3px rgba(0,0,0,0.12)"
               fontSize="xs"
               fontWeight="500"
             >

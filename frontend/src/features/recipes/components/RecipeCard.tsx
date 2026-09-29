@@ -47,12 +47,6 @@ export function RecipeCard({ recipe }: Props) {
 
         <Box
           position="absolute"
-          inset={0}
-          bg="linear-gradient(to bottom, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.45) 100%)"
-        />
-
-        <Box
-          position="absolute"
           top={2.5}
           left={2.5}
           px={2}
@@ -60,6 +54,7 @@ export function RecipeCard({ recipe }: Props) {
           rounded="md"
           fontSize="11px"
           fontWeight="500"
+          boxShadow="0 1px 3px rgba(0,0,0,0.12)"
           bg={cat?.bg}
           color={cat?.fg}
         >
@@ -75,6 +70,7 @@ export function RecipeCard({ recipe }: Props) {
           rounded="md"
           fontSize="11px"
           fontWeight="500"
+          boxShadow="0 1px 3px rgba(0,0,0,0.12)"
           bg={recipe.isPublic ? 'red.100' : 'neutral.100'}
           color={recipe.isPublic ? 'red.700' : 'neutral.500'}
         >
