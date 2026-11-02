@@ -1,8 +1,8 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import { LuFlame } from 'react-icons/lu';
+import { LuFlame, LuShare2 } from 'react-icons/lu';
 import type { Recipe } from '../types';
-import { CATEGORY_META, COVER_GRADIENT } from '@/shared';
+import { CATEGORY_META, COVER_GRADIENT, shareRecipe } from '@/shared';
 
 interface Props {
   recipe: Recipe;
@@ -131,9 +131,33 @@ export function RecipeCard({ recipe }: Props) {
 
         <Box mt={3}>
           <hr />
-          <Flex align="center" gap={1} mt="auto" pt={2.5} fontSize="11px" color="neutral.400">
-            <LuFlame size={13} color="var(--chakra-colors-secondary-500)" />
-            <Text>{recipe.cooks ?? 0}x feita</Text>
+          <Flex align="center" justify="space-between" mt="auto" pt={2.5} fontSize="11px" color="neutral.400">
+            <Flex align="center" gap={1}>
+              <LuFlame size={13} color="var(--chakra-colors-secondary-500)" />
+              <Text>{recipe.cooks ?? 0}x feita</Text>
+            </Flex>
+            {recipe.isPublic && (
+              <Box
+                as="button"
+                aria-label="Compartilhar receita"
+                title="Compartilhar receita"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                w="26px"
+                h="26px"
+                rounded="6px"
+                color="neutral.400"
+                cursor="pointer"
+                _hover={{ color: 'primary.500', bg: 'beige.50' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  shareRecipe(recipe.id, recipe.title);
+                }}
+              >
+                <LuShare2 size={14} />
+              </Box>
+            )}
           </Flex>
         </Box>
       </Box>

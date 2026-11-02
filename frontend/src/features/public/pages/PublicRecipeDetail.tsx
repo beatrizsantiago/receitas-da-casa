@@ -1,7 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { Box, Heading, Image } from '@chakra-ui/react';
+import { Box, Flex, Heading, Image } from '@chakra-ui/react';
 import { useBreakpointValue } from '@chakra-ui/react';
-import { LuChevronLeft } from 'react-icons/lu';
+import { LuChevronLeft, LuShare2 } from 'react-icons/lu';
+import { shareRecipe } from '@/shared';
 import { usePublicRecipeQuery } from '../hooks/usePublicRecipes';
 import { LoadingSpinner } from '@/shared/components/ui/LoadingSpinner';
 import { EmptyState } from '@/shared/components/ui/EmptyState';
@@ -60,7 +61,13 @@ export default function PublicRecipeDetail() {
           pointerEvents="none"
         />
 
-        <Box position="absolute" top={4} left={mobile ? 4 : 6}>
+        <Flex
+          position="absolute"
+          top={4}
+          left={mobile ? 4 : 6}
+          right={mobile ? 4 : 6}
+          justify="space-between"
+        >
           <Box
             as="button"
             w="40px"
@@ -76,7 +83,24 @@ export default function PublicRecipeDetail() {
           >
             <LuChevronLeft size={18} />
           </Box>
-        </Box>
+          <Box
+            as="button"
+            aria-label="Compartilhar receita"
+            title="Compartilhar receita"
+            w="40px"
+            h="40px"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            bg="rgba(255,251,243,0.95)"
+            color="neutral.800"
+            rounded="md"
+            boxShadow="0 2px 8px rgba(0,0,0,0.15)"
+            onClick={() => shareRecipe(recipe.id, recipe.title)}
+          >
+            <LuShare2 size={16} />
+          </Box>
+        </Flex>
 
         <Box
           position="absolute"

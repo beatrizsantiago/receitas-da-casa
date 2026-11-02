@@ -1,6 +1,7 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import { CATEGORY_META, COVER_GRADIENT } from '@/shared';
+import { LuShare2 } from 'react-icons/lu';
+import { CATEGORY_META, COVER_GRADIENT, shareRecipe } from '@/shared';
 import type { PublicRecipeSummary } from '../types';
 
 interface Props {
@@ -54,6 +55,32 @@ export function PublicRecipeCard({ recipe }: Props) {
           color={cat?.fg}
         >
           {cat?.label ?? recipe.category}
+        </Box>
+
+        <Box
+          as="button"
+          aria-label="Compartilhar receita"
+          title="Compartilhar receita"
+          position="absolute"
+          top={2.5}
+          right={2.5}
+          w="28px"
+          h="28px"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          rounded="md"
+          bg="rgba(255,251,243,0.95)"
+          color="neutral.800"
+          boxShadow="0 1px 3px rgba(0,0,0,0.12)"
+          cursor="pointer"
+          _hover={{ color: 'primary.500' }}
+          onClick={(e) => {
+            e.stopPropagation();
+            shareRecipe(recipe.id, recipe.title);
+          }}
+        >
+          <LuShare2 size={13} />
         </Box>
       </Box>
 

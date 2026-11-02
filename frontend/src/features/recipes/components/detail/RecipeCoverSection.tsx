@@ -1,10 +1,10 @@
 import { useRef, useState } from 'react';
 import { Badge, Box, Button, Flex, Heading, Image } from '@chakra-ui/react';
 import { useBreakpointValue } from '@chakra-ui/react';
-import { LuCamera, LuChevronLeft, LuMove, LuTrash2 } from 'react-icons/lu';
+import { LuCamera, LuChevronLeft, LuMove, LuShare2, LuTrash2 } from 'react-icons/lu';
 import type { Recipe } from '../../types';
 
-import { CATEGORY_META, COVER_GRADIENT } from '@/shared';
+import { CATEGORY_META, COVER_GRADIENT, shareRecipe } from '@/shared';
 import { IMAGE_ACCEPT } from '@/shared/utils/prepareImage';
 
 interface RecipeCoverSectionProps {
@@ -199,6 +199,25 @@ export function RecipeCoverSection({
               <LuChevronLeft size={18} />
             </Button>
             <Flex gap={2}>
+              {recipe.isPublic && (
+                <Button
+                  w="40px"
+                  minW="40px"
+                  p={0}
+                  bg="rgba(255,251,243,0.95)"
+                  color="neutral.800"
+                  border="none"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  boxShadow="0 2px 8px rgba(0,0,0,0.15)"
+                  aria-label="Compartilhar receita"
+                  title="Compartilhar receita"
+                  onClick={() => shareRecipe(recipe.id, recipe.title)}
+                >
+                  <LuShare2 size={14} />
+                </Button>
+              )}
               <Button
                 px={3.5}
                 py={1.5}
