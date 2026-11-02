@@ -23,7 +23,7 @@ export default function RecipeCreate() {
   const navigate = useNavigate();
   const mobile = useBreakpointValue({ base: true, md: false });
   const [category, setCategory] = useState<RecipeCategory>('SAVORY');
-  const [isPublic, setIsPublic] = useState(false);
+  const [isPublic, setIsPublic] = useState(true);
   const createRecipe = useCreateRecipeMutation();
 
   const validationErrors = (createRecipe.error as AxiosError<ApiErrorResponse> | null)?.response?.data?.validation_errors;
