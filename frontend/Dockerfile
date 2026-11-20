@@ -22,8 +22,15 @@ RUN npm run build
 # ─────────────────────────────────────────
 FROM nginx:1.27-alpine AS runner
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# O entrypoint do nginx gera o default.conf a partir do template na subida,
+# substituindo só as variáveis que passam no filtro abaixo
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Endereço interno do backend (rede do CapRover), usado só para gerar a
+# prévia de links das receitas. Pode ser sobrescrito nas env vars do app.
+ENV BACKEND_URL=http://srv-captain--receitas-backend:3000
+ENV NGINX_ENVSUBST_FILTER=^BACKEND_URL$
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

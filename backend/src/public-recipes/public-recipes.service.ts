@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { FilterRecipesDto } from '../recipes/dto/filter-recipes.dto';
+import type { RecipePreviewData } from './recipe-preview.html';
 
 @Injectable()
 export class PublicRecipesService {
@@ -88,5 +89,29 @@ export class PublicRecipesService {
 
     if (!recipe) throw new NotFoundException('Receita não encontrada');
     return recipe;
+  }
+
+  async findPreview(id: number): Promise<RecipePreviewData> {
+    const recipe = await this.prisma.recipe.findFirst({
+      where: { id, deletedAt: null, isPublic: true },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        photos: {
+          where: { type: 'COVER' },
+          select: { url: true },
+          take: 1,
+        },
+      },
+    });
+
+    if (!recipe) throw new NotFoundException('Receita não encontrada');
+    return {
+      id: recipe.id,
+      title: recipe.title,
+      description: recipe.description,
+      photoUrl: recipe.photos[0]?.url ?? null,
+    };
   }
 }

@@ -12,7 +12,7 @@ Arquivos relevantes:
 
 - `backend/Dockerfile` — NestJS + Prisma (multi-stage, roda `prisma migrate deploy` ao subir)
 - `frontend/Dockerfile` — Vite build servido por nginx (SPA)
-- `frontend/nginx.conf` — fallback de rotas do SPA + cache de assets
+- `frontend/nginx.conf.template` — fallback de rotas do SPA + cache de assets + prévia de links
 - `.github/workflows/deploy.yml` — esteira
 
 ---
@@ -66,8 +66,28 @@ AWS_S3_ENDPOINT=   # opcional: host S3 customizado (vazio = AWS)
 > (ex.: `receitas.seudominio.com` + `api.seudominio.com`). Em domínios
 > diferentes, use `none` (exige HTTPS).
 
-> O frontend **não** recebe env em runtime: o `VITE_API_URL` é embutido no
-> bundle durante o build (veja a variável `VITE_API_URL` na seção 3).
+> O bundle do frontend **não** recebe env em runtime: o `VITE_API_URL` é
+> embutido durante o build (veja a variável `VITE_API_URL` na seção 3).
+
+### Prévia de links das receitas (frontend)
+
+WhatsApp, Telegram etc. não executam JavaScript. Para que o link de uma receita
+mostre o nome e a foto dela, o nginx do frontend detecta esses robôs em
+`/detalhes-da-receita/:id` e busca o HTML com as meta tags em
+`GET /api/public/recipes/:id/preview` no backend, pela rede interna do
+CapRover. Pessoas continuam recebendo o SPA normalmente.
+
+O endereço do backend vem da env `BACKEND_URL` do app frontend, com padrão
+`http://srv-captain--receitas-backend:3000`. Se o app backend tiver outro
+nome, defina em `receitas-frontend` → **App Configs** → **Environment
+Variables**:
+
+```
+BACKEND_URL=http://srv-captain--NOME-DO-APP-BACKEND:3000
+```
+
+Se o backend estiver fora do ar, ou a receita for privada ou não existir, o
+robô recebe a prévia padrão do site.
 
 ---
 
