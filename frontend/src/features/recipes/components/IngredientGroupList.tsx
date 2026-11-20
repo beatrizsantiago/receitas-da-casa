@@ -1,5 +1,6 @@
 import { Box, Flex, Input, Text } from '@chakra-ui/react';
-import { useState, forwardRef, useImperativeHandle } from 'react';
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import type { KeyboardEvent } from 'react';
 import { toast } from 'react-toastify';
 import { AddRowButton } from '@/shared/components/ui/AddRowButton';
 import { RemoveRowButton } from '@/shared/components/ui/RemoveRowButton';
@@ -38,7 +39,16 @@ interface LocalGroup {
   deletedRowIds: Set<number>;
 }
 
+type RowField = 'amount' | 'name';
+
 let tempCounter = 0;
+
+const fieldKey = (rowTempId: string, field: RowField) => `${rowTempId}:${field}`;
+
+// Enter só conta como "confirmar" fora de composição de IME (acentos etc.)
+function isPlainEnter(e: KeyboardEvent<HTMLInputElement>) {
+  return e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing;
+}
 
 function makeLocalGroup(overrides: Partial<LocalGroup> = {}): LocalGroup {
   return {
@@ -69,6 +79,25 @@ export const IngredientGroupList = forwardRef<IngredientGroupListHandle, Props>(
     );
     const [deletedGroupIds] = useState(() => new Set<number>());
     const [rowErrors, setRowErrors] = useState<Set<string>>(new Set());
+
+    // Inputs das linhas, para mover o foco com Enter
+    const inputRefs = useRef(new Map<string, HTMLInputElement>());
+    // Campo a focar assim que a linha recém-criada for renderizada
+    const pendingFocus = useRef<string | null>(null);
+
+    useEffect(() => {
+      if (!pendingFocus.current) return;
+      inputRefs.current.get(pendingFocus.current)?.focus();
+      pendingFocus.current = null;
+    }, [groups]);
+
+    function registerInput(rowTempId: string, field: RowField) {
+      return (el: HTMLInputElement | null) => {
+        const key = fieldKey(rowTempId, field);
+        if (el) inputRefs.current.set(key, el);
+        else inputRefs.current.delete(key);
+      };
+    }
 
     const addGroupMut = useAddIngredientGroupMutation();
     const updateGroupMut = useUpdateIngredientGroupMutation();
@@ -207,17 +236,36 @@ export const IngredientGroupList = forwardRef<IngredientGroupListHandle, Props>(
       setGroups((prev) => prev.map((g) => (g.tempId === tempId ? { ...g, title: value } : g)));
     }
 
-    function addRow(groupTempId: string) {
+    /** Cria uma linha vazia (após `afterRowTempId`, ou no fim) e foca a quantidade. */
+    function addRow(groupTempId: string, afterRowTempId?: string) {
+      const newRow: LocalRow = { tempId: `new-row-${++tempCounter}`, amount: '', name: '' };
+      pendingFocus.current = fieldKey(newRow.tempId, 'amount');
       setGroups((prev) =>
-        prev.map((g) =>
-          g.tempId === groupTempId
-            ? { ...g, rows: [...g.rows, { tempId: `new-row-${++tempCounter}`, amount: '', name: '' }] }
-            : g
-        )
+        prev.map((g) => {
+          if (g.tempId !== groupTempId) return g;
+          const idx = afterRowTempId ? g.rows.findIndex((r) => r.tempId === afterRowTempId) : -1;
+          const rows = [...g.rows];
+          rows.splice(idx >= 0 ? idx + 1 : rows.length, 0, newRow);
+          return { ...g, rows };
+        })
       );
     }
 
-    function handleUpdateRow(groupTempId: string, rowTempId: string, field: 'amount' | 'name', value: string) {
+    // Enter na quantidade → vai para o nome do ingrediente da mesma linha
+    function handleAmountKeyDown(e: KeyboardEvent<HTMLInputElement>, rowTempId: string) {
+      if (!isPlainEnter(e)) return;
+      e.preventDefault();
+      inputRefs.current.get(fieldKey(rowTempId, 'name'))?.focus();
+    }
+
+    // Enter no nome → abre uma nova linha logo abaixo, já com foco na quantidade
+    function handleNameKeyDown(e: KeyboardEvent<HTMLInputElement>, groupTempId: string, rowTempId: string) {
+      if (!isPlainEnter(e)) return;
+      e.preventDefault();
+      addRow(groupTempId, rowTempId);
+    }
+
+    function handleUpdateRow(groupTempId: string, rowTempId: string, field: RowField, value: string) {
       setGroups((prev) =>
         prev.map((g) =>
           g.tempId === groupTempId
@@ -285,8 +333,11 @@ export const IngredientGroupList = forwardRef<IngredientGroupListHandle, Props>(
                   return (
                     <Flex key={row.tempId} align="center" gap={2}>
                       <Input
+                        ref={registerInput(row.tempId, 'amount')}
                         value={row.amount}
                         onChange={(e) => handleUpdateRow(group.tempId, row.tempId, 'amount', e.target.value)}
+                        onKeyDown={(e) => handleAmountKeyDown(e, row.tempId)}
+                        enterKeyHint="next"
                         fontFamily="'JetBrains Mono', monospace"
                         fontSize="12px"
                         fontWeight="600"
@@ -305,8 +356,11 @@ export const IngredientGroupList = forwardRef<IngredientGroupListHandle, Props>(
                       />
 
                       <Input
+                        ref={registerInput(row.tempId, 'name')}
                         value={row.name}
                         onChange={(e) => handleUpdateRow(group.tempId, row.tempId, 'name', e.target.value)}
+                        onKeyDown={(e) => handleNameKeyDown(e, group.tempId, row.tempId)}
+                        enterKeyHint="next"
                         flex={1}
                         bg="white"
                         fontSize="14px"
