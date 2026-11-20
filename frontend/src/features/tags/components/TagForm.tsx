@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { Box, Button, Field, Flex, Input, Text } from '@chakra-ui/react';
 import { LuCheck } from 'react-icons/lu';
 import type { ApiErrorResponse } from '@/shared/utils/parseError';
@@ -15,7 +14,6 @@ interface Props {
 }
 
 export function TagForm({ draft, onChange, onSave, onCancel, isPending, mobile, mutationError }: Props) {
-  const colorRef = useRef<HTMLInputElement>(null);
   const validationErrors = mutationError?.response?.data?.validation_errors;
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -72,27 +70,35 @@ export function TagForm({ draft, onChange, onSave, onCancel, isPending, mobile, 
               ))}
             </Field.Root>
 
-            <Box position="relative">
-              <button
-                type="button"
+            {/* O input de cor fica transparente por cima da bolinha e recebe o
+                toque direto: no Safari do iOS/iPadOS, abrir o seletor via
+                .click() num input escondido não funciona. */}
+            <Box position="relative" w="32px" h="32px" flexShrink={0}>
+              <Box
+                aria-hidden
+                w="100%"
+                h="100%"
+                rounded="full"
                 style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '9999px',
-                  cursor: 'pointer',
-                  flexShrink: 0,
-                  border: 'none',
                   backgroundColor: draft.color,
                   boxShadow: `0 0 0 3px ${draft.color}44, 0 2px 6px rgba(0,0,0,0.12)`,
                 }}
-                onClick={() => colorRef.current?.click()}
               />
               <input
-                ref={colorRef}
                 type="color"
+                aria-label="Cor da tag"
                 value={draft.color}
                 onChange={(e) => onChange({ ...draft, color: e.target.value })}
-                style={{ position: 'absolute', opacity: 0, width: 0, height: 0, pointerEvents: 'none' }}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  width: '100%',
+                  height: '100%',
+                  opacity: 0,
+                  cursor: 'pointer',
+                  border: 'none',
+                  padding: 0,
+                }}
               />
             </Box>
           </Flex>

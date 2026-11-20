@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Box, Flex, Input, Text } from '@chakra-ui/react';
 import { LuX } from 'react-icons/lu';
 import { useTagsQuery } from '@/features/tags/hooks/useTags';
@@ -25,7 +25,6 @@ function randomColor(): string {
 export function TagSelector({ selected, onChange }: Props) {
   const [input, setInput] = useState('');
   const [newColor, setNewColor] = useState(randomColor);
-  const colorInputRef = useRef<HTMLInputElement>(null);
 
   const { data: tagsData } = useTagsQuery();
   const available = tagsData ?? [];
@@ -104,25 +103,35 @@ export function TagSelector({ selected, onChange }: Props) {
         ))}
 
         <Flex align="center" gap={1.5} flex={1} minW="120px">
-          <Box
-            as="button"
-            w="16px"
-            h="16px"
-            rounded="full"
-            flexShrink={0}
-            border="none"
-            cursor="pointer"
-            style={{ backgroundColor: newColor }}
-            boxShadow="0 0 0 2px rgba(0,0,0,0.08)"
-            onClick={() => colorInputRef.current?.click()}
-          />
-          <input
-            ref={colorInputRef}
-            type="color"
-            value={newColor}
-            onChange={(e) => setNewColor(e.target.value)}
-            style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }}
-          />
+          {/* Input de cor transparente por cima da bolinha, recebendo o toque
+              direto (no Safari do iOS/iPadOS, .click() programático não abre
+              o seletor) */}
+          <Box position="relative" w="16px" h="16px" flexShrink={0}>
+            <Box
+              aria-hidden
+              w="100%"
+              h="100%"
+              rounded="full"
+              style={{ backgroundColor: newColor }}
+              boxShadow="0 0 0 2px rgba(0,0,0,0.08)"
+            />
+            <input
+              type="color"
+              aria-label="Cor da nova tag"
+              value={newColor}
+              onChange={(e) => setNewColor(e.target.value)}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                opacity: 0,
+                cursor: 'pointer',
+                border: 'none',
+                padding: 0,
+              }}
+            />
+          </Box>
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
